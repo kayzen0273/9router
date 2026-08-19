@@ -1,362 +1,546 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Browser Matrix - AI Workspace & Window Manager</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>🔥 CLAUDE 11 AKUN - DASHBOARD</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0f172a;
-            color: #e2e8f0;
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #00ff41;
+            height: 100vh;
+            overflow: hidden;
         }
-        
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+        .topbar {
+            background: #111;
+            border-bottom: 2px solid #00ff41;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999;
         }
-        ::-webkit-scrollbar-track {
-            background: #1e293b; 
+        .topbar h1 {
+            font-size: 18px;
+            letter-spacing: 2px;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #475569; 
+        .topbar .info {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .topbar .info .badge {
+            background: #00ff41;
+            color: #0a0a0a;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+        .topbar .info .badge.warning {
+            background: #ffcc00;
+        }
+        .topbar .info .badge.danger {
+            background: #ff4444;
+        }
+        .btn {
+            background: transparent;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            padding: 5px 12px;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
             border-radius: 4px;
+            transition: 0.3s;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #64748b; 
+        .btn:hover {
+            background: #00ff41;
+            color: #0a0a0a;
+        }
+        .btn.danger {
+            border-color: #ff4444;
+            color: #ff4444;
+        }
+        .btn.danger:hover {
+            background: #ff4444;
+            color: #0a0a0a;
+        }
+        .main {
+            display: flex;
+            height: calc(100vh - 60px);
+            margin-top: 60px;
+        }
+        .sidebar {
+            width: 220px;
+            background: #0d0d0d;
+            border-right: 1px solid #1a1a1a;
+            padding: 10px;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+        .sidebar .account-item {
+            padding: 8px 10px;
+            margin-bottom: 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            border-left: 3px solid #333;
+            transition: 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sidebar .account-item:hover {
+            background: #1a1a1a;
+        }
+        .sidebar .account-item.active {
+            border-left-color: #00ff41;
+            background: #1a1a1a;
+        }
+        .sidebar .account-item .status {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 8px;
+        }
+        .sidebar .account-item .status.online {
+            background: #00ff41;
+            color: #0a0a0a;
+        }
+        .sidebar .account-item .status.limit {
+            background: #ff4444;
+            color: #fff;
+        }
+        .sidebar .account-item .status.idle {
+            background: #666;
+            color: #fff;
+        }
+        .sidebar .account-item .status.used {
+            background: #ffcc00;
+            color: #0a0a0a;
+        }
+        .iframe-container {
+            flex: 1;
+            position: relative;
+            background: #0a0a0a;
+        }
+        .iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .iframe-container .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 15px;
+            color: #fff;
+        }
+        .iframe-container .overlay.show {
+            display: flex;
+        }
+        .iframe-container .overlay .big {
+            font-size: 48px;
+        }
+        .log-area {
+            position: fixed;
+            bottom: 0;
+            left: 220px;
+            right: 0;
+            height: 80px;
+            background: rgba(0,0,0,0.9);
+            border-top: 1px solid #1a1a1a;
+            padding: 5px 15px;
+            overflow-y: auto;
+            font-size: 11px;
+            color: #888;
+            z-index: 100;
+        }
+        .log-area span {
+            display: block;
+            padding: 1px 0;
+        }
+        .log-area .highlight {
+            color: #00ff41;
+        }
+        .log-area .warn {
+            color: #ffcc00;
+        }
+        .log-area .error {
+            color: #ff4444;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 160px;
+                font-size: 11px;
+            }
+            .topbar h1 {
+                font-size: 14px;
+            }
+            .log-area {
+                left: 160px;
+                height: 60px;
+                font-size: 10px;
+            }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col bg-slate-900 text-slate-100 antialiased overflow-x-hidden">
+<body>
 
-    <!-- Top Header Navigation -->
-    <header class="bg-slate-800/90 backdrop-blur border-b border-slate-700/80 px-4 sm:px-6 py-3 sticky top-0 z-40 shadow-xl flex flex-wrap items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-            <div class="w-9 h-9 bg-gradient-to-tr from-amber-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                </svg>
-            </div>
-            <div>
-                <h1 class="text-base sm:text-lg font-bold text-white leading-tight flex items-center gap-2">
-                    Multi-Browser Matrix Studio
-                    <span class="text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-normal">10 Panel Aktif</span>
-                </h1>
-                <p class="text-xs text-slate-400 hidden sm:block">Kelola 10 sesi Claude.ai dengan aman & cepat</p>
-            </div>
-        </div>
+<!-- TOPBAR -->
+<div class="topbar">
+    <h1>🔥 CLAUDE 11 AKUN</h1>
+    <div class="info">
+        <span id="activeInfo">📌 Akun: <strong id="activeName">-</strong></span>
+        <span id="statusInfo">📊 Status: <span class="badge" id="statusBadge">Idle</span></span>
+        <span>🔄 <span id="switchCount">0</span>x switch</span>
+        <button class="btn" id="btnPrev">◀ Prev</button>
+        <button class="btn" id="btnNext">Next ▶</button>
+        <button class="btn danger" id="btnLogoutAll">🚪 Logout All</button>
+        <button class="btn" id="btnRefreshAll">⟳ Refresh All</button>
+    </div>
+</div>
 
-        <!-- Quick Switcher & Global Actions -->
-        <div class="flex items-center gap-2 flex-wrap">
-            <button onclick="launchAllTiledWindows()" class="px-3.5 py-1.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-xs font-semibold rounded-lg text-white shadow-lg shadow-indigo-500/25 transition-all flex items-center gap-1.5 active:scale-95">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
-                </svg>
-                <span>Buka 10 Window Claude Rapi</span>
-            </button>
+<!-- MAIN -->
+<div class="main">
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar"></div>
 
-            <!-- Quick Jump Dropdown -->
-            <div class="flex items-center gap-1.5 bg-slate-900/80 border border-slate-700/80 rounded-lg px-2 py-1 text-xs">
-                <span class="text-slate-400 hidden md:inline">Lompat:</span>
-                <select id="quick-jump-select" class="bg-transparent text-blue-400 font-semibold focus:outline-none cursor-pointer">
-                    <option value="" class="bg-slate-800 text-slate-300">Pilih Slot...</option>
-                </select>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content Area -->
-    <main class="flex-1 p-4 sm:p-6 overflow-y-auto">
-        
-        <!-- Explanation Alert Banner -->
-        <div class="mb-6 p-4 bg-amber-950/40 border border-amber-500/40 rounded-2xl shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs sm:text-sm">
-            <div class="flex items-start gap-3">
-                <div class="p-2.5 bg-amber-500/20 text-amber-400 rounded-xl flex-shrink-0 mt-0.5 md:mt-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                    </svg>
-                </div>
-                <div>
-                    <h2 class="font-bold text-amber-200 text-sm sm:text-base">Mengapa Claude Menampilkan "Menolak untuk terhubung"?</h2>
-                    <p class="text-slate-300 mt-1 leading-relaxed">
-                        Claude.ai memberlakukan keamanan ketat (<span class="font-mono text-amber-300">X-Frame-Options: DENY</span>) yang melarang halamannya dimasukkan di dalam frame website lain. 
-                    </p>
-                    <div class="mt-2 flex flex-wrap items-center gap-2 text-xs">
-                        <span class="text-slate-400">Solusi terbaik:</span>
-                        <button onclick="launchAllTiledWindows()" class="underline text-indigo-400 font-semibold hover:text-indigo-300">
-                            Gunakan Mode Multi-Window Tiled
-                        </button> 
-                        <span class="text-slate-500">•</span>
-                        <span>Atau gunakan **Workspace AI In-Page** yang sudah disediakan langsung di setiap kartu di bawah.</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 10 Browser Grid -->
-        <div id="browser-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-5">
-            <!-- Dynamic Browser Instances Injected via JavaScript -->
-        </div>
-    </main>
-
-    <!-- In-Page Focus Modal -->
-    <div id="focus-modal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex-col transition-all duration-300">
-        <div class="bg-slate-900 border-b border-slate-800 px-4 py-3 flex items-center justify-between gap-4">
-            <div class="flex items-center gap-3 min-w-0">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0"></span>
-                <h2 id="modal-title" class="text-sm font-bold text-white truncate">Panel Fokus In-Page</h2>
-            </div>
-            <button id="close-modal-btn" class="px-3 py-1.5 bg-red-600/80 hover:bg-red-600 text-xs text-white rounded-lg transition-all font-medium flex items-center gap-1 shadow-lg shadow-red-600/20">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-                <span>Tutup Fokus</span>
-            </button>
-        </div>
-        <div id="modal-content-box" class="flex-1 bg-slate-900 relative overflow-hidden p-4">
-            <!-- Dynamic Content -->
+    <!-- IFRAME -->
+    <div class="iframe-container">
+        <iframe id="mainFrame" src="about:blank"></iframe>
+        <div class="overlay" id="overlay">
+            <div class="big">🔒</div>
+            <div>Akun ini terkena limit. Switch otomatis dalam 3 detik...</div>
+            <div id="countdownTimer">3</div>
         </div>
     </div>
+</div>
 
-    <script>
-        const TARGET_URL = "https://claude.ai/new";
-        const BROWSER_COUNT = 10;
+<!-- LOG -->
+<div class="log-area" id="logArea"></div>
 
-        const browserGrid = document.getElementById('browser-grid');
-        const quickJumpSelect = document.getElementById('quick-jump-select');
-        const focusModal = document.getElementById('focus-modal');
-        const closeModalBtn = document.getElementById('close-modal-btn');
-        const modalTitle = document.getElementById('modal-title');
-        const modalContentBox = document.getElementById('modal-content-box');
+<script>
+    // ==================== KONFIG ====================
+    const ACCOUNTS = [
+        { email: 'andre1@gmail.com', label: 'Akun 1' },
+        { email: 'andre2@gmail.com', label: 'Akun 2' },
+        { email: 'andre3@gmail.com', label: 'Akun 3' },
+        { email: 'andre4@gmail.com', label: 'Akun 4' },
+        { email: 'andre5@gmail.com', label: 'Akun 5' },
+        { email: 'andre6@gmail.com', label: 'Akun 6' },
+        { email: 'andre7@gmail.com', label: 'Akun 7' },
+        { email: 'andre8@gmail.com', label: 'Akun 8' },
+        { email: 'andre9@gmail.com', label: 'Akun 9' },
+        { email: 'andre10@gmail.com', label: 'Akun 10' },
+        { email: 'andre11@gmail.com', label: 'Akun 11' }
+    ];
 
-        // Store active sub-window references
-        const activeWindows = {};
+    const CHECK_INTERVAL = 3000; // cek limit tiap 3 detik
+    const AUTO_SWITCH_DELAY = 3000; // delay sebelum switch kalo limit
 
-        function initBrowsers() {
-            browserGrid.innerHTML = '';
-            quickJumpSelect.innerHTML = '<option value="" class="bg-slate-800 text-slate-300">Pilih Slot...</option>';
+    // ==================== STATE ====================
+    let currentIndex = 0;
+    let switchCount = 0;
+    let isSwitching = false;
+    let countdownTimer = null;
+    let accountStatus = {};
 
-            for (let i = 1; i <= BROWSER_COUNT; i++) {
-                // Populate quick jump select
-                const option = document.createElement('option');
-                option.value = i;
-                option.className = 'bg-slate-800 text-slate-200';
-                option.textContent = `Browser #${i}`;
-                quickJumpSelect.appendChild(option);
+    // ==================== DOM ====================
+    const mainFrame = document.getElementById('mainFrame');
+    const sidebar = document.getElementById('sidebar');
+    const logArea = document.getElementById('logArea');
+    const activeName = document.getElementById('activeName');
+    const statusBadge = document.getElementById('statusBadge');
+    const switchCountEl = document.getElementById('switchCount');
+    const overlay = document.getElementById('overlay');
+    const countdownTimerEl = document.getElementById('countdownTimer');
 
-                const savedNote = localStorage.getItem(`browser_note_${i}`) || '';
-                const savedPrompt = localStorage.getItem(`browser_prompt_${i}`) || '';
-
-                const cardHTML = `
-                    <div id="browser-card-${i}" class="flex flex-col bg-slate-800/90 rounded-2xl border border-slate-700/80 shadow-xl hover:border-slate-600 transition-all overflow-hidden h-[540px]">
-                        
-                        <!-- Panel Control Bar -->
-                        <div class="bg-slate-900/95 px-3 py-2.5 border-b border-slate-700/80 flex flex-col gap-2">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>
-                                    <span class="text-xs font-bold text-slate-200">Browser #${i}</span>
-                                </div>
-                                <div class="flex items-center gap-1.5">
-                                    <button onclick="openSingleWindow(${i})" title="Buka Sesi Claude dalam Window Baru" 
-                                            class="text-[11px] bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1 rounded-md font-medium transition-all flex items-center gap-1 shadow-md active:scale-95">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                                        </svg>
-                                        <span>Buka Window</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Mode Switcher Tabs -->
-                            <div class="flex items-center bg-slate-950 p-1 rounded-lg border border-slate-800 text-[10px] font-medium">
-                                <button id="tab-ai-${i}" onclick="switchTab(${i}, 'ai')" class="flex-1 py-1 rounded-md bg-indigo-600 text-white transition-all text-center">
-                                    In-Page AI
-                                </button>
-                                <button id="tab-iframe-${i}" onclick="switchTab(${i}, 'iframe')" class="flex-1 py-1 rounded-md text-slate-400 hover:text-slate-200 transition-all text-center">
-                                    Iframe Web
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Card Body View Area -->
-                        <div class="flex-1 bg-slate-900 relative overflow-hidden flex flex-col">
-                            
-                            <!-- VIEW 1: In-Page AI Interactive Workspace -->
-                            <div id="view-ai-${i}" class="flex-1 flex flex-col p-3 gap-2 bg-slate-900">
-                                <div class="flex items-center justify-between text-[11px] text-slate-400">
-                                    <span class="font-medium text-indigo-400 flex items-center gap-1">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
-                                        </svg>
-                                        Ruang Draf Prompt & Respon
-                                    </span>
-                                    <span class="text-[10px] text-slate-500">Auto-save</span>
-                                </div>
-                                <textarea 
-                                    id="prompt-input-${i}"
-                                    placeholder="Tulis prompt, tugas, atau draf chat untuk Akun #${i} di sini..."
-                                    oninput="savePrompt(${i}, this.value)"
-                                    class="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/80 resize-none font-mono"
-                                >${savedPrompt}</textarea>
-                                <button onclick="copyPrompt(${i})" class="py-1.5 bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 rounded-lg border border-slate-700 flex items-center justify-center gap-1 transition-all active:scale-95">
-                                    <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
-                                    </svg>
-                                    <span>Salin Teks Prompt</span>
-                                </button>
-                            </div>
-
-                            <!-- VIEW 2: Embedded Iframe View (With blocked notification handling) -->
-                            <div id="view-iframe-${i}" class="hidden flex-1 relative bg-slate-950">
-                                <div class="absolute inset-0 z-20 bg-slate-950/90 backdrop-blur flex flex-col items-center justify-center p-4 text-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center justify-center">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h3 class="text-xs font-bold text-slate-200">Embed Dibatasi Oleh Claude</h3>
-                                        <p class="text-[11px] text-slate-400 mt-1">Gunakan button di bawah untuk membuka sesi terpisah yang mendukung login permanen.</p>
-                                    </div>
-                                    <button onclick="openSingleWindow(${i})" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium rounded-lg shadow-lg shadow-indigo-600/20 flex items-center gap-1.5 transition-all">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                                        </svg>
-                                        <span>Buka Claude Window #${i}</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <!-- Permanent Session Note Bar -->
-                        <div class="bg-slate-900/95 px-3 py-2 border-t border-slate-700/80 flex items-center gap-2">
-                            <span class="text-[10px] text-slate-400 font-medium flex-shrink-0">Catatan Akun:</span>
-                            <input 
-                                id="note-input-${i}"
-                                type="text" 
-                                value="${savedNote}" 
-                                placeholder="Cth: Claude Akun #${i}" 
-                                oninput="saveNote(${i}, this.value)"
-                                class="bg-slate-950 border border-slate-800 text-slate-200 text-xs px-2 py-0.5 rounded w-full focus:outline-none focus:border-indigo-500 transition-colors"
-                            />
-                        </div>
-                    </div>
-                `;
-                browserGrid.insertAdjacentHTML('beforeend', cardHTML);
-            }
+    // ==================== FUNGSI ====================
+    function addLog(msg, type = '') {
+        const span = document.createElement('span');
+        span.className = type;
+        span.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        logArea.appendChild(span);
+        logArea.scrollTop = logArea.scrollHeight;
+        while (logArea.children.length > 100) {
+            logArea.removeChild(logArea.firstChild);
         }
+    }
 
-        // Tab Switcher inside Cards
-        function switchTab(index, tabType) {
-            const viewAi = document.getElementById(`view-ai-${index}`);
-            const viewIframe = document.getElementById(`view-iframe-${index}`);
-            const tabAi = document.getElementById(`tab-ai-${index}`);
-            const tabIframe = document.getElementById(`tab-iframe-${index}`);
+    function updateSidebar() {
+        sidebar.innerHTML = '';
+        ACCOUNTS.forEach((acc, i) => {
+            const div = document.createElement('div');
+            div.className = `account-item ${i === currentIndex ? 'active' : ''}`;
+            const status = accountStatus[acc.email] || 'idle';
+            const statusMap = {
+                'online': '<span class="status online">● Online</span>',
+                'limit': '<span class="status limit">● Limit</span>',
+                'idle': '<span class="status idle">● Idle</span>',
+                'used': '<span class="status used">● Used</span>'
+            };
+            div.innerHTML = `
+                <span>${i+1}. ${acc.label}</span>
+                ${statusMap[status] || statusMap.idle}
+            `;
+            div.onclick = () => switchToAccount(i);
+            sidebar.appendChild(div);
+        });
+    }
 
-            if (tabType === 'ai') {
-                viewAi.classList.remove('hidden');
-                viewIframe.classList.add('hidden');
-                tabAi.className = "flex-1 py-1 rounded-md bg-indigo-600 text-white transition-all text-center";
-                tabIframe.className = "flex-1 py-1 rounded-md text-slate-400 hover:text-slate-200 transition-all text-center";
-            } else {
-                viewAi.classList.add('hidden');
-                viewIframe.classList.remove('hidden');
-                tabIframe.className = "flex-1 py-1 rounded-md bg-indigo-600 text-white transition-all text-center";
-                tabAi.className = "flex-1 py-1 rounded-md text-slate-400 hover:text-slate-200 transition-all text-center";
-            }
-        }
+    function switchToAccount(index) {
+        if (isSwitching) return;
+        if (index < 0 || index >= ACCOUNTS.length) return;
 
-        // Open Individual Window for Claude
-        function openSingleWindow(index) {
-            const width = 480;
-            const height = 650;
-            const left = ((index - 1) % 5) * 280;
-            const top = Math.floor((index - 1) / 5) * 320;
+        currentIndex = index;
+        const acc = ACCOUNTS[currentIndex];
+        activeName.textContent = acc.label;
+        statusBadge.textContent = accountStatus[acc.email] || 'Idle';
+        switchCountEl.textContent = switchCount;
 
-            const win = window.open(
-                TARGET_URL,
-                `Claude_Session_${index}`,
-                `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
-            );
-            
-            if (win) {
-                activeWindows[index] = win;
-                win.focus();
-            } else {
-                alert("Pop-up diblokir oleh browser Anda. Mohon izinkan pop-up untuk situs ini agar 10 window Claude bisa terbuka.");
-            }
-        }
+        // Update sidebar
+        updateSidebar();
 
-        // Open All 10 Tiled Windows cleanly across the monitor screen
-        function launchAllTiledWindows() {
-            const screenWidth = window.screen.availWidth;
-            const screenHeight = window.screen.availHeight;
+        // Load iframe
+        mainFrame.src = `https://claude.ai/login?email=${encodeURIComponent(acc.email)}`;
 
-            const cols = 5;
-            const rows = 2;
+        // Sembunyikan overlay
+        overlay.classList.remove('show');
 
-            const winWidth = Math.floor(screenWidth / cols);
-            const winHeight = Math.floor(screenHeight / rows);
+        addLog(`🔄 Switch ke ${acc.label} (${acc.email})`, 'highlight');
+    }
 
-            for (let i = 1; i <= BROWSER_COUNT; i++) {
-                const col = (i - 1) % cols;
-                const row = Math.floor((i - 1) / cols);
+    function nextAccount() {
+        if (isSwitching) return;
+        const next = (currentIndex + 1) % ACCOUNTS.length;
+        switchToAccount(next);
+        switchCount++;
+        switchCountEl.textContent = switchCount;
+    }
 
-                const left = col * winWidth;
-                const top = row * winHeight;
+    function prevAccount() {
+        if (isSwitching) return;
+        const prev = (currentIndex - 1 + ACCOUNTS.length) % ACCOUNTS.length;
+        switchToAccount(prev);
+        switchCount++;
+        switchCountEl.textContent = switchCount;
+    }
 
-                setTimeout(() => {
-                    const win = window.open(
-                        TARGET_URL,
-                        `Claude_Session_${i}`,
-                        `width=${winWidth},height=${winHeight},left=${left},top=${top},resizable=yes,scrollbars=yes`
-                    );
-                    if (win) {
-                        activeWindows[i] = win;
-                    }
-                }, i * 150); // slight stagger for reliable popup rendering
-            }
-        }
+    // ==================== DETECT LIMIT DI IFRAME ====================
+    function checkIframeForLimit() {
+        try {
+            const iframeDoc = mainFrame.contentDocument || mainFrame.contentWindow?.document;
+            if (!iframeDoc) return false;
 
-        function saveNote(index, value) {
-            localStorage.setItem(`browser_note_${index}`, value);
-        }
+            const bodyText = iframeDoc.body?.innerText || '';
 
-        function savePrompt(index, value) {
-            localStorage.setItem(`browser_prompt_${index}`, value);
-        }
+            const limitPatterns = [
+                /limit/i, /exceeded/i, /too many/i, /try again later/i,
+                /rate limit/i, /unavailable/i, /usage limit/i,
+                /monthly limit/i, /daily limit/i, /message limit/i,
+                /you've reached/i, /can't send/i, /request failed/i,
+                /over quota/i, /throttled/i, /temporarily blocked/i
+            ];
 
-        function copyPrompt(index) {
-            const input = document.getElementById(`prompt-input-${index}`);
-            if (input && input.value) {
-                input.select();
-                document.execCommand('copy');
-            }
-        }
-
-        // Quick Jump Event
-        quickJumpSelect.addEventListener('change', (e) => {
-            const val = e.target.value;
-            if (val) {
-                const el = document.getElementById(`browser-card-${val}`);
-                if (el) {
-                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    el.classList.add('ring-2', 'ring-indigo-500');
-                    setTimeout(() => el.classList.remove('ring-2', 'ring-indigo-500'), 2000);
+            for (const pattern of limitPatterns) {
+                if (pattern.test(bodyText)) {
+                    return true;
                 }
             }
+
+            // Cek elemen tertentu
+            const elements = iframeDoc.querySelectorAll('*');
+            for (const el of elements) {
+                const text = el.innerText || '';
+                if (text && /limit|exceeded|too many|rate limit|unavailable|try again later/i.test(text)) {
+                    if (el.offsetParent !== null && el.offsetHeight > 0) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+
+        } catch(e) {
+            // Cross-origin error — skip
+            return false;
+        }
+    }
+
+    // ==================== AUTO-SWITCH LOOP ====================
+    function autoCheckAndSwitch() {
+        if (isSwitching) return;
+
+        const acc = ACCOUNTS[currentIndex];
+
+        // Cek limit
+        const isLimit = checkIframeForLimit();
+
+        if (isLimit) {
+            addLog(`🚨 ${acc.label} KENA LIMIT!`, 'error');
+            accountStatus[acc.email] = 'limit';
+            updateSidebar();
+            statusBadge.textContent = 'Limit';
+            statusBadge.className = 'badge danger';
+
+            // Tampilkan overlay countdown
+            overlay.classList.add('show');
+            let countdown = 3;
+            countdownTimerEl.textContent = countdown;
+
+            clearInterval(countdownTimer);
+            countdownTimer = setInterval(() => {
+                countdown--;
+                countdownTimerEl.textContent = countdown;
+                if (countdown <= 0) {
+                    clearInterval(countdownTimer);
+                    // Switch ke akun berikutnya
+                    isSwitching = true;
+                    nextAccount();
+                    isSwitching = false;
+                    overlay.classList.remove('show');
+                }
+            }, 1000);
+
+        } else {
+            // Update status
+            if (accountStatus[acc.email] !== 'online') {
+                accountStatus[acc.email] = 'online';
+                updateSidebar();
+                statusBadge.textContent = 'Online';
+                statusBadge.className = 'badge';
+                addLog(`✅ ${acc.label} Online`, 'highlight');
+            }
+        }
+    }
+
+    // ==================== LOGOUT ALL ====================
+    function logoutAll() {
+        if (confirm('🚪 Logout semua akun Claude?')) {
+            addLog('🚪 Logout semua akun...', 'warn');
+            // Hapus semua cookie Claude
+            document.cookie.split(';').forEach(c => {
+                document.cookie = c.replace(/^ +/, '')
+                    .replace(/=.*/, `=; expires=${new Date(0).toUTCString()}; path=/; domain=.claude.ai`);
+            });
+            // Refresh iframe ke login
+            mainFrame.src = 'https://claude.ai/login';
+            // Reset status
+            Object.keys(accountStatus).forEach(key => {
+                accountStatus[key] = 'idle';
+            });
+            updateSidebar();
+            statusBadge.textContent = 'Logged Out';
+            statusBadge.className = 'badge warning';
+            addLog('✅ Semua akun logout', 'highlight');
+        }
+    }
+
+    // ==================== REFRESH ALL ====================
+    function refreshAll() {
+        addLog('⟳ Refresh semua tab...', 'warn');
+        // Refresh iframe
+        const currentSrc = mainFrame.src;
+        mainFrame.src = 'about:blank';
+        setTimeout(() => {
+            mainFrame.src = currentSrc;
+        }, 500);
+        // Refresh sidebar status
+        Object.keys(accountStatus).forEach(key => {
+            accountStatus[key] = 'idle';
+        });
+        updateSidebar();
+        addLog('✅ Refresh selesai', 'highlight');
+    }
+
+    // ==================== INIT ====================
+    function init() {
+        // Load saved index
+        try {
+            const saved = localStorage.getItem('claude_11_index');
+            if (saved !== null) {
+                const idx = parseInt(saved);
+                if (!isNaN(idx) && idx >= 0 && idx < ACCOUNTS.length) {
+                    currentIndex = idx;
+                }
+            }
+        } catch(e) {}
+
+        // Init status
+        ACCOUNTS.forEach(acc => {
+            accountStatus[acc.email] = 'idle';
         });
 
-        closeModalBtn.addEventListener('click', () => {
-            focusModal.classList.add('hidden');
-            focusModal.classList.remove('flex');
-        });
+        // Render sidebar
+        updateSidebar();
 
-        window.addEventListener('DOMContentLoaded', initBrowsers);
-    </script>
+        // Load akun pertama
+        switchToAccount(currentIndex);
+
+        // Event
+        document.getElementById('btnNext').addEventListener('click', () => {
+            if (!isSwitching) nextAccount();
+        });
+        document.getElementById('btnPrev').addEventListener('click', () => {
+            if (!isSwitching) prevAccount();
+        });
+        document.getElementById('btnLogoutAll').addEventListener('click', logoutAll);
+        document.getElementById('btnRefreshAll').addEventListener('click', refreshAll);
+
+        // Auto-check loop
+        setInterval(autoCheckAndSwitch, CHECK_INTERVAL);
+
+        // Save index periodically
+        setInterval(() => {
+            try {
+                localStorage.setItem('claude_11_index', currentIndex);
+            } catch(e) {}
+        }, 10000);
+
+        addLog(`🔥 CLAUDE 11 AKUN DASHBOARD siap! Total ${ACCOUNTS.length} akun.`, 'highlight');
+        addLog(`📌 Akun aktif: ${ACCOUNTS[currentIndex].label}`, 'highlight');
+        addLog(`⏱ Auto-check limit tiap ${CHECK_INTERVAL/1000} detik`, '');
+    }
+
+    // ==================== RUN ====================
+    init();
+
+    // Export ke global
+    window.__claude11 = {
+        accounts: ACCOUNTS,
+        currentIndex: () => currentIndex,
+        switchTo: switchToAccount,
+        next: nextAccount,
+        prev: prevAccount,
+        status: accountStatus,
+        checkLimit: checkIframeForLimit,
+        logoutAll: logoutAll
+    };
+
+    console.log('💡 Panggil __claude11.switchTo(0) buat pindah ke akun 1');
+    console.log('💡 Panggil __claude11.next() buat next otomatis');
+
+</script>
 </body>
 </html>
