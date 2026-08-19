@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>🔥 CLAUDE 11 AKUN - DASHBOARD v2</title>
+    <title>🔥 CLAUDE 11 AKUN - POPUP CONTROLLER</title>
     <style>
         * {
             margin: 0;
@@ -18,35 +18,37 @@
             padding: 20px;
         }
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
         }
         h1 {
             text-align: center;
-            font-size: 28px;
-            letter-spacing: 3px;
+            font-size: 26px;
+            letter-spacing: 2px;
             border-bottom: 2px solid #00ff41;
             padding-bottom: 15px;
             margin-bottom: 20px;
         }
-        .status-bar {
+        .top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 10px;
             background: #111;
-            padding: 15px 20px;
+            padding: 12px 18px;
             border-radius: 8px;
             border: 1px solid #1a1a1a;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
-        .status-bar .active {
-            font-size: 18px;
+        .top-bar .active-info {
+            font-size: 16px;
+        }
+        .top-bar .active-info strong {
             color: #ffcc00;
         }
-        .status-bar .badge {
-            padding: 4px 12px;
+        .badge {
+            padding: 3px 12px;
             border-radius: 12px;
             font-size: 12px;
             font-weight: bold;
@@ -63,25 +65,25 @@
             background: #444;
             color: #aaa;
         }
-        .badge.switching {
+        .badge.used {
             background: #ffcc00;
             color: #0a0a0a;
         }
         .btn-group {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             flex-wrap: wrap;
         }
         .btn {
             background: transparent;
             border: 1px solid #00ff41;
             color: #00ff41;
-            padding: 8px 16px;
+            padding: 6px 14px;
             font-family: inherit;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
             cursor: pointer;
-            border-radius: 6px;
+            border-radius: 4px;
             transition: 0.3s;
         }
         .btn:hover {
@@ -104,21 +106,17 @@
             background: #ffcc00;
             color: #0a0a0a;
         }
-        .btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
             gap: 8px;
-            margin: 15px 0;
+            margin: 12px 0;
         }
         .account-card {
             background: #111;
             border: 1px solid #1a1a1a;
             border-radius: 6px;
-            padding: 10px;
+            padding: 10px 8px;
             text-align: center;
             cursor: pointer;
             transition: 0.3s;
@@ -128,35 +126,39 @@
         }
         .account-card.active {
             border-color: #00ff41;
-            box-shadow: 0 0 20px rgba(0,255,65,0.2);
+            box-shadow: 0 0 20px rgba(0,255,65,0.15);
         }
         .account-card .num {
-            font-size: 11px;
+            font-size: 10px;
             color: #666;
         }
+        .account-card .label {
+            font-size: 12px;
+            font-weight: bold;
+            margin: 2px 0;
+        }
         .account-card .email {
-            font-size: 10px;
-            color: #888;
-            margin: 4px 0;
+            font-size: 9px;
+            color: #666;
             word-break: break-all;
         }
-        .account-card .status-dot {
+        .account-card .dot {
             display: inline-block;
             width: 10px;
             height: 10px;
             border-radius: 50%;
             margin-top: 4px;
         }
-        .status-dot.online {
+        .dot.online {
             background: #00ff41;
         }
-        .status-dot.limit {
+        .dot.limit {
             background: #ff4444;
         }
-        .status-dot.idle {
+        .dot.idle {
             background: #444;
         }
-        .status-dot.used {
+        .dot.used {
             background: #ffcc00;
         }
         .log {
@@ -164,11 +166,11 @@
             border: 1px solid #1a1a1a;
             border-radius: 6px;
             padding: 10px;
-            max-height: 150px;
+            max-height: 120px;
             overflow-y: auto;
-            font-size: 12px;
+            font-size: 11px;
             color: #888;
-            margin-top: 15px;
+            margin-top: 12px;
         }
         .log span {
             display: block;
@@ -185,49 +187,65 @@
             color: #ff4444;
         }
         .note {
-            font-size: 12px;
-            color: #666;
+            font-size: 11px;
+            color: #555;
             text-align: center;
-            margin-top: 15px;
+            margin-top: 12px;
             border-top: 1px solid #1a1a1a;
-            padding-top: 15px;
+            padding-top: 12px;
+        }
+        .shortcut-hint {
+            font-size: 10px;
+            color: #444;
+            margin-top: 4px;
+        }
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+            .account-card .email {
+                display: none;
+            }
+            .top-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🔥 CLAUDE 11 AKUN - DASHBOARD v2</h1>
+    <h1>🔥 CLAUDE 11 AKUN — POPUP CONTROLLER</h1>
 
-    <!-- Status Bar -->
-    <div class="status-bar">
-        <div>
-            <span>📌 Akun Aktif: </span>
-            <span class="active" id="activeLabel">Akun 1</span>
-            <span class="badge online" id="statusBadge">Online</span>
-        </div>
-        <div>
-            <span>🔄 Switch: <span id="switchCount">0</span>x</span>
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <div class="active-info">
+            📌 <strong id="activeLabel">-</strong>
+            <span class="badge idle" id="statusBadge">IDLE</span>
+            <span style="margin-left:10px;font-size:12px;color:#666;">🔄 <span id="switchCount">0</span>x</span>
         </div>
         <div class="btn-group">
             <button class="btn" id="btnPrev">◀ Prev</button>
             <button class="btn" id="btnNext">Next ▶</button>
             <button class="btn warning" id="btnOpenAll">🪟 Buka Semua</button>
-            <button class="btn danger" id="btnLogoutAll">🚪 Logout All</button>
+            <button class="btn" id="btnFocus">🎯 Focus</button>
+            <button class="btn danger" id="btnCloseAll">✖ Tutup Semua</button>
         </div>
     </div>
 
-    <!-- Grid Akun -->
+    <!-- GRID -->
     <div class="grid" id="accountGrid"></div>
 
-    <!-- Log -->
+    <!-- LOG -->
     <div class="log" id="logArea">
-        <span class="hl">🔥 Dashboard siap. Klik "Buka Semua" untuk buka 11 tab Claude.</span>
+        <span class="hl">🔥 Dashboard siap. Klik "Buka Semua" untuk buka 11 popup Claude.</span>
+        <span>💡 Setelah login semua, tinggal klik kartu buat pindah.</span>
     </div>
 
     <div class="note">
-        ⚡ Klik kartu akun untuk pindah ke tab itu. <br/>
-        🔥 Auto-detect limit dari tab Claude. Kena limit? Auto-switch ke akun berikutnya!
+        ⚡ Claude <strong>TIDAK BISA</strong> di-iframe — pakai POPUP WINDOW.<br/>
+        ⌨️ <strong>Ctrl+→</strong> next | <strong>Ctrl+←</strong> prev | <strong>Ctrl+F</strong> focus
     </div>
 </div>
 
@@ -248,14 +266,15 @@
     ];
 
     const CHECK_INTERVAL = 3000;
+    const POPUP_FEATURES = 'width=1200,height=800,menubar=no,toolbar=no,location=yes,status=no,scrollbars=yes';
 
     // ==================== STATE ====================
     let currentIndex = 0;
     let switchCount = 0;
     let isSwitching = false;
-    let tabs = {}; // { tabId: window }
-    let tabStatus = {}; // { tabId: 'online'|'limit'|'idle'|'used' }
-    let tabFocus = {}; // { tabId: lastFocusTime }
+    let popups = {}; // { accountId: window }
+    let popupStatus = {}; // { accountId: 'online'|'limit'|'idle'|'used' }
+    let popupTitle = {}; // { accountId: string }
 
     // ==================== DOM ====================
     const grid = document.getElementById('accountGrid');
@@ -281,7 +300,7 @@
         ACCOUNTS.forEach((acc, i) => {
             const div = document.createElement('div');
             div.className = `account-card ${i === currentIndex ? 'active' : ''}`;
-            const status = tabStatus[acc.id] || 'idle';
+            const status = popupStatus[acc.id] || 'idle';
             const dotClass = {
                 'online': 'online',
                 'limit': 'limit',
@@ -289,11 +308,15 @@
                 'used': 'used'
             }[status] || 'idle';
 
+            const isOpen = popups[acc.id] && !popups[acc.id].closed;
+            const openIndicator = isOpen ? '🟢' : '🔴';
+
             div.innerHTML = `
-                <div class="num">#${i+1}</div>
-                <div class="email">${acc.label}</div>
-                <div class="status-dot ${dotClass}"></div>
-                <div style="font-size:9px;color:#666;margin-top:2px;">${status.toUpperCase()}</div>
+                <div class="num">${openIndicator} #${i+1}</div>
+                <div class="label">${acc.label}</div>
+                <div class="email">${acc.email}</div>
+                <div class="dot ${dotClass}"></div>
+                <div style="font-size:8px;color:#555;margin-top:2px;">${status.toUpperCase()}</div>
             `;
             div.onclick = () => switchToAccount(i);
             grid.appendChild(div);
@@ -303,7 +326,7 @@
     function updateStatusBar() {
         const acc = ACCOUNTS[currentIndex];
         activeLabel.textContent = acc.label;
-        const status = tabStatus[acc.id] || 'idle';
+        const status = popupStatus[acc.id] || 'idle';
         statusBadge.textContent = status.toUpperCase();
         statusBadge.className = `badge ${status}`;
         switchCountEl.textContent = switchCount;
@@ -317,17 +340,23 @@
         const acc = ACCOUNTS[index];
         currentIndex = index;
 
-        // Focus tab
-        if (tabs[acc.id] && !tabs[acc.id].closed) {
-            tabs[acc.id].focus();
-            addLog(`🔄 Switch ke ${acc.label} (tab #${acc.id+1})`, 'hl');
+        // Cek popup masih hidup
+        const win = popups[acc.id];
+        if (win && !win.closed) {
+            win.focus();
+            addLog(`🎯 Focus ke ${acc.label} (tab #${acc.id+1})`, 'hl');
         } else {
-            // Tab ga ada, buka baru
-            openTab(acc.id);
-            addLog(`🔄 Buka tab baru: ${acc.label}`, 'hl');
+            // Popup mati, buka ulang
+            openPopup(acc.id);
+            addLog(`🔄 Buka ulang ${acc.label}`, 'warn');
         }
 
         updateStatusBar();
+
+        // Save index
+        try {
+            localStorage.setItem('claude_11_index_v3', currentIndex);
+        } catch(e) {}
     }
 
     function nextAccount() {
@@ -344,182 +373,198 @@
         switchToAccount(prev);
     }
 
-    function openTab(accountId) {
+    function openPopup(accountId) {
         const acc = ACCOUNTS[accountId];
-        const win = window.open(
-            `https://claude.ai/login?email=${encodeURIComponent(acc.email)}`,
-            `claude_${acc.id}`,
-            'width=1200,height=800'
-        );
-        if (win) {
-            tabs[acc.id] = win;
-            tabStatus[acc.id] = 'idle';
-            // Monitor tab close
-            const checkClosed = setInterval(() => {
-                if (win.closed) {
-                    clearInterval(checkClosed);
-                    tabStatus[acc.id] = 'idle';
-                    addLog(`❌ Tab ${acc.label} ditutup`, 'err');
-                    renderGrid();
-                }
-            }, 2000);
-        } else {
-            addLog(`⚠️ Popup blocked! Buka manual: ${acc.email}`, 'warn');
+        const url = `https://claude.ai/login?email=${encodeURIComponent(acc.email)}`;
+
+        // Tutup popup lama kalo ada
+        if (popups[accountId] && !popups[accountId].closed) {
+            popups[accountId].close();
         }
+
+        const win = window.open(url, `claude_popup_${accountId}`, POPUP_FEATURES);
+
+        if (win) {
+            popups[accountId] = win;
+            popupStatus[accountId] = 'idle';
+            popupTitle[accountId] = '';
+
+            // Monitor popup
+            const monitor = setInterval(() => {
+                if (win.closed) {
+                    clearInterval(monitor);
+                    popupStatus[accountId] = 'idle';
+                    addLog(`❌ Popup ${acc.label} ditutup`, 'err');
+                    renderGrid();
+                    updateStatusBar();
+                    return;
+                }
+
+                // Coba baca title
+                try {
+                    const title = win.document.title || '';
+                    if (title && title !== popupTitle[accountId]) {
+                        popupTitle[accountId] = title;
+                        // Detect limit dari title
+                        detectLimitFromTitle(accountId, title);
+                    }
+                } catch(e) {
+                    // Cross-origin — coba dari URL
+                    try {
+                        const url = win.location.href || '';
+                        detectLimitFromURL(accountId, url);
+                    } catch(e2) {}
+                }
+            }, 1000);
+
+            addLog(`📧 Buka popup: ${acc.label} (${acc.email})`, '');
+
+        } else {
+            addLog(`⚠️ Popup diblokir! Izinkan popup untuk ${acc.email}`, 'err');
+        }
+
         renderGrid();
         updateStatusBar();
     }
 
-    function openAllTabs() {
-        addLog(`🪟 Membuka ${ACCOUNTS.length} tab Claude...`, 'warn');
+    function openAllPopups() {
+        addLog(`🪟 Membuka ${ACCOUNTS.length} popup Claude...`, 'warn');
         ACCOUNTS.forEach((acc, i) => {
             setTimeout(() => {
-                openTab(acc.id);
-                addLog(`  📧 Tab #${i+1}: ${acc.label}`, '');
-            }, i * 500);
+                openPopup(acc.id);
+            }, i * 600);
         });
         setTimeout(() => {
-            addLog(`✅ Semua tab dibuka!`, 'hl');
-        }, ACCOUNTS.length * 500 + 1000);
+            addLog(`✅ Semua popup dibuka! Login satu per satu.`, 'hl');
+        }, ACCOUNTS.length * 600 + 2000);
     }
 
-    function logoutAll() {
-        if (!confirm('🚪 Logout semua akun Claude?')) return;
-        addLog('🚪 Logout semua akun...', 'warn');
+    function closeAllPopups() {
+        if (!confirm('✖ Tutup semua popup Claude?')) return;
+        addLog('✖ Menutup semua popup...', 'warn');
         ACCOUNTS.forEach(acc => {
-            if (tabs[acc.id] && !tabs[acc.id].closed) {
-                try {
-                    tabs[acc.id].location.href = 'https://claude.ai/logout';
-                } catch(e) {
-                    // Cross-origin, close tab aja
-                    tabs[acc.id].close();
-                }
+            if (popups[acc.id] && !popups[acc.id].closed) {
+                popups[acc.id].close();
             }
-            tabStatus[acc.id] = 'idle';
-            delete tabs[acc.id];
+            popupStatus[acc.id] = 'idle';
         });
         renderGrid();
         updateStatusBar();
-        addLog('✅ Semua akun logout', 'hl');
+        addLog('✅ Semua popup ditutup', 'hl');
+    }
+
+    function focusCurrent() {
+        const acc = ACCOUNTS[currentIndex];
+        const win = popups[acc.id];
+        if (win && !win.closed) {
+            win.focus();
+            addLog(`🎯 Focus ke ${acc.label}`, 'hl');
+        } else {
+            openPopup(acc.id);
+        }
     }
 
     // ==================== DETECT LIMIT ====================
-    function checkAllTabs() {
-        if (isSwitching) return;
+    function detectLimitFromTitle(accountId, title) {
+        const lower = title.toLowerCase();
+        const limitPatterns = [
+            'limit', 'exceeded', 'too many', 'try again',
+            'rate limit', 'unavailable', 'usage limit',
+            'monthly limit', 'daily limit', 'message limit',
+            'reached', 'can\'t send', 'request failed',
+            'over quota', 'throttled', 'blocked', 'error'
+        ];
 
-        let anyLimit = false;
-        let firstLimitId = -1;
+        let isLimit = false;
+        for (const pattern of limitPatterns) {
+            if (lower.includes(pattern)) {
+                isLimit = true;
+                break;
+            }
+        }
 
+        // Cek juga kalo title mengandung "Claude" tapi bukan error — berarti online
+        const isOnline = lower.includes('claude') && !isLimit;
+
+        if (isLimit) {
+            if (popupStatus[accountId] !== 'limit') {
+                popupStatus[accountId] = 'limit';
+                const acc = ACCOUNTS.find(a => a.id === accountId);
+                addLog(`🚨 ${acc.label} KENA LIMIT! (title: "${title}")`, 'err');
+                renderGrid();
+                updateStatusBar();
+                // Auto-switch kalo ini akun aktif
+                if (accountId === ACCOUNTS[currentIndex].id && !isSwitching) {
+                    isSwitching = true;
+                    setTimeout(() => {
+                        nextAccount();
+                        isSwitching = false;
+                    }, 2000);
+                }
+            }
+        } else if (isOnline) {
+            if (popupStatus[accountId] !== 'online') {
+                popupStatus[accountId] = 'online';
+                const acc = ACCOUNTS.find(a => a.id === accountId);
+                addLog(`✅ ${acc.label} Online`, 'hl');
+                renderGrid();
+                updateStatusBar();
+            }
+        }
+    }
+
+    function detectLimitFromURL(accountId, url) {
+        const lower = url.toLowerCase();
+        if (lower.includes('limit') || lower.includes('error') || lower.includes('blocked')) {
+            if (popupStatus[accountId] !== 'limit') {
+                popupStatus[accountId] = 'limit';
+                const acc = ACCOUNTS.find(a => a.id === accountId);
+                addLog(`🚨 ${acc.label} KENA LIMIT! (URL: "${url}")`, 'err');
+                renderGrid();
+                updateStatusBar();
+                if (accountId === ACCOUNTS[currentIndex].id && !isSwitching) {
+                    isSwitching = true;
+                    setTimeout(() => {
+                        nextAccount();
+                        isSwitching = false;
+                    }, 2000);
+                }
+            }
+        }
+    }
+
+    // ==================== SCAN ALL POPUPS ====================
+    function scanAllPopups() {
         ACCOUNTS.forEach(acc => {
-            const win = tabs[acc.id];
+            const win = popups[acc.id];
             if (!win || win.closed) {
-                tabStatus[acc.id] = 'idle';
+                if (popupStatus[acc.id] !== 'idle') {
+                    popupStatus[acc.id] = 'idle';
+                    renderGrid();
+                    updateStatusBar();
+                }
                 return;
             }
 
             try {
-                // Cek title atau URL
                 const title = win.document.title || '';
-                const url = win.location.href || '';
-
-                // Limit indicators
-                const limitPatterns = [
-                    'limit', 'exceeded', 'too many', 'try again',
-                    'rate limit', 'unavailable', 'usage limit',
-                    'monthly limit', 'daily limit', 'message limit',
-                    'you\'ve reached', 'can\'t send', 'request failed',
-                    'over quota', 'throttled', 'temporarily blocked'
-                ];
-
-                let isLimit = false;
-                const lowerTitle = title.toLowerCase();
-                const lowerUrl = url.toLowerCase();
-
-                for (const pattern of limitPatterns) {
-                    if (lowerTitle.includes(pattern) || lowerUrl.includes(pattern)) {
-                        isLimit = true;
-                        break;
-                    }
+                if (title) {
+                    detectLimitFromTitle(acc.id, title);
                 }
-
-                // Cek body text
-                try {
-                    const body = win.document.body?.innerText || '';
-                    for (const pattern of limitPatterns) {
-                        if (body.toLowerCase().includes(pattern)) {
-                            isLimit = true;
-                            break;
-                        }
-                    }
-                } catch(e) {}
-
-                if (isLimit) {
-                    if (tabStatus[acc.id] !== 'limit') {
-                        tabStatus[acc.id] = 'limit';
-                        addLog(`🚨 ${acc.label} KENA LIMIT!`, 'err');
-                    }
-                    anyLimit = true;
-                    if (firstLimitId === -1) firstLimitId = acc.id;
-                } else {
-                    if (tabStatus[acc.id] !== 'online' && tabStatus[acc.id] !== 'used') {
-                        tabStatus[acc.id] = 'online';
-                        addLog(`✅ ${acc.label} Online`, 'hl');
-                    }
-                }
-
             } catch(e) {
-                // Cross-origin, skip
-                // Tapi kita bisa cek dari URL via location (cuma bisa baca URL)
                 try {
                     const url = win.location.href || '';
-                    if (url.includes('limit') || url.includes('error') || url.includes('blocked')) {
-                        if (tabStatus[acc.id] !== 'limit') {
-                            tabStatus[acc.id] = 'limit';
-                            addLog(`🚨 ${acc.label} KENA LIMIT!`, 'err');
-                        }
-                        anyLimit = true;
-                        if (firstLimitId === -1) firstLimitId = acc.id;
-                    }
-                } catch(e2) {
-                    // Silent
-                }
+                    detectLimitFromURL(acc.id, url);
+                } catch(e2) {}
             }
         });
-
-        renderGrid();
-        updateStatusBar();
-
-        // Kalo ada limit, auto-switch ke akun berikutnya
-        if (anyLimit && firstLimitId !== -1) {
-            const currentAcc = ACCOUNTS[currentIndex];
-            if (tabStatus[currentAcc.id] === 'limit') {
-                addLog(`⚠️ Akun aktif kena limit! Auto-switch...`, 'warn');
-                isSwitching = true;
-                setTimeout(() => {
-                    nextAccount();
-                    isSwitching = false;
-                }, 2000);
-            }
-        }
     }
-
-    // ==================== KEYBOARD ====================
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowRight' && e.ctrlKey) {
-            e.preventDefault();
-            nextAccount();
-        }
-        if (e.key === 'ArrowLeft' && e.ctrlKey) {
-            e.preventDefault();
-            prevAccount();
-        }
-    });
 
     // ==================== INIT ====================
     function init() {
         // Load saved index
         try {
-            const saved = localStorage.getItem('claude_11_index_v2');
+            const saved = localStorage.getItem('claude_11_index_v3');
             if (saved !== null) {
                 const idx = parseInt(saved);
                 if (!isNaN(idx) && idx >= 0 && idx < ACCOUNTS.length) {
@@ -538,22 +583,39 @@
         document.getElementById('btnPrev').addEventListener('click', () => {
             if (!isSwitching) prevAccount();
         });
-        document.getElementById('btnOpenAll').addEventListener('click', openAllTabs);
-        document.getElementById('btnLogoutAll').addEventListener('click', logoutAll);
+        document.getElementById('btnOpenAll').addEventListener('click', openAllPopups);
+        document.getElementById('btnCloseAll').addEventListener('click', closeAllPopups);
+        document.getElementById('btnFocus').addEventListener('click', focusCurrent);
 
-        // Auto-check loop
-        setInterval(checkAllTabs, CHECK_INTERVAL);
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' && e.ctrlKey) {
+                e.preventDefault();
+                if (!isSwitching) nextAccount();
+            }
+            if (e.key === 'ArrowLeft' && e.ctrlKey) {
+                e.preventDefault();
+                if (!isSwitching) prevAccount();
+            }
+            if (e.key === 'f' && e.ctrlKey) {
+                e.preventDefault();
+                focusCurrent();
+            }
+        });
+
+        // Auto-scan
+        setInterval(scanAllPopups, CHECK_INTERVAL);
 
         // Save index
         setInterval(() => {
             try {
-                localStorage.setItem('claude_11_index_v2', currentIndex);
+                localStorage.setItem('claude_11_index_v3', currentIndex);
             } catch(e) {}
-        }, 10000);
+        }, 5000);
 
-        addLog(`🔥 CLAUDE 11 AKUN v2 siap! Total ${ACCOUNTS.length} akun.`, 'hl');
-        addLog(`💡 Klik "Buka Semua" untuk buka 11 tab login.`, '');
-        addLog(`⌨️ Ctrl+→ / Ctrl+← buat ganti akun.`, '');
+        addLog(`🔥 CLAUDE 11 AKUN v3 siap! Total ${ACCOUNTS.length} akun.`, 'hl');
+        addLog(`💡 Klik "Buka Semua" → izinkan popup → login semua akun.`, '');
+        addLog(`⌨️ Ctrl+→ / Ctrl+← = ganti akun | Ctrl+F = focus`, '');
     }
 
     init();
@@ -564,16 +626,17 @@
         switchTo: switchToAccount,
         next: nextAccount,
         prev: prevAccount,
-        openAll: openAllTabs,
-        logoutAll: logoutAll,
-        status: tabStatus,
-        tabs: tabs,
-        check: checkAllTabs
+        openAll: openAllPopups,
+        closeAll: closeAllPopups,
+        focus: focusCurrent,
+        status: popupStatus,
+        popups: popups,
+        scan: scanAllPopups
     };
 
-    console.log('🔥 CLAUDE 11 AKUN v2 loaded!');
-    console.log('💡 Panggil __claude11.next() buat next akun');
-    console.log('💡 Panggil __claude11.openAll() buka semua tab');
+    console.log('🔥 CLAUDE 11 AKUN v3 loaded!');
+    console.log('💡 Panggil __claude11.openAll() buka semua popup');
+    console.log('💡 Panggil __claude11.next() next akun');
 </script>
 
 </body>
