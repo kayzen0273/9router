@@ -3,198 +3,260 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-    <title>🔥 Claude 11 Akun - HP</title>
+    <title>🔥 Mini Browser - 11 Akun Claude</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, sans-serif;
             background: #0a0a0a;
             color: #00ff41;
-            min-height: 100vh;
-            padding: 12px;
-            padding-bottom: 80px;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
-        h1 {
-            font-size: 18px;
-            text-align: center;
+        /* TOP BAR */
+        .topbar {
+            background: #111;
             border-bottom: 2px solid #00ff41;
-            padding-bottom: 10px;
-            margin-bottom: 12px;
+            padding: 6px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            flex-shrink: 0;
+            min-height: 48px;
+        }
+        .topbar .brand {
+            font-size: 14px;
+            font-weight: bold;
             letter-spacing: 1px;
         }
-        .status-box {
-            background: #111;
-            border: 1px solid #1a1a1a;
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 12px;
-            text-align: center;
-        }
-        .status-box .active {
-            font-size: 16px;
-            color: #ffcc00;
-            word-break: break-all;
-            font-weight: bold;
-        }
-        .status-box .badge {
-            display: inline-block;
-            padding: 3px 12px;
-            border-radius: 20px;
+        .topbar .info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             font-size: 11px;
+            flex-wrap: wrap;
+        }
+        .topbar .badge {
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 10px;
             font-weight: bold;
-            margin-top: 4px;
         }
         .badge.online { background: #00ff41; color: #000; }
         .badge.limit { background: #ff4444; color: #fff; }
         .badge.idle { background: #444; color: #aaa; }
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 6px;
-            margin: 10px 0;
-        }
         .btn {
             background: transparent;
             border: 1px solid #00ff41;
             color: #00ff41;
-            padding: 12px 6px;
-            font-size: 13px;
+            padding: 4px 10px;
+            font-size: 11px;
             font-weight: bold;
-            border-radius: 8px;
+            border-radius: 4px;
             cursor: pointer;
             transition: 0.2s;
-            text-align: center;
         }
         .btn:active { background: #00ff41; color: #000; transform: scale(0.95); }
         .btn.danger { border-color: #ff4444; color: #ff4444; }
-        .btn.danger:active { background: #ff4444; color: #000; }
         .btn.warning { border-color: #ffcc00; color: #ffcc00; }
-        .btn.warning:active { background: #ffcc00; color: #000; }
-        .btn.full { grid-column: 1 / -1; }
-        .btn.big { padding: 16px; font-size: 16px; }
-        .list {
-            margin-top: 10px;
-        }
-        .item {
+
+        /* TAB BAR */
+        .tabbar {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 10px;
-            background: #111;
-            border-radius: 6px;
-            margin-bottom: 3px;
-            border-left: 3px solid #333;
-            font-size: 12px;
+            background: #0d0d0d;
+            border-bottom: 1px solid #1a1a1a;
+            overflow-x: auto;
+            flex-shrink: 0;
+            padding: 2px 4px;
+            gap: 2px;
+            min-height: 36px;
         }
-        .item.active {
-            border-left-color: #00ff41;
+        .tabbar .tab {
+            padding: 4px 12px;
+            font-size: 10px;
             background: #1a1a1a;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            white-space: nowrap;
+            border: 1px solid transparent;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
         }
-        .item .dot {
-            width: 8px;
-            height: 8px;
+        .tabbar .tab.active {
+            background: #0a0a0a;
+            border-color: #00ff41;
+            color: #00ff41;
+        }
+        .tabbar .tab .dot {
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             display: inline-block;
         }
-        .dot.online { background: #00ff41; }
-        .dot.limit { background: #ff4444; }
-        .dot.idle { background: #444; }
+        .tabbar .tab .dot.online { background: #00ff41; }
+        .tabbar .tab .dot.limit { background: #ff4444; }
+        .tabbar .tab .dot.idle { background: #444; }
+        .tabbar .tab .close {
+            color: #666;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 4px;
+        }
+        .tabbar .tab .close:hover { color: #ff4444; }
+
+        /* IFRAME AREA */
+        .iframe-wrapper {
+            flex: 1;
+            position: relative;
+            background: #0a0a0a;
+            overflow: hidden;
+        }
+        .iframe-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #fff;
+        }
+        .iframe-wrapper .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #666;
+            font-size: 14px;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .iframe-wrapper .limit-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 10px;
+            color: #fff;
+            z-index: 10;
+        }
+        .iframe-wrapper .limit-overlay.show { display: flex; }
+        .iframe-wrapper .limit-overlay .big {
+            font-size: 48px;
+            color: #ff4444;
+        }
+        .iframe-wrapper .limit-overlay .msg {
+            font-size: 16px;
+            color: #ffcc00;
+        }
+        .iframe-wrapper .limit-overlay .countdown {
+            font-size: 32px;
+            color: #00ff41;
+        }
+
+        /* BOTTOM LOG */
         .log {
             background: #0a0a0a;
-            border: 1px solid #1a1a1a;
-            border-radius: 6px;
-            padding: 8px;
-            max-height: 100px;
+            border-top: 1px solid #1a1a1a;
+            padding: 4px 10px;
+            max-height: 50px;
             overflow-y: auto;
-            font-size: 10px;
-            color: #666;
-            margin-top: 10px;
+            font-size: 9px;
+            color: #555;
+            flex-shrink: 0;
         }
-        .log span { display: block; padding: 2px 0; border-bottom: 1px solid #0d0d0d; }
+        .log span { display: inline; padding: 0 6px; border-right: 1px solid #1a1a1a; }
         .log .hl { color: #00ff41; }
         .log .err { color: #ff4444; }
-        .note {
-            font-size: 10px;
-            color: #444;
-            text-align: center;
-            margin-top: 12px;
-            border-top: 1px solid #1a1a1a;
-            padding-top: 10px;
+        .log .warn { color: #ffcc00; }
+
+        /* RESPONSIVE */
+        @media (max-width: 600px) {
+            .topbar .brand { font-size: 12px; }
+            .topbar .info { font-size: 10px; }
+            .tabbar .tab { font-size: 8px; padding: 3px 8px; }
+            .btn { font-size: 9px; padding: 3px 8px; }
         }
-        .shortcut {
-            background: #1a1a1a;
-            padding: 8px;
-            border-radius: 6px;
-            margin: 8px 0;
-            font-size: 11px;
-            color: #888;
-            text-align: center;
-        }
-        .shortcut strong { color: #ffcc00; }
     </style>
 </head>
 <body>
 
-<h1>🔥 CLAUDE 11 AKUN - HP</h1>
-
-<div class="status-box">
-    <div>📌 Akun Aktif</div>
-    <div class="active" id="activeLabel">-</div>
-    <div>
+<!-- TOPBAR -->
+<div class="topbar">
+    <div class="brand">🔥 Mini Browser</div>
+    <div class="info">
+        <span id="activeInfo">📌 <span id="activeLabel">-</span></span>
         <span class="badge idle" id="statusBadge">IDLE</span>
-        <span style="font-size:11px;color:#666;margin-left:10px;">🔄 <span id="switchCount">0</span>x</span>
+        <span>🔄 <span id="switchCount">0</span>x</span>
+        <button class="btn" id="btnPrev">◀</button>
+        <button class="btn" id="btnNext">▶</button>
+        <button class="btn warning" id="btnSwitch">🔄 Switch</button>
+        <button class="btn danger" id="btnCloseAll">✖ All</button>
     </div>
 </div>
 
-<div class="grid">
-    <button class="btn" id="btnPrev">◀ Prev</button>
-    <button class="btn warning" id="btnSwitch">🔄 Switch</button>
-    <button class="btn" id="btnNext">Next ▶</button>
-    <button class="btn full big" id="btnGo">🚀 Buka Claude</button>
+<!-- TAB BAR -->
+<div class="tabbar" id="tabbar"></div>
+
+<!-- IFRAME -->
+<div class="iframe-wrapper" id="iframeWrapper">
+    <div class="loading" id="loadingText">⏳ Loading...</div>
+    <iframe id="mainFrame" src="about:blank"></iframe>
+    <div class="limit-overlay" id="limitOverlay">
+        <div class="big">🚨</div>
+        <div class="msg">Akun kena limit!</div>
+        <div class="countdown" id="countdownNum">3</div>
+        <div style="font-size:12px;color:#666;">Switch otomatis...</div>
+    </div>
 </div>
 
-<div class="shortcut">
-    ⚡ <strong>Tap "Switch"</strong> → pindah akun + buka Claude otomatis!
-</div>
-
-<div class="list" id="accountList"></div>
-
+<!-- LOG -->
 <div class="log" id="logArea">
-    <span class="hl">🔥 HP Switcher siap! 11 akun.</span>
-    <span>💡 Tap "Switch" buat pindah akun.</span>
-</div>
-
-<div class="note">
-    📌 Data tersimpan di HP lo.<br/>
-    🔥 Kalo kena limit, tap "Switch" → langsung pindah akun!
+    <span class="hl">🔥 Mini Browser siap!</span>
+    <span>💡 Klik tab buat pindah</span>
+    <span>📌 "Switch" buat pindah akun</span>
 </div>
 
 <script>
     // ==================== KONFIG ====================
     const ACCOUNTS = [
-        'andre1@gmail.com',
-        'andre2@gmail.com',
-        'andre3@gmail.com',
-        'andre4@gmail.com',
-        'andre5@gmail.com',
-        'andre6@gmail.com',
-        'andre7@gmail.com',
-        'andre8@gmail.com',
-        'andre9@gmail.com',
-        'andre10@gmail.com',
-        'andre11@gmail.com'
+        { id: 0, email: 'andre1@gmail.com', label: 'A1' },
+        { id: 1, email: 'andre2@gmail.com', label: 'A2' },
+        { id: 2, email: 'andre3@gmail.com', label: 'A3' },
+        { id: 3, email: 'andre4@gmail.com', label: 'A4' },
+        { id: 4, email: 'andre5@gmail.com', label: 'A5' },
+        { id: 5, email: 'andre6@gmail.com', label: 'A6' },
+        { id: 6, email: 'andre7@gmail.com', label: 'A7' },
+        { id: 7, email: 'andre8@gmail.com', label: 'A8' },
+        { id: 8, email: 'andre9@gmail.com', label: 'A9' },
+        { id: 9, email: 'andre10@gmail.com', label: 'A10' },
+        { id: 10, email: 'andre11@gmail.com', label: 'A11' }
     ];
 
     // ==================== STATE ====================
-    let currentIndex = parseInt(localStorage.getItem('c_idx') || '0');
-    let switchCount = parseInt(localStorage.getItem('c_switch_count') || '0');
+    let currentIndex = parseInt(localStorage.getItem('mb_idx') || '0');
+    let switchCount = parseInt(localStorage.getItem('mb_switch') || '0');
+    let tabStatus = {};
+    let isSwitching = false;
+    let countdownTimer = null;
+    let iframeLoaded = {};
 
     // ==================== DOM ====================
+    const tabbar = document.getElementById('tabbar');
+    const mainFrame = document.getElementById('mainFrame');
+    const logArea = document.getElementById('logArea');
     const activeLabel = document.getElementById('activeLabel');
     const statusBadge = document.getElementById('statusBadge');
     const switchCountEl = document.getElementById('switchCount');
-    const accountList = document.getElementById('accountList');
-    const logArea = document.getElementById('logArea');
+    const limitOverlay = document.getElementById('limitOverlay');
+    const countdownNum = document.getElementById('countdownNum');
+    const loadingText = document.getElementById('loadingText');
 
     // ==================== FUNGSI ====================
     function addLog(msg, type = '') {
@@ -203,161 +265,298 @@
         span.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
         logArea.appendChild(span);
         logArea.scrollTop = logArea.scrollHeight;
-        while (logArea.children.length > 40) {
+        while (logArea.children.length > 30) {
             logArea.removeChild(logArea.firstChild);
         }
     }
 
-    function renderList() {
-        accountList.innerHTML = '';
-        ACCOUNTS.forEach((email, i) => {
+    function renderTabs() {
+        tabbar.innerHTML = '';
+        ACCOUNTS.forEach((acc, i) => {
             const div = document.createElement('div');
-            div.className = `item ${i === currentIndex ? 'active' : ''}`;
-            const status = localStorage.getItem(`c_status_${i}`) || 'idle';
+            div.className = `tab ${i === currentIndex ? 'active' : ''}`;
+            const status = tabStatus[acc.id] || 'idle';
             const dotClass = { 'online': 'online', 'limit': 'limit', 'idle': 'idle' }[status] || 'idle';
-            const shortEmail = email.length > 18 ? email.slice(0,18)+'…' : email;
             div.innerHTML = `
-                <span>#${i+1} ${shortEmail}</span>
-                <span><span class="dot ${dotClass}"></span> ${status}</span>
+                <span class="dot ${dotClass}"></span>
+                ${acc.label}
+                <span class="close" data-id="${acc.id}">✕</span>
             `;
-            div.onclick = () => switchTo(i);
-            accountList.appendChild(div);
+            div.onclick = (e) => {
+                if (e.target.classList.contains('close')) return;
+                switchTo(i);
+            };
+            // Close button
+            div.querySelector('.close').onclick = (e) => {
+                e.stopPropagation();
+                closeTab(acc.id);
+            };
+            tabbar.appendChild(div);
         });
+        // Scroll tab aktif ke view
+        const activeTab = tabbar.querySelector('.tab.active');
+        if (activeTab) activeTab.scrollIntoView({ behavior: 'smooth', inline: 'center' });
     }
 
     function updateUI() {
-        const email = ACCOUNTS[currentIndex] || '-';
-        activeLabel.textContent = email;
-        const status = localStorage.getItem(`c_status_${currentIndex}`) || 'idle';
+        const acc = ACCOUNTS[currentIndex];
+        activeLabel.textContent = acc.label + ' (' + acc.email + ')';
+        const status = tabStatus[acc.id] || 'idle';
         statusBadge.textContent = status.toUpperCase();
         statusBadge.className = `badge ${status}`;
         switchCountEl.textContent = switchCount;
-        renderList();
-        localStorage.setItem('c_idx', currentIndex);
-        localStorage.setItem('c_switch_count', switchCount);
+        renderTabs();
+        // Simpan
+        localStorage.setItem('mb_idx', currentIndex);
+        localStorage.setItem('mb_switch', switchCount);
     }
 
     function switchTo(index) {
+        if (isSwitching) return;
         if (index < 0 || index >= ACCOUNTS.length) return;
         currentIndex = index;
-        switchCount++;
-        // Mark as online
-        localStorage.setItem(`c_status_${index}`, 'online');
-        ACCOUNTS.forEach((_, i) => {
-            if (i !== index) {
-                const s = localStorage.getItem(`c_status_${i}`);
-                if (s === 'online') localStorage.setItem(`c_status_${i}`, 'idle');
-            }
-        });
+        const acc = ACCOUNTS[currentIndex];
+        
+        // Tandai online
+        tabStatus[acc.id] = 'online';
+        
+        // Load iframe
+        const url = 'https://claude.ai/login?email=' + encodeURIComponent(acc.email);
+        loadingText.style.display = 'block';
+        mainFrame.src = url;
+        
+        // Sembunyikan overlay limit
+        limitOverlay.classList.remove('show');
+        clearInterval(countdownTimer);
+        
         updateUI();
-        addLog(`🔄 Akun ${index+1}: ${ACCOUNTS[index]}`, 'hl');
+        addLog(`🔄 Buka ${acc.label}: ${acc.email}`, 'hl');
     }
 
     function nextAccount() {
+        if (isSwitching) return;
         const next = (currentIndex + 1) % ACCOUNTS.length;
+        switchCount++;
         switchTo(next);
     }
 
     function prevAccount() {
+        if (isSwitching) return;
         const prev = (currentIndex - 1 + ACCOUNTS.length) % ACCOUNTS.length;
+        switchCount++;
         switchTo(prev);
     }
 
+    function closeTab(id) {
+        const acc = ACCOUNTS.find(a => a.id === id);
+        if (!acc) return;
+        tabStatus[acc.id] = 'idle';
+        if (currentIndex === acc.id) {
+            // Pindah ke tab lain
+            const next = (currentIndex + 1) % ACCOUNTS.length;
+            switchTo(next);
+        } else {
+            renderTabs();
+            updateUI();
+        }
+        addLog(`✖ Tutup ${acc.label}`, 'warn');
+    }
+
+    function closeAllTabs() {
+        if (!confirm('✖ Tutup semua tab?')) return;
+        ACCOUNTS.forEach(acc => {
+            tabStatus[acc.id] = 'idle';
+        });
+        switchTo(0);
+        addLog('✖ Semua tab ditutup', 'warn');
+    }
+
+    // ==================== SWITCH + GO (BRUTAL) ====================
     function switchAndGo() {
-        const email = ACCOUNTS[currentIndex];
-        localStorage.setItem(`c_status_${currentIndex}`, 'limit');
-        renderList();
-        addLog(`🚨 Switch dari limit: ${email}`, 'err');
-        setTimeout(() => {
-            nextAccount();
-            setTimeout(() => {
-                window.location.href = 'https://claude.ai/login?email=' + encodeURIComponent(ACCOUNTS[currentIndex]);
-            }, 400);
-        }, 400);
-    }
-
-    function goToClaude() {
-        const email = ACCOUNTS[currentIndex];
-        window.location.href = 'https://claude.ai/login?email=' + encodeURIComponent(email);
-        addLog(`🚀 Buka Claude: ${email}`, '');
-    }
-
-    // ==================== DETECT LIMIT (jika di halaman Claude) ====================
-    function detectLimit() {
-        if (!window.location.hostname.includes('claude')) return false;
-        const body = document.body?.innerText || '';
-        const patterns = ['limit','exceeded','too many','rate limit','unavailable','usage limit','try again'];
-        for (const p of patterns) {
-            if (body.toLowerCase().includes(p)) {
-                const idx = parseInt(localStorage.getItem('c_idx') || '0');
-                localStorage.setItem(`c_status_${idx}`, 'limit');
-                renderList();
-                addLog(`🚨 Akun ${idx+1} KENA LIMIT!`, 'err');
-                return true;
+        if (isSwitching) return;
+        const acc = ACCOUNTS[currentIndex];
+        tabStatus[acc.id] = 'limit';
+        updateUI();
+        addLog(`🚨 ${acc.label} KENA LIMIT!`, 'err');
+        
+        // Tampilkan overlay countdown
+        limitOverlay.classList.add('show');
+        let count = 3;
+        countdownNum.textContent = count;
+        
+        clearInterval(countdownTimer);
+        countdownTimer = setInterval(() => {
+            count--;
+            countdownNum.textContent = count;
+            if (count <= 0) {
+                clearInterval(countdownTimer);
+                limitOverlay.classList.remove('show');
+                isSwitching = true;
+                nextAccount();
+                isSwitching = false;
+                addLog(`🔄 Auto-switch ke ${ACCOUNTS[currentIndex].label}`, 'warn');
             }
-        }
-        // Kalo ada "Claude" di title = online
-        if (document.title && document.title.includes('Claude')) {
-            const idx = parseInt(localStorage.getItem('c_idx') || '0');
-            localStorage.setItem(`c_status_${idx}`, 'online');
-            renderList();
-            addLog(`✅ Akun ${idx+1} Online`, 'hl');
-        }
-        return false;
+        }, 1000);
     }
+
+    // ==================== DETECT LIMIT DARI IFRAME ====================
+    function detectLimit() {
+        try {
+            const iframeDoc = mainFrame.contentDocument || mainFrame.contentWindow?.document;
+            if (!iframeDoc) return;
+
+            const body = iframeDoc.body?.innerText || '';
+            const title = iframeDoc.title || '';
+
+            const patterns = ['limit','exceeded','too many','rate limit','unavailable','usage limit','try again later','monthly limit','daily limit','you\'ve reached','can\'t send','request failed','over quota','throttled','temporarily blocked'];
+
+            let isLimit = false;
+            for (const p of patterns) {
+                if (body.toLowerCase().includes(p) || title.toLowerCase().includes(p)) {
+                    isLimit = true;
+                    break;
+                }
+            }
+
+            // Cek elemen error
+            if (!isLimit) {
+                const els = iframeDoc.querySelectorAll('*');
+                for (const el of els) {
+                    const text = el.innerText || '';
+                    if (text && /limit|exceeded|too many|rate limit|unavailable|try again later/i.test(text)) {
+                        if (el.offsetParent !== null && el.offsetHeight > 0) {
+                            isLimit = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            const acc = ACCOUNTS[currentIndex];
+            if (isLimit) {
+                if (tabStatus[acc.id] !== 'limit') {
+                    tabStatus[acc.id] = 'limit';
+                    updateUI();
+                    addLog(`🚨 ${acc.label} KENA LIMIT!`, 'err');
+                    // Auto switch
+                    if (!isSwitching) {
+                        isSwitching = true;
+                        setTimeout(() => {
+                            switchAndGo();
+                            isSwitching = false;
+                        }, 1500);
+                    }
+                }
+            } else {
+                if (tabStatus[acc.id] !== 'online' && tabStatus[acc.id] !== 'idle') {
+                    tabStatus[acc.id] = 'online';
+                    updateUI();
+                    addLog(`✅ ${acc.label} Online`, 'hl');
+                }
+            }
+
+            // Sembunyikan loading
+            loadingText.style.display = 'none';
+
+        } catch(e) {
+            // Cross-origin - coba dari URL
+            try {
+                const url = mainFrame.contentWindow?.location?.href || '';
+                if (url.includes('limit') || url.includes('error') || url.includes('blocked')) {
+                    const acc = ACCOUNTS[currentIndex];
+                    if (tabStatus[acc.id] !== 'limit') {
+                        tabStatus[acc.id] = 'limit';
+                        updateUI();
+                        addLog(`🚨 ${acc.label} KENA LIMIT! (URL)`, 'err');
+                        if (!isSwitching) {
+                            isSwitching = true;
+                            setTimeout(() => {
+                                switchAndGo();
+                                isSwitching = false;
+                            }, 1500);
+                        }
+                    }
+                }
+            } catch(e2) {}
+        }
+    }
+
+    // ==================== IFRAME LOAD ====================
+    mainFrame.addEventListener('load', () => {
+        loadingText.style.display = 'none';
+        const acc = ACCOUNTS[currentIndex];
+        if (tabStatus[acc.id] !== 'online') {
+            tabStatus[acc.id] = 'online';
+            updateUI();
+            addLog(`✅ ${acc.label} loaded`, 'hl');
+        }
+        // Cek limit setelah load
+        setTimeout(detectLimit, 2000);
+    });
 
     // ==================== INIT ====================
     function init() {
-        // Detect limit kalo di Claude
-        if (window.location.hostname.includes('claude')) {
-            setTimeout(() => {
-                if (detectLimit()) {
-                    // Auto switch
-                    setTimeout(() => {
-                        nextAccount();
-                        setTimeout(() => {
-                            window.location.href = 'https://claude.ai/login?email=' + encodeURIComponent(ACCOUNTS[currentIndex]);
-                        }, 500);
-                    }, 1500);
-                }
-            }, 1500);
-        }
+        // Init status
+        ACCOUNTS.forEach(acc => {
+            tabStatus[acc.id] = 'idle';
+        });
 
-        updateUI();
-        addLog(`🔥 Claude HP Switcher siap! ${ACCOUNTS.length} akun`, 'hl');
-        addLog(`📌 Aktif: ${ACCOUNTS[currentIndex]}`, '');
-        addLog(`💡 Tap "Switch" buat pindah + buka Claude`, '');
+        // Load tab pertama
+        switchTo(currentIndex);
+
+        // Events
+        document.getElementById('btnNext').addEventListener('click', () => {
+            if (!isSwitching) nextAccount();
+        });
+        document.getElementById('btnPrev').addEventListener('click', () => {
+            if (!isSwitching) prevAccount();
+        });
+        document.getElementById('btnSwitch').addEventListener('click', switchAndGo);
+        document.getElementById('btnCloseAll').addEventListener('click', closeAllTabs);
+
+        // Auto detect limit tiap 3 detik
+        setInterval(detectLimit, 3000);
+
+        // Keyboard shortcuts (desktop)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' && e.ctrlKey) {
+                e.preventDefault();
+                if (!isSwitching) nextAccount();
+            }
+            if (e.key === 'ArrowLeft' && e.ctrlKey) {
+                e.preventDefault();
+                if (!isSwitching) prevAccount();
+            }
+            if (e.key === 's' && e.ctrlKey) {
+                e.preventDefault();
+                switchAndGo();
+            }
+        });
+
+        addLog(`🔥 Mini Browser siap! ${ACCOUNTS.length} akun`, 'hl');
+        addLog(`📌 Aktif: ${ACCOUNTS[currentIndex].label}`, '');
+        addLog(`💡 Klik tab buat pindah | Klik Switch buat pindah akun`, '');
+        addLog(`⌨️ Ctrl+→ / Ctrl+← = ganti tab`, '');
     }
 
-    // ==================== EVENT ====================
-    document.getElementById('btnNext').addEventListener('click', () => {
-        nextAccount();
-        addLog(`⏩ Next ke akun ${currentIndex+1}`, '');
-    });
-    document.getElementById('btnPrev').addEventListener('click', () => {
-        prevAccount();
-        addLog(`⏪ Prev ke akun ${currentIndex+1}`, '');
-    });
-    document.getElementById('btnSwitch').addEventListener('click', switchAndGo);
-    document.getElementById('btnGo').addEventListener('click', goToClaude);
-
-    // ==================== RUN ====================
     init();
 
     // ==================== GLOBAL ====================
-    window.__c = {
+    window.__miniBrowser = {
         accounts: ACCOUNTS,
         current: () => ACCOUNTS[currentIndex],
         switchTo: switchTo,
         next: nextAccount,
         prev: prevAccount,
         switchAndGo: switchAndGo,
-        go: goToClaude,
-        detectLimit: detectLimit
+        detectLimit: detectLimit,
+        closeAll: closeAllTabs,
+        status: tabStatus
     };
 
-    console.log('🔥 CLAUDE HP SWITCHER loaded!');
-    console.log('💡 Panggil __c.switchAndGo() buat pindah akun');
+    console.log('🔥 MINI BROWSER loaded!');
+    console.log('💡 Panggil __miniBrowser.next() buat next');
+    console.log('💡 Panggil __miniBrowser.switchAndGo() buat switch');
 </script>
 
 </body>
