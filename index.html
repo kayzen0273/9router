@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>🔥 CLAUDE 11 AKUN - DASHBOARD</title>
+    <title>🔥 CLAUDE 11 AKUN - DASHBOARD v2</title>
     <style>
         * {
             margin: 0;
@@ -14,57 +14,74 @@
             font-family: 'Courier New', monospace;
             background: #0a0a0a;
             color: #00ff41;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            padding: 20px;
         }
-        .topbar {
-            background: #111;
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            letter-spacing: 3px;
             border-bottom: 2px solid #00ff41;
-            padding: 10px 20px;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .status-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 10px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 999;
+            background: #111;
+            padding: 15px 20px;
+            border-radius: 8px;
+            border: 1px solid #1a1a1a;
+            margin-bottom: 20px;
         }
-        .topbar h1 {
+        .status-bar .active {
             font-size: 18px;
-            letter-spacing: 2px;
+            color: #ffcc00;
         }
-        .topbar .info {
-            display: flex;
-            gap: 15px;
-            font-size: 13px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .topbar .info .badge {
-            background: #00ff41;
-            color: #0a0a0a;
-            padding: 2px 10px;
+        .status-bar .badge {
+            padding: 4px 12px;
             border-radius: 12px;
+            font-size: 12px;
             font-weight: bold;
         }
-        .topbar .info .badge.warning {
-            background: #ffcc00;
+        .badge.online {
+            background: #00ff41;
+            color: #0a0a0a;
         }
-        .topbar .info .badge.danger {
+        .badge.limit {
             background: #ff4444;
+            color: #fff;
+        }
+        .badge.idle {
+            background: #444;
+            color: #aaa;
+        }
+        .badge.switching {
+            background: #ffcc00;
+            color: #0a0a0a;
+        }
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
         }
         .btn {
             background: transparent;
             border: 1px solid #00ff41;
             color: #00ff41;
-            padding: 5px 12px;
+            padding: 8px 16px;
             font-family: inherit;
-            font-size: 12px;
+            font-size: 13px;
+            font-weight: bold;
             cursor: pointer;
-            border-radius: 4px;
+            border-radius: 6px;
             transition: 0.3s;
         }
         .btn:hover {
@@ -79,202 +96,173 @@
             background: #ff4444;
             color: #0a0a0a;
         }
-        .main {
-            display: flex;
-            height: calc(100vh - 60px);
-            margin-top: 60px;
+        .btn.warning {
+            border-color: #ffcc00;
+            color: #ffcc00;
         }
-        .sidebar {
-            width: 220px;
-            background: #0d0d0d;
-            border-right: 1px solid #1a1a1a;
-            padding: 10px;
-            overflow-y: auto;
-            flex-shrink: 0;
-        }
-        .sidebar .account-item {
-            padding: 8px 10px;
-            margin-bottom: 4px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            border-left: 3px solid #333;
-            transition: 0.2s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .sidebar .account-item:hover {
-            background: #1a1a1a;
-        }
-        .sidebar .account-item.active {
-            border-left-color: #00ff41;
-            background: #1a1a1a;
-        }
-        .sidebar .account-item .status {
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 8px;
-        }
-        .sidebar .account-item .status.online {
-            background: #00ff41;
-            color: #0a0a0a;
-        }
-        .sidebar .account-item .status.limit {
-            background: #ff4444;
-            color: #fff;
-        }
-        .sidebar .account-item .status.idle {
-            background: #666;
-            color: #fff;
-        }
-        .sidebar .account-item .status.used {
+        .btn.warning:hover {
             background: #ffcc00;
             color: #0a0a0a;
         }
-        .iframe-container {
-            flex: 1;
-            position: relative;
-            background: #0a0a0a;
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
         }
-        .iframe-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 8px;
+            margin: 15px 0;
         }
-        .iframe-container .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.7);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            gap: 15px;
-            color: #fff;
+        .account-card {
+            background: #111;
+            border: 1px solid #1a1a1a;
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
         }
-        .iframe-container .overlay.show {
-            display: flex;
+        .account-card:hover {
+            border-color: #00ff41;
         }
-        .iframe-container .overlay .big {
-            font-size: 48px;
+        .account-card.active {
+            border-color: #00ff41;
+            box-shadow: 0 0 20px rgba(0,255,65,0.2);
         }
-        .log-area {
-            position: fixed;
-            bottom: 0;
-            left: 220px;
-            right: 0;
-            height: 80px;
-            background: rgba(0,0,0,0.9);
-            border-top: 1px solid #1a1a1a;
-            padding: 5px 15px;
-            overflow-y: auto;
+        .account-card .num {
             font-size: 11px;
+            color: #666;
+        }
+        .account-card .email {
+            font-size: 10px;
             color: #888;
-            z-index: 100;
+            margin: 4px 0;
+            word-break: break-all;
         }
-        .log-area span {
+        .account-card .status-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-top: 4px;
+        }
+        .status-dot.online {
+            background: #00ff41;
+        }
+        .status-dot.limit {
+            background: #ff4444;
+        }
+        .status-dot.idle {
+            background: #444;
+        }
+        .status-dot.used {
+            background: #ffcc00;
+        }
+        .log {
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 6px;
+            padding: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 12px;
+            color: #888;
+            margin-top: 15px;
+        }
+        .log span {
             display: block;
-            padding: 1px 0;
+            padding: 2px 0;
+            border-bottom: 1px solid #0d0d0d;
         }
-        .log-area .highlight {
+        .log .hl {
             color: #00ff41;
         }
-        .log-area .warn {
+        .log .warn {
             color: #ffcc00;
         }
-        .log-area .error {
+        .log .err {
             color: #ff4444;
         }
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 160px;
-                font-size: 11px;
-            }
-            .topbar h1 {
-                font-size: 14px;
-            }
-            .log-area {
-                left: 160px;
-                height: 60px;
-                font-size: 10px;
-            }
+        .note {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            margin-top: 15px;
+            border-top: 1px solid #1a1a1a;
+            padding-top: 15px;
         }
     </style>
 </head>
 <body>
 
-<!-- TOPBAR -->
-<div class="topbar">
-    <h1>🔥 CLAUDE 11 AKUN</h1>
-    <div class="info">
-        <span id="activeInfo">📌 Akun: <strong id="activeName">-</strong></span>
-        <span id="statusInfo">📊 Status: <span class="badge" id="statusBadge">Idle</span></span>
-        <span>🔄 <span id="switchCount">0</span>x switch</span>
-        <button class="btn" id="btnPrev">◀ Prev</button>
-        <button class="btn" id="btnNext">Next ▶</button>
-        <button class="btn danger" id="btnLogoutAll">🚪 Logout All</button>
-        <button class="btn" id="btnRefreshAll">⟳ Refresh All</button>
-    </div>
-</div>
+<div class="container">
+    <h1>🔥 CLAUDE 11 AKUN - DASHBOARD v2</h1>
 
-<!-- MAIN -->
-<div class="main">
-    <!-- SIDEBAR -->
-    <div class="sidebar" id="sidebar"></div>
-
-    <!-- IFRAME -->
-    <div class="iframe-container">
-        <iframe id="mainFrame" src="about:blank"></iframe>
-        <div class="overlay" id="overlay">
-            <div class="big">🔒</div>
-            <div>Akun ini terkena limit. Switch otomatis dalam 3 detik...</div>
-            <div id="countdownTimer">3</div>
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <div>
+            <span>📌 Akun Aktif: </span>
+            <span class="active" id="activeLabel">Akun 1</span>
+            <span class="badge online" id="statusBadge">Online</span>
+        </div>
+        <div>
+            <span>🔄 Switch: <span id="switchCount">0</span>x</span>
+        </div>
+        <div class="btn-group">
+            <button class="btn" id="btnPrev">◀ Prev</button>
+            <button class="btn" id="btnNext">Next ▶</button>
+            <button class="btn warning" id="btnOpenAll">🪟 Buka Semua</button>
+            <button class="btn danger" id="btnLogoutAll">🚪 Logout All</button>
         </div>
     </div>
-</div>
 
-<!-- LOG -->
-<div class="log-area" id="logArea"></div>
+    <!-- Grid Akun -->
+    <div class="grid" id="accountGrid"></div>
+
+    <!-- Log -->
+    <div class="log" id="logArea">
+        <span class="hl">🔥 Dashboard siap. Klik "Buka Semua" untuk buka 11 tab Claude.</span>
+    </div>
+
+    <div class="note">
+        ⚡ Klik kartu akun untuk pindah ke tab itu. <br/>
+        🔥 Auto-detect limit dari tab Claude. Kena limit? Auto-switch ke akun berikutnya!
+    </div>
+</div>
 
 <script>
     // ==================== KONFIG ====================
     const ACCOUNTS = [
-        { email: 'andre1@gmail.com', label: 'Akun 1' },
-        { email: 'andre2@gmail.com', label: 'Akun 2' },
-        { email: 'andre3@gmail.com', label: 'Akun 3' },
-        { email: 'andre4@gmail.com', label: 'Akun 4' },
-        { email: 'andre5@gmail.com', label: 'Akun 5' },
-        { email: 'andre6@gmail.com', label: 'Akun 6' },
-        { email: 'andre7@gmail.com', label: 'Akun 7' },
-        { email: 'andre8@gmail.com', label: 'Akun 8' },
-        { email: 'andre9@gmail.com', label: 'Akun 9' },
-        { email: 'andre10@gmail.com', label: 'Akun 10' },
-        { email: 'andre11@gmail.com', label: 'Akun 11' }
+        { id: 0, email: 'andre1@gmail.com', label: 'Akun 1' },
+        { id: 1, email: 'andre2@gmail.com', label: 'Akun 2' },
+        { id: 2, email: 'andre3@gmail.com', label: 'Akun 3' },
+        { id: 3, email: 'andre4@gmail.com', label: 'Akun 4' },
+        { id: 4, email: 'andre5@gmail.com', label: 'Akun 5' },
+        { id: 5, email: 'andre6@gmail.com', label: 'Akun 6' },
+        { id: 6, email: 'andre7@gmail.com', label: 'Akun 7' },
+        { id: 7, email: 'andre8@gmail.com', label: 'Akun 8' },
+        { id: 8, email: 'andre9@gmail.com', label: 'Akun 9' },
+        { id: 9, email: 'andre10@gmail.com', label: 'Akun 10' },
+        { id: 10, email: 'andre11@gmail.com', label: 'Akun 11' }
     ];
 
-    const CHECK_INTERVAL = 3000; // cek limit tiap 3 detik
-    const AUTO_SWITCH_DELAY = 3000; // delay sebelum switch kalo limit
+    const CHECK_INTERVAL = 3000;
 
     // ==================== STATE ====================
     let currentIndex = 0;
     let switchCount = 0;
     let isSwitching = false;
-    let countdownTimer = null;
-    let accountStatus = {};
+    let tabs = {}; // { tabId: window }
+    let tabStatus = {}; // { tabId: 'online'|'limit'|'idle'|'used' }
+    let tabFocus = {}; // { tabId: lastFocusTime }
 
     // ==================== DOM ====================
-    const mainFrame = document.getElementById('mainFrame');
-    const sidebar = document.getElementById('sidebar');
+    const grid = document.getElementById('accountGrid');
     const logArea = document.getElementById('logArea');
-    const activeName = document.getElementById('activeName');
+    const activeLabel = document.getElementById('activeLabel');
     const statusBadge = document.getElementById('statusBadge');
     const switchCountEl = document.getElementById('switchCount');
-    const overlay = document.getElementById('overlay');
-    const countdownTimerEl = document.getElementById('countdownTimer');
 
     // ==================== FUNGSI ====================
     function addLog(msg, type = '') {
@@ -283,202 +271,255 @@
         span.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
         logArea.appendChild(span);
         logArea.scrollTop = logArea.scrollHeight;
-        while (logArea.children.length > 100) {
+        while (logArea.children.length > 80) {
             logArea.removeChild(logArea.firstChild);
         }
     }
 
-    function updateSidebar() {
-        sidebar.innerHTML = '';
+    function renderGrid() {
+        grid.innerHTML = '';
         ACCOUNTS.forEach((acc, i) => {
             const div = document.createElement('div');
-            div.className = `account-item ${i === currentIndex ? 'active' : ''}`;
-            const status = accountStatus[acc.email] || 'idle';
-            const statusMap = {
-                'online': '<span class="status online">● Online</span>',
-                'limit': '<span class="status limit">● Limit</span>',
-                'idle': '<span class="status idle">● Idle</span>',
-                'used': '<span class="status used">● Used</span>'
-            };
+            div.className = `account-card ${i === currentIndex ? 'active' : ''}`;
+            const status = tabStatus[acc.id] || 'idle';
+            const dotClass = {
+                'online': 'online',
+                'limit': 'limit',
+                'idle': 'idle',
+                'used': 'used'
+            }[status] || 'idle';
+
             div.innerHTML = `
-                <span>${i+1}. ${acc.label}</span>
-                ${statusMap[status] || statusMap.idle}
+                <div class="num">#${i+1}</div>
+                <div class="email">${acc.label}</div>
+                <div class="status-dot ${dotClass}"></div>
+                <div style="font-size:9px;color:#666;margin-top:2px;">${status.toUpperCase()}</div>
             `;
             div.onclick = () => switchToAccount(i);
-            sidebar.appendChild(div);
+            grid.appendChild(div);
         });
+    }
+
+    function updateStatusBar() {
+        const acc = ACCOUNTS[currentIndex];
+        activeLabel.textContent = acc.label;
+        const status = tabStatus[acc.id] || 'idle';
+        statusBadge.textContent = status.toUpperCase();
+        statusBadge.className = `badge ${status}`;
+        switchCountEl.textContent = switchCount;
+        renderGrid();
     }
 
     function switchToAccount(index) {
         if (isSwitching) return;
         if (index < 0 || index >= ACCOUNTS.length) return;
 
+        const acc = ACCOUNTS[index];
         currentIndex = index;
-        const acc = ACCOUNTS[currentIndex];
-        activeName.textContent = acc.label;
-        statusBadge.textContent = accountStatus[acc.email] || 'Idle';
-        switchCountEl.textContent = switchCount;
 
-        // Update sidebar
-        updateSidebar();
+        // Focus tab
+        if (tabs[acc.id] && !tabs[acc.id].closed) {
+            tabs[acc.id].focus();
+            addLog(`🔄 Switch ke ${acc.label} (tab #${acc.id+1})`, 'hl');
+        } else {
+            // Tab ga ada, buka baru
+            openTab(acc.id);
+            addLog(`🔄 Buka tab baru: ${acc.label}`, 'hl');
+        }
 
-        // Load iframe
-        mainFrame.src = `https://claude.ai/login?email=${encodeURIComponent(acc.email)}`;
-
-        // Sembunyikan overlay
-        overlay.classList.remove('show');
-
-        addLog(`🔄 Switch ke ${acc.label} (${acc.email})`, 'highlight');
+        updateStatusBar();
     }
 
     function nextAccount() {
         if (isSwitching) return;
         const next = (currentIndex + 1) % ACCOUNTS.length;
-        switchToAccount(next);
         switchCount++;
-        switchCountEl.textContent = switchCount;
+        switchToAccount(next);
     }
 
     function prevAccount() {
         if (isSwitching) return;
         const prev = (currentIndex - 1 + ACCOUNTS.length) % ACCOUNTS.length;
-        switchToAccount(prev);
         switchCount++;
-        switchCountEl.textContent = switchCount;
+        switchToAccount(prev);
     }
 
-    // ==================== DETECT LIMIT DI IFRAME ====================
-    function checkIframeForLimit() {
-        try {
-            const iframeDoc = mainFrame.contentDocument || mainFrame.contentWindow?.document;
-            if (!iframeDoc) return false;
-
-            const bodyText = iframeDoc.body?.innerText || '';
-
-            const limitPatterns = [
-                /limit/i, /exceeded/i, /too many/i, /try again later/i,
-                /rate limit/i, /unavailable/i, /usage limit/i,
-                /monthly limit/i, /daily limit/i, /message limit/i,
-                /you've reached/i, /can't send/i, /request failed/i,
-                /over quota/i, /throttled/i, /temporarily blocked/i
-            ];
-
-            for (const pattern of limitPatterns) {
-                if (pattern.test(bodyText)) {
-                    return true;
+    function openTab(accountId) {
+        const acc = ACCOUNTS[accountId];
+        const win = window.open(
+            `https://claude.ai/login?email=${encodeURIComponent(acc.email)}`,
+            `claude_${acc.id}`,
+            'width=1200,height=800'
+        );
+        if (win) {
+            tabs[acc.id] = win;
+            tabStatus[acc.id] = 'idle';
+            // Monitor tab close
+            const checkClosed = setInterval(() => {
+                if (win.closed) {
+                    clearInterval(checkClosed);
+                    tabStatus[acc.id] = 'idle';
+                    addLog(`❌ Tab ${acc.label} ditutup`, 'err');
+                    renderGrid();
                 }
-            }
-
-            // Cek elemen tertentu
-            const elements = iframeDoc.querySelectorAll('*');
-            for (const el of elements) {
-                const text = el.innerText || '';
-                if (text && /limit|exceeded|too many|rate limit|unavailable|try again later/i.test(text)) {
-                    if (el.offsetParent !== null && el.offsetHeight > 0) {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-
-        } catch(e) {
-            // Cross-origin error — skip
-            return false;
+            }, 2000);
+        } else {
+            addLog(`⚠️ Popup blocked! Buka manual: ${acc.email}`, 'warn');
         }
+        renderGrid();
+        updateStatusBar();
     }
 
-    // ==================== AUTO-SWITCH LOOP ====================
-    function autoCheckAndSwitch() {
+    function openAllTabs() {
+        addLog(`🪟 Membuka ${ACCOUNTS.length} tab Claude...`, 'warn');
+        ACCOUNTS.forEach((acc, i) => {
+            setTimeout(() => {
+                openTab(acc.id);
+                addLog(`  📧 Tab #${i+1}: ${acc.label}`, '');
+            }, i * 500);
+        });
+        setTimeout(() => {
+            addLog(`✅ Semua tab dibuka!`, 'hl');
+        }, ACCOUNTS.length * 500 + 1000);
+    }
+
+    function logoutAll() {
+        if (!confirm('🚪 Logout semua akun Claude?')) return;
+        addLog('🚪 Logout semua akun...', 'warn');
+        ACCOUNTS.forEach(acc => {
+            if (tabs[acc.id] && !tabs[acc.id].closed) {
+                try {
+                    tabs[acc.id].location.href = 'https://claude.ai/logout';
+                } catch(e) {
+                    // Cross-origin, close tab aja
+                    tabs[acc.id].close();
+                }
+            }
+            tabStatus[acc.id] = 'idle';
+            delete tabs[acc.id];
+        });
+        renderGrid();
+        updateStatusBar();
+        addLog('✅ Semua akun logout', 'hl');
+    }
+
+    // ==================== DETECT LIMIT ====================
+    function checkAllTabs() {
         if (isSwitching) return;
 
-        const acc = ACCOUNTS[currentIndex];
+        let anyLimit = false;
+        let firstLimitId = -1;
 
-        // Cek limit
-        const isLimit = checkIframeForLimit();
+        ACCOUNTS.forEach(acc => {
+            const win = tabs[acc.id];
+            if (!win || win.closed) {
+                tabStatus[acc.id] = 'idle';
+                return;
+            }
 
-        if (isLimit) {
-            addLog(`🚨 ${acc.label} KENA LIMIT!`, 'error');
-            accountStatus[acc.email] = 'limit';
-            updateSidebar();
-            statusBadge.textContent = 'Limit';
-            statusBadge.className = 'badge danger';
+            try {
+                // Cek title atau URL
+                const title = win.document.title || '';
+                const url = win.location.href || '';
 
-            // Tampilkan overlay countdown
-            overlay.classList.add('show');
-            let countdown = 3;
-            countdownTimerEl.textContent = countdown;
+                // Limit indicators
+                const limitPatterns = [
+                    'limit', 'exceeded', 'too many', 'try again',
+                    'rate limit', 'unavailable', 'usage limit',
+                    'monthly limit', 'daily limit', 'message limit',
+                    'you\'ve reached', 'can\'t send', 'request failed',
+                    'over quota', 'throttled', 'temporarily blocked'
+                ];
 
-            clearInterval(countdownTimer);
-            countdownTimer = setInterval(() => {
-                countdown--;
-                countdownTimerEl.textContent = countdown;
-                if (countdown <= 0) {
-                    clearInterval(countdownTimer);
-                    // Switch ke akun berikutnya
-                    isSwitching = true;
+                let isLimit = false;
+                const lowerTitle = title.toLowerCase();
+                const lowerUrl = url.toLowerCase();
+
+                for (const pattern of limitPatterns) {
+                    if (lowerTitle.includes(pattern) || lowerUrl.includes(pattern)) {
+                        isLimit = true;
+                        break;
+                    }
+                }
+
+                // Cek body text
+                try {
+                    const body = win.document.body?.innerText || '';
+                    for (const pattern of limitPatterns) {
+                        if (body.toLowerCase().includes(pattern)) {
+                            isLimit = true;
+                            break;
+                        }
+                    }
+                } catch(e) {}
+
+                if (isLimit) {
+                    if (tabStatus[acc.id] !== 'limit') {
+                        tabStatus[acc.id] = 'limit';
+                        addLog(`🚨 ${acc.label} KENA LIMIT!`, 'err');
+                    }
+                    anyLimit = true;
+                    if (firstLimitId === -1) firstLimitId = acc.id;
+                } else {
+                    if (tabStatus[acc.id] !== 'online' && tabStatus[acc.id] !== 'used') {
+                        tabStatus[acc.id] = 'online';
+                        addLog(`✅ ${acc.label} Online`, 'hl');
+                    }
+                }
+
+            } catch(e) {
+                // Cross-origin, skip
+                // Tapi kita bisa cek dari URL via location (cuma bisa baca URL)
+                try {
+                    const url = win.location.href || '';
+                    if (url.includes('limit') || url.includes('error') || url.includes('blocked')) {
+                        if (tabStatus[acc.id] !== 'limit') {
+                            tabStatus[acc.id] = 'limit';
+                            addLog(`🚨 ${acc.label} KENA LIMIT!`, 'err');
+                        }
+                        anyLimit = true;
+                        if (firstLimitId === -1) firstLimitId = acc.id;
+                    }
+                } catch(e2) {
+                    // Silent
+                }
+            }
+        });
+
+        renderGrid();
+        updateStatusBar();
+
+        // Kalo ada limit, auto-switch ke akun berikutnya
+        if (anyLimit && firstLimitId !== -1) {
+            const currentAcc = ACCOUNTS[currentIndex];
+            if (tabStatus[currentAcc.id] === 'limit') {
+                addLog(`⚠️ Akun aktif kena limit! Auto-switch...`, 'warn');
+                isSwitching = true;
+                setTimeout(() => {
                     nextAccount();
                     isSwitching = false;
-                    overlay.classList.remove('show');
-                }
-            }, 1000);
-
-        } else {
-            // Update status
-            if (accountStatus[acc.email] !== 'online') {
-                accountStatus[acc.email] = 'online';
-                updateSidebar();
-                statusBadge.textContent = 'Online';
-                statusBadge.className = 'badge';
-                addLog(`✅ ${acc.label} Online`, 'highlight');
+                }, 2000);
             }
         }
     }
 
-    // ==================== LOGOUT ALL ====================
-    function logoutAll() {
-        if (confirm('🚪 Logout semua akun Claude?')) {
-            addLog('🚪 Logout semua akun...', 'warn');
-            // Hapus semua cookie Claude
-            document.cookie.split(';').forEach(c => {
-                document.cookie = c.replace(/^ +/, '')
-                    .replace(/=.*/, `=; expires=${new Date(0).toUTCString()}; path=/; domain=.claude.ai`);
-            });
-            // Refresh iframe ke login
-            mainFrame.src = 'https://claude.ai/login';
-            // Reset status
-            Object.keys(accountStatus).forEach(key => {
-                accountStatus[key] = 'idle';
-            });
-            updateSidebar();
-            statusBadge.textContent = 'Logged Out';
-            statusBadge.className = 'badge warning';
-            addLog('✅ Semua akun logout', 'highlight');
+    // ==================== KEYBOARD ====================
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' && e.ctrlKey) {
+            e.preventDefault();
+            nextAccount();
         }
-    }
-
-    // ==================== REFRESH ALL ====================
-    function refreshAll() {
-        addLog('⟳ Refresh semua tab...', 'warn');
-        // Refresh iframe
-        const currentSrc = mainFrame.src;
-        mainFrame.src = 'about:blank';
-        setTimeout(() => {
-            mainFrame.src = currentSrc;
-        }, 500);
-        // Refresh sidebar status
-        Object.keys(accountStatus).forEach(key => {
-            accountStatus[key] = 'idle';
-        });
-        updateSidebar();
-        addLog('✅ Refresh selesai', 'highlight');
-    }
+        if (e.key === 'ArrowLeft' && e.ctrlKey) {
+            e.preventDefault();
+            prevAccount();
+        }
+    });
 
     // ==================== INIT ====================
     function init() {
         // Load saved index
         try {
-            const saved = localStorage.getItem('claude_11_index');
+            const saved = localStorage.getItem('claude_11_index_v2');
             if (saved !== null) {
                 const idx = parseInt(saved);
                 if (!isNaN(idx) && idx >= 0 && idx < ACCOUNTS.length) {
@@ -487,60 +528,53 @@
             }
         } catch(e) {}
 
-        // Init status
-        ACCOUNTS.forEach(acc => {
-            accountStatus[acc.email] = 'idle';
-        });
+        renderGrid();
+        updateStatusBar();
 
-        // Render sidebar
-        updateSidebar();
-
-        // Load akun pertama
-        switchToAccount(currentIndex);
-
-        // Event
+        // Events
         document.getElementById('btnNext').addEventListener('click', () => {
             if (!isSwitching) nextAccount();
         });
         document.getElementById('btnPrev').addEventListener('click', () => {
             if (!isSwitching) prevAccount();
         });
+        document.getElementById('btnOpenAll').addEventListener('click', openAllTabs);
         document.getElementById('btnLogoutAll').addEventListener('click', logoutAll);
-        document.getElementById('btnRefreshAll').addEventListener('click', refreshAll);
 
         // Auto-check loop
-        setInterval(autoCheckAndSwitch, CHECK_INTERVAL);
+        setInterval(checkAllTabs, CHECK_INTERVAL);
 
-        // Save index periodically
+        // Save index
         setInterval(() => {
             try {
-                localStorage.setItem('claude_11_index', currentIndex);
+                localStorage.setItem('claude_11_index_v2', currentIndex);
             } catch(e) {}
         }, 10000);
 
-        addLog(`🔥 CLAUDE 11 AKUN DASHBOARD siap! Total ${ACCOUNTS.length} akun.`, 'highlight');
-        addLog(`📌 Akun aktif: ${ACCOUNTS[currentIndex].label}`, 'highlight');
-        addLog(`⏱ Auto-check limit tiap ${CHECK_INTERVAL/1000} detik`, '');
+        addLog(`🔥 CLAUDE 11 AKUN v2 siap! Total ${ACCOUNTS.length} akun.`, 'hl');
+        addLog(`💡 Klik "Buka Semua" untuk buka 11 tab login.`, '');
+        addLog(`⌨️ Ctrl+→ / Ctrl+← buat ganti akun.`, '');
     }
 
-    // ==================== RUN ====================
     init();
 
-    // Export ke global
+    // ==================== GLOBAL ====================
     window.__claude11 = {
         accounts: ACCOUNTS,
-        currentIndex: () => currentIndex,
         switchTo: switchToAccount,
         next: nextAccount,
         prev: prevAccount,
-        status: accountStatus,
-        checkLimit: checkIframeForLimit,
-        logoutAll: logoutAll
+        openAll: openAllTabs,
+        logoutAll: logoutAll,
+        status: tabStatus,
+        tabs: tabs,
+        check: checkAllTabs
     };
 
-    console.log('💡 Panggil __claude11.switchTo(0) buat pindah ke akun 1');
-    console.log('💡 Panggil __claude11.next() buat next otomatis');
-
+    console.log('🔥 CLAUDE 11 AKUN v2 loaded!');
+    console.log('💡 Panggil __claude11.next() buat next akun');
+    console.log('💡 Panggil __claude11.openAll() buka semua tab');
 </script>
+
 </body>
 </html>
