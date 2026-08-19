@@ -3,64 +3,66 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-    <title>🔥 Claude HP Switcher</title>
+    <title>🔥 Claude 11 Akun - HP</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
             background: #0a0a0a;
             color: #00ff41;
             min-height: 100vh;
-            padding: 15px;
-            padding-bottom: 100px;
+            padding: 12px;
+            padding-bottom: 80px;
         }
         h1 {
-            font-size: 20px;
+            font-size: 18px;
             text-align: center;
             border-bottom: 2px solid #00ff41;
-            padding-bottom: 12px;
-            margin-bottom: 15px;
+            padding-bottom: 10px;
+            margin-bottom: 12px;
             letter-spacing: 1px;
         }
         .status-box {
             background: #111;
             border: 1px solid #1a1a1a;
             border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
+            padding: 12px;
+            margin-bottom: 12px;
+            text-align: center;
         }
         .status-box .active {
-            font-size: 18px;
+            font-size: 16px;
             color: #ffcc00;
             word-break: break-all;
+            font-weight: bold;
         }
         .status-box .badge {
             display: inline-block;
-            padding: 4px 12px;
+            padding: 3px 12px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
-            margin-top: 5px;
+            margin-top: 4px;
         }
         .badge.online { background: #00ff41; color: #000; }
         .badge.limit { background: #ff4444; color: #fff; }
         .badge.idle { background: #444; color: #aaa; }
-        .btn-group {
+        .grid {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
-            gap: 8px;
+            gap: 6px;
             margin: 10px 0;
         }
         .btn {
             background: transparent;
             border: 1px solid #00ff41;
             color: #00ff41;
-            padding: 14px 8px;
-            font-size: 14px;
+            padding: 12px 6px;
+            font-size: 13px;
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.2s;
             text-align: center;
         }
         .btn:active { background: #00ff41; color: #000; transform: scale(0.95); }
@@ -69,27 +71,28 @@
         .btn.warning { border-color: #ffcc00; color: #ffcc00; }
         .btn.warning:active { background: #ffcc00; color: #000; }
         .btn.full { grid-column: 1 / -1; }
-        .account-list {
-            margin-top: 12px;
+        .btn.big { padding: 16px; font-size: 16px; }
+        .list {
+            margin-top: 10px;
         }
-        .account-item {
+        .item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 12px;
+            padding: 8px 10px;
             background: #111;
             border-radius: 6px;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
             border-left: 3px solid #333;
-            font-size: 13px;
+            font-size: 12px;
         }
-        .account-item.active {
+        .item.active {
             border-left-color: #00ff41;
             background: #1a1a1a;
         }
-        .account-item .dot {
-            width: 10px;
-            height: 10px;
+        .item .dot {
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             display: inline-block;
         }
@@ -100,66 +103,65 @@
             background: #0a0a0a;
             border: 1px solid #1a1a1a;
             border-radius: 6px;
-            padding: 10px;
-            max-height: 120px;
+            padding: 8px;
+            max-height: 100px;
             overflow-y: auto;
-            font-size: 11px;
+            font-size: 10px;
             color: #666;
-            margin-top: 12px;
+            margin-top: 10px;
         }
         .log span { display: block; padding: 2px 0; border-bottom: 1px solid #0d0d0d; }
         .log .hl { color: #00ff41; }
         .log .err { color: #ff4444; }
-        .log .warn { color: #ffcc00; }
         .note {
-            font-size: 11px;
+            font-size: 10px;
             color: #444;
             text-align: center;
-            margin-top: 15px;
+            margin-top: 12px;
             border-top: 1px solid #1a1a1a;
-            padding-top: 15px;
+            padding-top: 10px;
         }
-        input {
-            width: 100%;
-            padding: 12px;
-            background: #0a0a0a;
-            border: 1px solid #333;
+        .shortcut {
+            background: #1a1a1a;
+            padding: 8px;
             border-radius: 6px;
-            color: #00ff41;
-            font-size: 14px;
-            margin: 5px 0;
+            margin: 8px 0;
+            font-size: 11px;
+            color: #888;
+            text-align: center;
         }
-        input::placeholder { color: #444; }
+        .shortcut strong { color: #ffcc00; }
     </style>
 </head>
 <body>
 
-<h1>🔥 CLAUDE HP SWITCHER</h1>
+<h1>🔥 CLAUDE 11 AKUN - HP</h1>
 
 <div class="status-box">
-    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">
-        <span>📌 Akun Aktif</span>
-        <span class="badge idle" id="statusBadge">IDLE</span>
-    </div>
+    <div>📌 Akun Aktif</div>
     <div class="active" id="activeLabel">-</div>
-    <div style="font-size:12px;color:#666;margin-top:5px;">
-        🔄 Switch: <span id="switchCount">0</span>x
+    <div>
+        <span class="badge idle" id="statusBadge">IDLE</span>
+        <span style="font-size:11px;color:#666;margin-left:10px;">🔄 <span id="switchCount">0</span>x</span>
     </div>
 </div>
 
-<div class="btn-group">
+<div class="grid">
     <button class="btn" id="btnPrev">◀ Prev</button>
-    <button class="btn" id="btnNext">Next ▶</button>
     <button class="btn warning" id="btnSwitch">🔄 Switch</button>
-    <button class="btn full" id="btnOpenLogin">🔐 Buka Claude Login</button>
-    <button class="btn full danger" id="btnReset">⟳ Reset Ke Akun 1</button>
+    <button class="btn" id="btnNext">Next ▶</button>
+    <button class="btn full big" id="btnGo">🚀 Buka Claude</button>
 </div>
 
-<div class="account-list" id="accountList"></div>
+<div class="shortcut">
+    ⚡ <strong>Tap "Switch"</strong> → pindah akun + buka Claude otomatis!
+</div>
+
+<div class="list" id="accountList"></div>
 
 <div class="log" id="logArea">
-    <span class="hl">🔥 Dashboard HP siap!</span>
-    <span>💡 Tap "Switch" buat pindah akun</span>
+    <span class="hl">🔥 HP Switcher siap! 11 akun.</span>
+    <span>💡 Tap "Switch" buat pindah akun.</span>
 </div>
 
 <div class="note">
@@ -184,8 +186,8 @@
     ];
 
     // ==================== STATE ====================
-    let currentIndex = parseInt(localStorage.getItem('claude_hp_idx') || '0');
-    let switchCount = parseInt(localStorage.getItem('claude_hp_switch_count') || '0');
+    let currentIndex = parseInt(localStorage.getItem('c_idx') || '0');
+    let switchCount = parseInt(localStorage.getItem('c_switch_count') || '0');
 
     // ==================== DOM ====================
     const activeLabel = document.getElementById('activeLabel');
@@ -201,21 +203,22 @@
         span.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
         logArea.appendChild(span);
         logArea.scrollTop = logArea.scrollHeight;
-        while (logArea.children.length > 50) {
+        while (logArea.children.length > 40) {
             logArea.removeChild(logArea.firstChild);
         }
     }
 
-    function renderAccounts() {
+    function renderList() {
         accountList.innerHTML = '';
         ACCOUNTS.forEach((email, i) => {
             const div = document.createElement('div');
-            div.className = `account-item ${i === currentIndex ? 'active' : ''}`;
-            const status = localStorage.getItem(`claude_status_${i}`) || 'idle';
+            div.className = `item ${i === currentIndex ? 'active' : ''}`;
+            const status = localStorage.getItem(`c_status_${i}`) || 'idle';
             const dotClass = { 'online': 'online', 'limit': 'limit', 'idle': 'idle' }[status] || 'idle';
+            const shortEmail = email.length > 18 ? email.slice(0,18)+'…' : email;
             div.innerHTML = `
-                <span>#${i+1} ${email.length > 20 ? email.slice(0,20)+'...' : email}</span>
-                <span><span class="dot ${dotClass}"></span> ${status.toUpperCase()}</span>
+                <span>#${i+1} ${shortEmail}</span>
+                <span><span class="dot ${dotClass}"></span> ${status}</span>
             `;
             div.onclick = () => switchTo(i);
             accountList.appendChild(div);
@@ -225,33 +228,29 @@
     function updateUI() {
         const email = ACCOUNTS[currentIndex] || '-';
         activeLabel.textContent = email;
-        const status = localStorage.getItem(`claude_status_${currentIndex}`) || 'idle';
+        const status = localStorage.getItem(`c_status_${currentIndex}`) || 'idle';
         statusBadge.textContent = status.toUpperCase();
         statusBadge.className = `badge ${status}`;
         switchCountEl.textContent = switchCount;
-        renderAccounts();
-        // Save
-        localStorage.setItem('claude_hp_idx', currentIndex);
-        localStorage.setItem('claude_hp_switch_count', switchCount);
+        renderList();
+        localStorage.setItem('c_idx', currentIndex);
+        localStorage.setItem('c_switch_count', switchCount);
     }
 
     function switchTo(index) {
         if (index < 0 || index >= ACCOUNTS.length) return;
         currentIndex = index;
         switchCount++;
-        updateUI();
-        addLog(`🔄 Pindah ke Akun ${index+1}: ${ACCOUNTS[index]}`, 'hl');
-        
-        // Update status ke online
-        localStorage.setItem(`claude_status_${index}`, 'online');
-        // Reset status akun lain ke idle
+        // Mark as online
+        localStorage.setItem(`c_status_${index}`, 'online');
         ACCOUNTS.forEach((_, i) => {
             if (i !== index) {
-                const s = localStorage.getItem(`claude_status_${i}`);
-                if (s === 'online') localStorage.setItem(`claude_status_${i}`, 'idle');
+                const s = localStorage.getItem(`c_status_${i}`);
+                if (s === 'online') localStorage.setItem(`c_status_${i}`, 'idle');
             }
         });
-        renderAccounts();
+        updateUI();
+        addLog(`🔄 Akun ${index+1}: ${ACCOUNTS[index]}`, 'hl');
     }
 
     function nextAccount() {
@@ -266,77 +265,62 @@
 
     function switchAndGo() {
         const email = ACCOUNTS[currentIndex];
-        // Tandai akun ini sebagai limit
-        localStorage.setItem(`claude_status_${currentIndex}`, 'limit');
-        renderAccounts();
+        localStorage.setItem(`c_status_${currentIndex}`, 'limit');
+        renderList();
         addLog(`🚨 Switch dari limit: ${email}`, 'err');
-        
-        // Pindah ke akun berikutnya
         setTimeout(() => {
             nextAccount();
-            // Buka Claude dengan email baru
             setTimeout(() => {
                 window.location.href = 'https://claude.ai/login?email=' + encodeURIComponent(ACCOUNTS[currentIndex]);
-            }, 500);
-        }, 500);
+            }, 400);
+        }, 400);
     }
 
-    function openLogin() {
+    function goToClaude() {
         const email = ACCOUNTS[currentIndex];
         window.location.href = 'https://claude.ai/login?email=' + encodeURIComponent(email);
-        addLog(`🔐 Buka login: ${email}`, '');
+        addLog(`🚀 Buka Claude: ${email}`, '');
     }
 
-    function resetToFirst() {
-        if (confirm('⟳ Reset ke akun 1?')) {
-            currentIndex = 0;
-            switchCount = 0;
-            ACCOUNTS.forEach((_, i) => {
-                localStorage.setItem(`claude_status_${i}`, 'idle');
-            });
-            updateUI();
-            addLog('⟳ Reset ke akun 1', 'warn');
-        }
-    }
-
-    // ==================== DETECT LIMIT DI HALAMAN CLAUDE ====================
+    // ==================== DETECT LIMIT (jika di halaman Claude) ====================
     function detectLimit() {
+        if (!window.location.hostname.includes('claude')) return false;
         const body = document.body?.innerText || '';
-        const patterns = ['limit','exceeded','too many','rate limit','unavailable','usage limit'];
+        const patterns = ['limit','exceeded','too many','rate limit','unavailable','usage limit','try again'];
         for (const p of patterns) {
             if (body.toLowerCase().includes(p)) {
-                const idx = parseInt(localStorage.getItem('claude_hp_idx') || '0');
-                localStorage.setItem(`claude_status_${idx}`, 'limit');
-                renderAccounts();
+                const idx = parseInt(localStorage.getItem('c_idx') || '0');
+                localStorage.setItem(`c_status_${idx}`, 'limit');
+                renderList();
                 addLog(`🚨 Akun ${idx+1} KENA LIMIT!`, 'err');
                 return true;
             }
+        }
+        // Kalo ada "Claude" di title = online
+        if (document.title && document.title.includes('Claude')) {
+            const idx = parseInt(localStorage.getItem('c_idx') || '0');
+            localStorage.setItem(`c_status_${idx}`, 'online');
+            renderList();
+            addLog(`✅ Akun ${idx+1} Online`, 'hl');
         }
         return false;
     }
 
     // ==================== INIT ====================
     function init() {
-        // Cek kalo di halaman Claude
+        // Detect limit kalo di Claude
         if (window.location.hostname.includes('claude')) {
-            // Cek limit
             setTimeout(() => {
                 if (detectLimit()) {
-                    // Auto-switch
+                    // Auto switch
                     setTimeout(() => {
                         nextAccount();
                         setTimeout(() => {
                             window.location.href = 'https://claude.ai/login?email=' + encodeURIComponent(ACCOUNTS[currentIndex]);
                         }, 500);
                     }, 1500);
-                } else {
-                    // Tandai online
-                    const idx = parseInt(localStorage.getItem('claude_hp_idx') || '0');
-                    localStorage.setItem(`claude_status_${idx}`, 'online');
-                    renderAccounts();
-                    addLog(`✅ Akun ${idx+1} Online`, 'hl');
                 }
-            }, 2000);
+            }, 1500);
         }
 
         updateUI();
@@ -355,25 +339,25 @@
         addLog(`⏪ Prev ke akun ${currentIndex+1}`, '');
     });
     document.getElementById('btnSwitch').addEventListener('click', switchAndGo);
-    document.getElementById('btnOpenLogin').addEventListener('click', openLogin);
-    document.getElementById('btnReset').addEventListener('click', resetToFirst);
+    document.getElementById('btnGo').addEventListener('click', goToClaude);
 
     // ==================== RUN ====================
     init();
 
     // ==================== GLOBAL ====================
-    window.__claudeHP = {
+    window.__c = {
         accounts: ACCOUNTS,
         current: () => ACCOUNTS[currentIndex],
         switchTo: switchTo,
         next: nextAccount,
         prev: prevAccount,
         switchAndGo: switchAndGo,
+        go: goToClaude,
         detectLimit: detectLimit
     };
 
     console.log('🔥 CLAUDE HP SWITCHER loaded!');
-    console.log('💡 Panggil __claudeHP.switchAndGo() buat pindah akun');
+    console.log('💡 Panggil __c.switchAndGo() buat pindah akun');
 </script>
 
 </body>
