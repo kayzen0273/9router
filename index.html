@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Browser Matrix - In-App Embedded</title>
+    <title>Multi-Browser Matrix - AI Workspace & Window Manager</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -27,19 +27,6 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #64748b; 
         }
-
-        .iframe-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        .iframe-container iframe {
-            width: 100%;
-            height: 100%;
-            border: 0;
-        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-900 text-slate-100 antialiased overflow-x-hidden">
@@ -47,106 +34,89 @@
     <!-- Top Header Navigation -->
     <header class="bg-slate-800/90 backdrop-blur border-b border-slate-700/80 px-4 sm:px-6 py-3 sticky top-0 z-40 shadow-xl flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-3">
-            <div class="w-9 h-9 bg-gradient-to-tr from-blue-600 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <div class="w-9 h-9 bg-gradient-to-tr from-amber-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                 </svg>
             </div>
             <div>
                 <h1 class="text-base sm:text-lg font-bold text-white leading-tight flex items-center gap-2">
-                    Multi-Browser Matrix
-                    <span class="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-normal">10 In-Page Panels</span>
+                    Multi-Browser Matrix Studio
+                    <span class="text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-normal">10 Panel Aktif</span>
                 </h1>
-                <p class="text-xs text-slate-400 hidden sm:block">Semua panel berjalan langsung di dalam website ini</p>
+                <p class="text-xs text-slate-400 hidden sm:block">Kelola 10 sesi Claude.ai dengan aman & cepat</p>
             </div>
         </div>
 
         <!-- Quick Switcher & Global Actions -->
         <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="launchAllTiledWindows()" class="px-3.5 py-1.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-xs font-semibold rounded-lg text-white shadow-lg shadow-indigo-500/25 transition-all flex items-center gap-1.5 active:scale-95">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                </svg>
+                <span>Buka 10 Window Claude Rapi</span>
+            </button>
+
             <!-- Quick Jump Dropdown -->
             <div class="flex items-center gap-1.5 bg-slate-900/80 border border-slate-700/80 rounded-lg px-2 py-1 text-xs">
-                <span class="text-slate-400 hidden md:inline">Lompat ke:</span>
+                <span class="text-slate-400 hidden md:inline">Lompat:</span>
                 <select id="quick-jump-select" class="bg-transparent text-blue-400 font-semibold focus:outline-none cursor-pointer">
-                    <option value="" class="bg-slate-800 text-slate-300">Pilih Browser...</option>
+                    <option value="" class="bg-slate-800 text-slate-300">Pilih Slot...</option>
                 </select>
             </div>
-
-            <!-- Reload All -->
-            <button id="refresh-all-btn" class="px-3 py-1.5 bg-slate-700/80 hover:bg-slate-600 text-xs font-medium rounded-lg text-slate-200 transition-all border border-slate-600/80 flex items-center gap-1.5 active:scale-95">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                </svg>
-                <span>Muat Ulang Semua</span>
-            </button>
         </div>
     </header>
 
     <!-- Main Content Area -->
     <main class="flex-1 p-4 sm:p-6 overflow-y-auto">
         
-        <!-- Status & Tip Alert -->
-        <div class="mb-6 p-4 bg-slate-800/60 border border-slate-700/70 rounded-xl shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs sm:text-sm">
+        <!-- Explanation Alert Banner -->
+        <div class="mb-6 p-4 bg-amber-950/40 border border-amber-500/40 rounded-2xl shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs sm:text-sm">
             <div class="flex items-start gap-3">
-                <div class="p-2 bg-blue-500/10 text-blue-400 rounded-lg flex-shrink-0 mt-0.5 md:mt-0">
+                <div class="p-2.5 bg-amber-500/20 text-amber-400 rounded-xl flex-shrink-0 mt-0.5 md:mt-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                     </svg>
                 </div>
                 <div>
-                    <span class="font-semibold text-slate-200">Semua browser aktif di dalam halaman ini.</span>
-                    <p class="text-slate-400 mt-0.5">
-                        Klik tombol <span class="text-blue-400 font-mono font-medium">🔍 Fokus Layar Penuh</span> di setiap browser untuk memperbesar tampilannya secara langsung di dalam website tanpa berpindah halaman.
+                    <h2 class="font-bold text-amber-200 text-sm sm:text-base">Mengapa Claude Menampilkan "Menolak untuk terhubung"?</h2>
+                    <p class="text-slate-300 mt-1 leading-relaxed">
+                        Claude.ai memberlakukan keamanan ketat (<span class="font-mono text-amber-300">X-Frame-Options: DENY</span>) yang melarang halamannya dimasukkan di dalam frame website lain. 
                     </p>
+                    <div class="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                        <span class="text-slate-400">Solusi terbaik:</span>
+                        <button onclick="launchAllTiledWindows()" class="underline text-indigo-400 font-semibold hover:text-indigo-300">
+                            Gunakan Mode Multi-Window Tiled
+                        </button> 
+                        <span class="text-slate-500">•</span>
+                        <span>Atau gunakan **Workspace AI In-Page** yang sudah disediakan langsung di setiap kartu di bawah.</span>
+                    </div>
                 </div>
-            </div>
-            <div class="text-slate-400 text-xs bg-slate-900/60 px-3 py-1.5 rounded-lg border border-slate-700/50 self-stretch md:self-auto text-center">
-                Sesi Simpan Permanen: <span class="text-emerald-400 font-medium">Aktif (Local Device)</span>
             </div>
         </div>
 
         <!-- 10 Browser Grid -->
         <div id="browser-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-5">
-            <!-- Dynamic Browser Instances Will Be Inserted Here -->
+            <!-- Dynamic Browser Instances Injected via JavaScript -->
         </div>
     </main>
 
-    <!-- In-Page Fullscreen / Focus Overlay Modal -->
+    <!-- In-Page Focus Modal -->
     <div id="focus-modal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex-col transition-all duration-300">
-        <!-- Modal Top Bar -->
         <div class="bg-slate-900 border-b border-slate-800 px-4 py-3 flex items-center justify-between gap-4">
             <div class="flex items-center gap-3 min-w-0">
                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0"></span>
-                <h2 id="modal-title" class="text-sm font-bold text-white truncate">Browser Fokus</h2>
-                <span id="modal-badge" class="text-[10px] bg-blue-500/20 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded font-mono hidden sm:inline">Mode Layar Penuh Dalam App</span>
+                <h2 id="modal-title" class="text-sm font-bold text-white truncate">Panel Fokus In-Page</h2>
             </div>
-
-            <!-- Address Bar inside Modal -->
-            <div class="flex-1 max-w-xl mx-2 hidden md:flex items-center bg-slate-950 border border-slate-800 rounded-lg px-3 py-1 text-xs text-slate-300">
-                <svg class="w-3.5 h-3.5 text-emerald-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            <button id="close-modal-btn" class="px-3 py-1.5 bg-red-600/80 hover:bg-red-600 text-xs text-white rounded-lg transition-all font-medium flex items-center gap-1 shadow-lg shadow-red-600/20">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
-                <input id="modal-url-input" type="text" readonly class="bg-transparent w-full focus:outline-none text-slate-300 font-mono text-xs">
-            </div>
-
-            <div class="flex items-center gap-2">
-                <button id="modal-reload-btn" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 rounded-lg border border-slate-700 flex items-center gap-1 transition-all">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    <span>Refresh</span>
-                </button>
-                <button id="close-modal-btn" class="px-3 py-1.5 bg-red-600/80 hover:bg-red-600 text-xs text-white rounded-lg transition-all font-medium flex items-center gap-1 shadow-lg shadow-red-600/20">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                    <span>Tutup Fokus</span>
-                </button>
-            </div>
+                <span>Tutup Fokus</span>
+            </button>
         </div>
-
-        <!-- Modal Iframe Container -->
-        <div id="modal-iframe-box" class="flex-1 bg-white relative">
-            <!-- Iframe injected dynamically when focus is clicked -->
+        <div id="modal-content-box" class="flex-1 bg-slate-900 relative overflow-hidden p-4">
+            <!-- Dynamic Content -->
         </div>
     </div>
 
@@ -155,88 +125,123 @@
         const BROWSER_COUNT = 10;
 
         const browserGrid = document.getElementById('browser-grid');
-        const refreshAllBtn = document.getElementById('refresh-all-btn');
         const quickJumpSelect = document.getElementById('quick-jump-select');
-        
-        // Modal Elements
         const focusModal = document.getElementById('focus-modal');
         const closeModalBtn = document.getElementById('close-modal-btn');
         const modalTitle = document.getElementById('modal-title');
-        const modalUrlInput = document.getElementById('modal-url-input');
-        const modalIframeBox = document.getElementById('modal-iframe-box');
-        const modalReloadBtn = document.getElementById('modal-reload-btn');
+        const modalContentBox = document.getElementById('modal-content-box');
 
-        let currentFocusedIndex = null;
+        // Store active sub-window references
+        const activeWindows = {};
 
         function initBrowsers() {
             browserGrid.innerHTML = '';
-            quickJumpSelect.innerHTML = '<option value="" class="bg-slate-800 text-slate-300">Pilih Browser...</option>';
+            quickJumpSelect.innerHTML = '<option value="" class="bg-slate-800 text-slate-300">Pilih Slot...</option>';
 
             for (let i = 1; i <= BROWSER_COUNT; i++) {
-                // Populate quick jump options
+                // Populate quick jump select
                 const option = document.createElement('option');
                 option.value = i;
                 option.className = 'bg-slate-800 text-slate-200';
                 option.textContent = `Browser #${i}`;
                 quickJumpSelect.appendChild(option);
 
-                // Load stored note from localStorage
                 const savedNote = localStorage.getItem(`browser_note_${i}`) || '';
+                const savedPrompt = localStorage.getItem(`browser_prompt_${i}`) || '';
 
                 const cardHTML = `
-                    <div id="browser-card-${i}" class="flex flex-col bg-slate-800/90 rounded-2xl border border-slate-700/80 shadow-xl hover:border-slate-600 transition-all overflow-hidden h-[520px] group">
+                    <div id="browser-card-${i}" class="flex flex-col bg-slate-800/90 rounded-2xl border border-slate-700/80 shadow-xl hover:border-slate-600 transition-all overflow-hidden h-[540px]">
                         
                         <!-- Panel Control Bar -->
-                        <div class="bg-slate-900/90 px-3 py-2.5 border-b border-slate-700/80 flex flex-col gap-2">
+                        <div class="bg-slate-900/95 px-3 py-2.5 border-b border-slate-700/80 flex flex-col gap-2">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-2">
                                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>
                                     <span class="text-xs font-bold text-slate-200">Browser #${i}</span>
                                 </div>
-                                <button onclick="openInPageFocus(${i})" 
-                                        class="text-[11px] bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1 rounded-md font-medium transition-all flex items-center gap-1 shadow-md shadow-blue-600/20 active:scale-95">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4"></path>
-                                    </svg>
-                                    <span>Fokus</span>
-                                </button>
+                                <div class="flex items-center gap-1.5">
+                                    <button onclick="openSingleWindow(${i})" title="Buka Sesi Claude dalam Window Baru" 
+                                            class="text-[11px] bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1 rounded-md font-medium transition-all flex items-center gap-1 shadow-md active:scale-95">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                        </svg>
+                                        <span>Buka Window</span>
+                                    </button>
+                                </div>
                             </div>
 
-                            <!-- Address Bar -->
-                            <div class="flex items-center justify-between bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-[11px] text-slate-400 gap-1.5">
-                                <svg class="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                                </svg>
-                                <span class="truncate font-mono text-slate-300 flex-1">${TARGET_URL}</span>
-                                <button onclick="reloadIframe(${i})" title="Reload Browser ${i}" class="text-slate-400 hover:text-white transition-colors">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                                    </svg>
+                            <!-- Mode Switcher Tabs -->
+                            <div class="flex items-center bg-slate-950 p-1 rounded-lg border border-slate-800 text-[10px] font-medium">
+                                <button id="tab-ai-${i}" onclick="switchTab(${i}, 'ai')" class="flex-1 py-1 rounded-md bg-indigo-600 text-white transition-all text-center">
+                                    In-Page AI
+                                </button>
+                                <button id="tab-iframe-${i}" onclick="switchTab(${i}, 'iframe')" class="flex-1 py-1 rounded-md text-slate-400 hover:text-slate-200 transition-all text-center">
+                                    Iframe Web
                                 </button>
                             </div>
                         </div>
 
-                        <!-- Embedded Web View Frame -->
-                        <div class="flex-1 bg-white relative overflow-hidden">
-                            <iframe 
-                                id="iframe-${i}"
-                                src="${TARGET_URL}" 
-                                class="w-full h-full border-0 absolute inset-0 z-10 bg-white"
-                                title="Browser Instance ${i}"
-                                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
-                            ></iframe>
+                        <!-- Card Body View Area -->
+                        <div class="flex-1 bg-slate-900 relative overflow-hidden flex flex-col">
+                            
+                            <!-- VIEW 1: In-Page AI Interactive Workspace -->
+                            <div id="view-ai-${i}" class="flex-1 flex flex-col p-3 gap-2 bg-slate-900">
+                                <div class="flex items-center justify-between text-[11px] text-slate-400">
+                                    <span class="font-medium text-indigo-400 flex items-center gap-1">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                                        </svg>
+                                        Ruang Draf Prompt & Respon
+                                    </span>
+                                    <span class="text-[10px] text-slate-500">Auto-save</span>
+                                </div>
+                                <textarea 
+                                    id="prompt-input-${i}"
+                                    placeholder="Tulis prompt, tugas, atau draf chat untuk Akun #${i} di sini..."
+                                    oninput="savePrompt(${i}, this.value)"
+                                    class="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/80 resize-none font-mono"
+                                >${savedPrompt}</textarea>
+                                <button onclick="copyPrompt(${i})" class="py-1.5 bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 rounded-lg border border-slate-700 flex items-center justify-center gap-1 transition-all active:scale-95">
+                                    <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                                    </svg>
+                                    <span>Salin Teks Prompt</span>
+                                </button>
+                            </div>
+
+                            <!-- VIEW 2: Embedded Iframe View (With blocked notification handling) -->
+                            <div id="view-iframe-${i}" class="hidden flex-1 relative bg-slate-950">
+                                <div class="absolute inset-0 z-20 bg-slate-950/90 backdrop-blur flex flex-col items-center justify-center p-4 text-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center justify-center">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xs font-bold text-slate-200">Embed Dibatasi Oleh Claude</h3>
+                                        <p class="text-[11px] text-slate-400 mt-1">Gunakan button di bawah untuk membuka sesi terpisah yang mendukung login permanen.</p>
+                                    </div>
+                                    <button onclick="openSingleWindow(${i})" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium rounded-lg shadow-lg shadow-indigo-600/20 flex items-center gap-1.5 transition-all">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                        </svg>
+                                        <span>Buka Claude Window #${i}</span>
+                                    </button>
+                                </div>
+                            </div>
+
                         </div>
 
-                        <!-- Permanent Session / Profile Note Bar -->
+                        <!-- Permanent Session Note Bar -->
                         <div class="bg-slate-900/95 px-3 py-2 border-t border-slate-700/80 flex items-center gap-2">
-                            <span class="text-[10px] text-slate-400 font-medium flex-shrink-0">Catatan/Akun:</span>
+                            <span class="text-[10px] text-slate-400 font-medium flex-shrink-0">Catatan Akun:</span>
                             <input 
                                 id="note-input-${i}"
                                 type="text" 
                                 value="${savedNote}" 
-                                placeholder="Cth: Akun Claude A..." 
+                                placeholder="Cth: Claude Akun #${i}" 
                                 oninput="saveNote(${i}, this.value)"
-                                class="bg-slate-950 border border-slate-800 text-slate-200 text-xs px-2 py-0.5 rounded w-full focus:outline-none focus:border-blue-500 transition-colors"
+                                class="bg-slate-950 border border-slate-800 text-slate-200 text-xs px-2 py-0.5 rounded w-full focus:outline-none focus:border-indigo-500 transition-colors"
                             />
                         </div>
                     </div>
@@ -245,87 +250,112 @@
             }
         }
 
-        function reloadIframe(index) {
-            const iframe = document.getElementById(`iframe-${index}`);
-            if (iframe) {
-                const currentSrc = iframe.src;
-                iframe.src = 'about:blank';
-                setTimeout(() => {
-                    iframe.src = currentSrc;
-                }, 100);
+        // Tab Switcher inside Cards
+        function switchTab(index, tabType) {
+            const viewAi = document.getElementById(`view-ai-${index}`);
+            const viewIframe = document.getElementById(`view-iframe-${index}`);
+            const tabAi = document.getElementById(`tab-ai-${index}`);
+            const tabIframe = document.getElementById(`tab-iframe-${index}`);
+
+            if (tabType === 'ai') {
+                viewAi.classList.remove('hidden');
+                viewIframe.classList.add('hidden');
+                tabAi.className = "flex-1 py-1 rounded-md bg-indigo-600 text-white transition-all text-center";
+                tabIframe.className = "flex-1 py-1 rounded-md text-slate-400 hover:text-slate-200 transition-all text-center";
+            } else {
+                viewAi.classList.add('hidden');
+                viewIframe.classList.remove('hidden');
+                tabIframe.className = "flex-1 py-1 rounded-md bg-indigo-600 text-white transition-all text-center";
+                tabAi.className = "flex-1 py-1 rounded-md text-slate-400 hover:text-slate-200 transition-all text-center";
             }
         }
 
-        function openInPageFocus(index) {
-            currentFocusedIndex = index;
-            modalTitle.textContent = `Browser #${index} - Mode Fokus In-Page`;
-            modalUrlInput.value = TARGET_URL;
+        // Open Individual Window for Claude
+        function openSingleWindow(index) {
+            const width = 480;
+            const height = 650;
+            const left = ((index - 1) % 5) * 280;
+            const top = Math.floor((index - 1) / 5) * 320;
 
-            // Clear previous iframe in modal
-            modalIframeBox.innerHTML = '';
-
-            // Inject full-screen embedded iframe directly inside the modal
-            const iframe = document.createElement('iframe');
-            iframe.src = TARGET_URL;
-            iframe.className = "w-full h-full border-0 absolute inset-0 z-10 bg-white";
-            iframe.title = `Focused Browser ${index}`;
-            iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-forms allow-popups allow-modals');
+            const win = window.open(
+                TARGET_URL,
+                `Claude_Session_${index}`,
+                `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+            );
             
-            modalIframeBox.appendChild(iframe);
-
-            // Show Modal
-            focusModal.classList.remove('hidden');
-            focusModal.classList.add('flex');
-            document.body.style.overflow = 'hidden';
+            if (win) {
+                activeWindows[index] = win;
+                win.focus();
+            } else {
+                alert("Pop-up diblokir oleh browser Anda. Mohon izinkan pop-up untuk situs ini agar 10 window Claude bisa terbuka.");
+            }
         }
 
-        function closeInPageFocus() {
-            focusModal.classList.add('hidden');
-            focusModal.classList.remove('flex');
-            modalIframeBox.innerHTML = '';
-            currentFocusedIndex = null;
-            document.body.style.overflow = 'auto';
+        // Open All 10 Tiled Windows cleanly across the monitor screen
+        function launchAllTiledWindows() {
+            const screenWidth = window.screen.availWidth;
+            const screenHeight = window.screen.availHeight;
+
+            const cols = 5;
+            const rows = 2;
+
+            const winWidth = Math.floor(screenWidth / cols);
+            const winHeight = Math.floor(screenHeight / rows);
+
+            for (let i = 1; i <= BROWSER_COUNT; i++) {
+                const col = (i - 1) % cols;
+                const row = Math.floor((i - 1) / cols);
+
+                const left = col * winWidth;
+                const top = row * winHeight;
+
+                setTimeout(() => {
+                    const win = window.open(
+                        TARGET_URL,
+                        `Claude_Session_${i}`,
+                        `width=${winWidth},height=${winHeight},left=${left},top=${top},resizable=yes,scrollbars=yes`
+                    );
+                    if (win) {
+                        activeWindows[i] = win;
+                    }
+                }, i * 150); // slight stagger for reliable popup rendering
+            }
         }
 
         function saveNote(index, value) {
             localStorage.setItem(`browser_note_${index}`, value);
         }
 
-        // Event Listeners
-        refreshAllBtn.addEventListener('click', () => {
-            for (let i = 1; i <= BROWSER_COUNT; i++) {
-                reloadIframe(i);
-            }
-        });
+        function savePrompt(index, value) {
+            localStorage.setItem(`browser_prompt_${index}`, value);
+        }
 
+        function copyPrompt(index) {
+            const input = document.getElementById(`prompt-input-${index}`);
+            if (input && input.value) {
+                input.select();
+                document.execCommand('copy');
+            }
+        }
+
+        // Quick Jump Event
         quickJumpSelect.addEventListener('change', (e) => {
             const val = e.target.value;
             if (val) {
                 const el = document.getElementById(`browser-card-${val}`);
                 if (el) {
                     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    el.classList.add('ring-2', 'ring-blue-500');
-                    setTimeout(() => el.classList.remove('ring-2', 'ring-blue-500'), 2000);
+                    el.classList.add('ring-2', 'ring-indigo-500');
+                    setTimeout(() => el.classList.remove('ring-2', 'ring-indigo-500'), 2000);
                 }
             }
         });
 
-        closeModalBtn.addEventListener('click', closeInPageFocus);
-
-        modalReloadBtn.addEventListener('click', () => {
-            if (currentFocusedIndex) {
-                openInPageFocus(currentFocusedIndex);
-            }
+        closeModalBtn.addEventListener('click', () => {
+            focusModal.classList.add('hidden');
+            focusModal.classList.remove('flex');
         });
 
-        // Close focus modal with Escape key
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !focusModal.classList.contains('hidden')) {
-                closeInPageFocus();
-            }
-        });
-
-        // Initialize application on load
         window.addEventListener('DOMContentLoaded', initBrowsers);
     </script>
 </body>
