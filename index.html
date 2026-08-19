@@ -2,165 +2,100 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>🔥 CLAUDE 11 AKUN - POPUP CONTROLLER</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <title>🔥 Claude HP Switcher</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Courier New', monospace;
+            font-family: 'Segoe UI', sans-serif;
             background: #0a0a0a;
             color: #00ff41;
             min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
+            padding: 15px;
+            padding-bottom: 100px;
         }
         h1 {
+            font-size: 20px;
             text-align: center;
-            font-size: 26px;
-            letter-spacing: 2px;
             border-bottom: 2px solid #00ff41;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
         }
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
+        .status-box {
             background: #111;
-            padding: 12px 18px;
-            border-radius: 8px;
             border: 1px solid #1a1a1a;
+            border-radius: 10px;
+            padding: 15px;
             margin-bottom: 15px;
         }
-        .top-bar .active-info {
-            font-size: 16px;
-        }
-        .top-bar .active-info strong {
+        .status-box .active {
+            font-size: 18px;
             color: #ffcc00;
+            word-break: break-all;
         }
-        .badge {
-            padding: 3px 12px;
-            border-radius: 12px;
+        .status-box .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
             font-size: 12px;
             font-weight: bold;
+            margin-top: 5px;
         }
-        .badge.online {
-            background: #00ff41;
-            color: #0a0a0a;
-        }
-        .badge.limit {
-            background: #ff4444;
-            color: #fff;
-        }
-        .badge.idle {
-            background: #444;
-            color: #aaa;
-        }
-        .badge.used {
-            background: #ffcc00;
-            color: #0a0a0a;
-        }
+        .badge.online { background: #00ff41; color: #000; }
+        .badge.limit { background: #ff4444; color: #fff; }
+        .badge.idle { background: #444; color: #aaa; }
         .btn-group {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin: 10px 0;
         }
         .btn {
             background: transparent;
             border: 1px solid #00ff41;
             color: #00ff41;
-            padding: 6px 14px;
-            font-family: inherit;
-            font-size: 12px;
+            padding: 14px 8px;
+            font-size: 14px;
             font-weight: bold;
+            border-radius: 8px;
             cursor: pointer;
-            border-radius: 4px;
             transition: 0.3s;
-        }
-        .btn:hover {
-            background: #00ff41;
-            color: #0a0a0a;
-        }
-        .btn.danger {
-            border-color: #ff4444;
-            color: #ff4444;
-        }
-        .btn.danger:hover {
-            background: #ff4444;
-            color: #0a0a0a;
-        }
-        .btn.warning {
-            border-color: #ffcc00;
-            color: #ffcc00;
-        }
-        .btn.warning:hover {
-            background: #ffcc00;
-            color: #0a0a0a;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 8px;
-            margin: 12px 0;
-        }
-        .account-card {
-            background: #111;
-            border: 1px solid #1a1a1a;
-            border-radius: 6px;
-            padding: 10px 8px;
             text-align: center;
-            cursor: pointer;
-            transition: 0.3s;
         }
-        .account-card:hover {
-            border-color: #00ff41;
+        .btn:active { background: #00ff41; color: #000; transform: scale(0.95); }
+        .btn.danger { border-color: #ff4444; color: #ff4444; }
+        .btn.danger:active { background: #ff4444; color: #000; }
+        .btn.warning { border-color: #ffcc00; color: #ffcc00; }
+        .btn.warning:active { background: #ffcc00; color: #000; }
+        .btn.full { grid-column: 1 / -1; }
+        .account-list {
+            margin-top: 12px;
         }
-        .account-card.active {
-            border-color: #00ff41;
-            box-shadow: 0 0 20px rgba(0,255,65,0.15);
+        .account-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: #111;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            border-left: 3px solid #333;
+            font-size: 13px;
         }
-        .account-card .num {
-            font-size: 10px;
-            color: #666;
+        .account-item.active {
+            border-left-color: #00ff41;
+            background: #1a1a1a;
         }
-        .account-card .label {
-            font-size: 12px;
-            font-weight: bold;
-            margin: 2px 0;
-        }
-        .account-card .email {
-            font-size: 9px;
-            color: #666;
-            word-break: break-all;
-        }
-        .account-card .dot {
-            display: inline-block;
+        .account-item .dot {
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            margin-top: 4px;
+            display: inline-block;
         }
-        .dot.online {
-            background: #00ff41;
-        }
-        .dot.limit {
-            background: #ff4444;
-        }
-        .dot.idle {
-            background: #444;
-        }
-        .dot.used {
-            background: #ffcc00;
-        }
+        .dot.online { background: #00ff41; }
+        .dot.limit { background: #ff4444; }
+        .dot.idle { background: #444; }
         .log {
             background: #0a0a0a;
             border: 1px solid #1a1a1a;
@@ -169,119 +104,95 @@
             max-height: 120px;
             overflow-y: auto;
             font-size: 11px;
-            color: #888;
+            color: #666;
             margin-top: 12px;
         }
-        .log span {
-            display: block;
-            padding: 2px 0;
-            border-bottom: 1px solid #0d0d0d;
-        }
-        .log .hl {
-            color: #00ff41;
-        }
-        .log .warn {
-            color: #ffcc00;
-        }
-        .log .err {
-            color: #ff4444;
-        }
+        .log span { display: block; padding: 2px 0; border-bottom: 1px solid #0d0d0d; }
+        .log .hl { color: #00ff41; }
+        .log .err { color: #ff4444; }
+        .log .warn { color: #ffcc00; }
         .note {
             font-size: 11px;
-            color: #555;
-            text-align: center;
-            margin-top: 12px;
-            border-top: 1px solid #1a1a1a;
-            padding-top: 12px;
-        }
-        .shortcut-hint {
-            font-size: 10px;
             color: #444;
-            margin-top: 4px;
+            text-align: center;
+            margin-top: 15px;
+            border-top: 1px solid #1a1a1a;
+            padding-top: 15px;
         }
-        @media (max-width: 600px) {
-            .grid {
-                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            }
-            .account-card .email {
-                display: none;
-            }
-            .top-bar {
-                flex-direction: column;
-                align-items: stretch;
-            }
+        input {
+            width: 100%;
+            padding: 12px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #00ff41;
+            font-size: 14px;
+            margin: 5px 0;
         }
+        input::placeholder { color: #444; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>🔥 CLAUDE 11 AKUN — POPUP CONTROLLER</h1>
+<h1>🔥 CLAUDE HP SWITCHER</h1>
 
-    <!-- TOP BAR -->
-    <div class="top-bar">
-        <div class="active-info">
-            📌 <strong id="activeLabel">-</strong>
-            <span class="badge idle" id="statusBadge">IDLE</span>
-            <span style="margin-left:10px;font-size:12px;color:#666;">🔄 <span id="switchCount">0</span>x</span>
-        </div>
-        <div class="btn-group">
-            <button class="btn" id="btnPrev">◀ Prev</button>
-            <button class="btn" id="btnNext">Next ▶</button>
-            <button class="btn warning" id="btnOpenAll">🪟 Buka Semua</button>
-            <button class="btn" id="btnFocus">🎯 Focus</button>
-            <button class="btn danger" id="btnCloseAll">✖ Tutup Semua</button>
-        </div>
+<div class="status-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">
+        <span>📌 Akun Aktif</span>
+        <span class="badge idle" id="statusBadge">IDLE</span>
     </div>
-
-    <!-- GRID -->
-    <div class="grid" id="accountGrid"></div>
-
-    <!-- LOG -->
-    <div class="log" id="logArea">
-        <span class="hl">🔥 Dashboard siap. Klik "Buka Semua" untuk buka 11 popup Claude.</span>
-        <span>💡 Setelah login semua, tinggal klik kartu buat pindah.</span>
+    <div class="active" id="activeLabel">-</div>
+    <div style="font-size:12px;color:#666;margin-top:5px;">
+        🔄 Switch: <span id="switchCount">0</span>x
     </div>
+</div>
 
-    <div class="note">
-        ⚡ Claude <strong>TIDAK BISA</strong> di-iframe — pakai POPUP WINDOW.<br/>
-        ⌨️ <strong>Ctrl+→</strong> next | <strong>Ctrl+←</strong> prev | <strong>Ctrl+F</strong> focus
-    </div>
+<div class="btn-group">
+    <button class="btn" id="btnPrev">◀ Prev</button>
+    <button class="btn" id="btnNext">Next ▶</button>
+    <button class="btn warning" id="btnSwitch">🔄 Switch</button>
+    <button class="btn full" id="btnOpenLogin">🔐 Buka Claude Login</button>
+    <button class="btn full danger" id="btnReset">⟳ Reset Ke Akun 1</button>
+</div>
+
+<div class="account-list" id="accountList"></div>
+
+<div class="log" id="logArea">
+    <span class="hl">🔥 Dashboard HP siap!</span>
+    <span>💡 Tap "Switch" buat pindah akun</span>
+</div>
+
+<div class="note">
+    📌 Data tersimpan di HP lo.<br/>
+    🔥 Kalo kena limit, tap "Switch" → langsung pindah akun!
 </div>
 
 <script>
     // ==================== KONFIG ====================
     const ACCOUNTS = [
-        { id: 0, email: 'andre1@gmail.com', label: 'Akun 1' },
-        { id: 1, email: 'andre2@gmail.com', label: 'Akun 2' },
-        { id: 2, email: 'andre3@gmail.com', label: 'Akun 3' },
-        { id: 3, email: 'andre4@gmail.com', label: 'Akun 4' },
-        { id: 4, email: 'andre5@gmail.com', label: 'Akun 5' },
-        { id: 5, email: 'andre6@gmail.com', label: 'Akun 6' },
-        { id: 6, email: 'andre7@gmail.com', label: 'Akun 7' },
-        { id: 7, email: 'andre8@gmail.com', label: 'Akun 8' },
-        { id: 8, email: 'andre9@gmail.com', label: 'Akun 9' },
-        { id: 9, email: 'andre10@gmail.com', label: 'Akun 10' },
-        { id: 10, email: 'andre11@gmail.com', label: 'Akun 11' }
+        'andre1@gmail.com',
+        'andre2@gmail.com',
+        'andre3@gmail.com',
+        'andre4@gmail.com',
+        'andre5@gmail.com',
+        'andre6@gmail.com',
+        'andre7@gmail.com',
+        'andre8@gmail.com',
+        'andre9@gmail.com',
+        'andre10@gmail.com',
+        'andre11@gmail.com'
     ];
 
-    const CHECK_INTERVAL = 3000;
-    const POPUP_FEATURES = 'width=1200,height=800,menubar=no,toolbar=no,location=yes,status=no,scrollbars=yes';
-
     // ==================== STATE ====================
-    let currentIndex = 0;
-    let switchCount = 0;
-    let isSwitching = false;
-    let popups = {}; // { accountId: window }
-    let popupStatus = {}; // { accountId: 'online'|'limit'|'idle'|'used' }
-    let popupTitle = {}; // { accountId: string }
+    let currentIndex = parseInt(localStorage.getItem('claude_hp_idx') || '0');
+    let switchCount = parseInt(localStorage.getItem('claude_hp_switch_count') || '0');
 
     // ==================== DOM ====================
-    const grid = document.getElementById('accountGrid');
-    const logArea = document.getElementById('logArea');
     const activeLabel = document.getElementById('activeLabel');
     const statusBadge = document.getElementById('statusBadge');
     const switchCountEl = document.getElementById('switchCount');
+    const accountList = document.getElementById('accountList');
+    const logArea = document.getElementById('logArea');
 
     // ==================== FUNGSI ====================
     function addLog(msg, type = '') {
@@ -290,353 +201,179 @@
         span.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
         logArea.appendChild(span);
         logArea.scrollTop = logArea.scrollHeight;
-        while (logArea.children.length > 80) {
+        while (logArea.children.length > 50) {
             logArea.removeChild(logArea.firstChild);
         }
     }
 
-    function renderGrid() {
-        grid.innerHTML = '';
-        ACCOUNTS.forEach((acc, i) => {
+    function renderAccounts() {
+        accountList.innerHTML = '';
+        ACCOUNTS.forEach((email, i) => {
             const div = document.createElement('div');
-            div.className = `account-card ${i === currentIndex ? 'active' : ''}`;
-            const status = popupStatus[acc.id] || 'idle';
-            const dotClass = {
-                'online': 'online',
-                'limit': 'limit',
-                'idle': 'idle',
-                'used': 'used'
-            }[status] || 'idle';
-
-            const isOpen = popups[acc.id] && !popups[acc.id].closed;
-            const openIndicator = isOpen ? '🟢' : '🔴';
-
+            div.className = `account-item ${i === currentIndex ? 'active' : ''}`;
+            const status = localStorage.getItem(`claude_status_${i}`) || 'idle';
+            const dotClass = { 'online': 'online', 'limit': 'limit', 'idle': 'idle' }[status] || 'idle';
             div.innerHTML = `
-                <div class="num">${openIndicator} #${i+1}</div>
-                <div class="label">${acc.label}</div>
-                <div class="email">${acc.email}</div>
-                <div class="dot ${dotClass}"></div>
-                <div style="font-size:8px;color:#555;margin-top:2px;">${status.toUpperCase()}</div>
+                <span>#${i+1} ${email.length > 20 ? email.slice(0,20)+'...' : email}</span>
+                <span><span class="dot ${dotClass}"></span> ${status.toUpperCase()}</span>
             `;
-            div.onclick = () => switchToAccount(i);
-            grid.appendChild(div);
+            div.onclick = () => switchTo(i);
+            accountList.appendChild(div);
         });
     }
 
-    function updateStatusBar() {
-        const acc = ACCOUNTS[currentIndex];
-        activeLabel.textContent = acc.label;
-        const status = popupStatus[acc.id] || 'idle';
+    function updateUI() {
+        const email = ACCOUNTS[currentIndex] || '-';
+        activeLabel.textContent = email;
+        const status = localStorage.getItem(`claude_status_${currentIndex}`) || 'idle';
         statusBadge.textContent = status.toUpperCase();
         statusBadge.className = `badge ${status}`;
         switchCountEl.textContent = switchCount;
-        renderGrid();
+        renderAccounts();
+        // Save
+        localStorage.setItem('claude_hp_idx', currentIndex);
+        localStorage.setItem('claude_hp_switch_count', switchCount);
     }
 
-    function switchToAccount(index) {
-        if (isSwitching) return;
+    function switchTo(index) {
         if (index < 0 || index >= ACCOUNTS.length) return;
-
-        const acc = ACCOUNTS[index];
         currentIndex = index;
-
-        // Cek popup masih hidup
-        const win = popups[acc.id];
-        if (win && !win.closed) {
-            win.focus();
-            addLog(`🎯 Focus ke ${acc.label} (tab #${acc.id+1})`, 'hl');
-        } else {
-            // Popup mati, buka ulang
-            openPopup(acc.id);
-            addLog(`🔄 Buka ulang ${acc.label}`, 'warn');
-        }
-
-        updateStatusBar();
-
-        // Save index
-        try {
-            localStorage.setItem('claude_11_index_v3', currentIndex);
-        } catch(e) {}
+        switchCount++;
+        updateUI();
+        addLog(`🔄 Pindah ke Akun ${index+1}: ${ACCOUNTS[index]}`, 'hl');
+        
+        // Update status ke online
+        localStorage.setItem(`claude_status_${index}`, 'online');
+        // Reset status akun lain ke idle
+        ACCOUNTS.forEach((_, i) => {
+            if (i !== index) {
+                const s = localStorage.getItem(`claude_status_${i}`);
+                if (s === 'online') localStorage.setItem(`claude_status_${i}`, 'idle');
+            }
+        });
+        renderAccounts();
     }
 
     function nextAccount() {
-        if (isSwitching) return;
         const next = (currentIndex + 1) % ACCOUNTS.length;
-        switchCount++;
-        switchToAccount(next);
+        switchTo(next);
     }
 
     function prevAccount() {
-        if (isSwitching) return;
         const prev = (currentIndex - 1 + ACCOUNTS.length) % ACCOUNTS.length;
-        switchCount++;
-        switchToAccount(prev);
+        switchTo(prev);
     }
 
-    function openPopup(accountId) {
-        const acc = ACCOUNTS[accountId];
-        const url = `https://claude.ai/login?email=${encodeURIComponent(acc.email)}`;
-
-        // Tutup popup lama kalo ada
-        if (popups[accountId] && !popups[accountId].closed) {
-            popups[accountId].close();
-        }
-
-        const win = window.open(url, `claude_popup_${accountId}`, POPUP_FEATURES);
-
-        if (win) {
-            popups[accountId] = win;
-            popupStatus[accountId] = 'idle';
-            popupTitle[accountId] = '';
-
-            // Monitor popup
-            const monitor = setInterval(() => {
-                if (win.closed) {
-                    clearInterval(monitor);
-                    popupStatus[accountId] = 'idle';
-                    addLog(`❌ Popup ${acc.label} ditutup`, 'err');
-                    renderGrid();
-                    updateStatusBar();
-                    return;
-                }
-
-                // Coba baca title
-                try {
-                    const title = win.document.title || '';
-                    if (title && title !== popupTitle[accountId]) {
-                        popupTitle[accountId] = title;
-                        // Detect limit dari title
-                        detectLimitFromTitle(accountId, title);
-                    }
-                } catch(e) {
-                    // Cross-origin — coba dari URL
-                    try {
-                        const url = win.location.href || '';
-                        detectLimitFromURL(accountId, url);
-                    } catch(e2) {}
-                }
-            }, 1000);
-
-            addLog(`📧 Buka popup: ${acc.label} (${acc.email})`, '');
-
-        } else {
-            addLog(`⚠️ Popup diblokir! Izinkan popup untuk ${acc.email}`, 'err');
-        }
-
-        renderGrid();
-        updateStatusBar();
-    }
-
-    function openAllPopups() {
-        addLog(`🪟 Membuka ${ACCOUNTS.length} popup Claude...`, 'warn');
-        ACCOUNTS.forEach((acc, i) => {
-            setTimeout(() => {
-                openPopup(acc.id);
-            }, i * 600);
-        });
+    function switchAndGo() {
+        const email = ACCOUNTS[currentIndex];
+        // Tandai akun ini sebagai limit
+        localStorage.setItem(`claude_status_${currentIndex}`, 'limit');
+        renderAccounts();
+        addLog(`🚨 Switch dari limit: ${email}`, 'err');
+        
+        // Pindah ke akun berikutnya
         setTimeout(() => {
-            addLog(`✅ Semua popup dibuka! Login satu per satu.`, 'hl');
-        }, ACCOUNTS.length * 600 + 2000);
+            nextAccount();
+            // Buka Claude dengan email baru
+            setTimeout(() => {
+                window.location.href = 'https://claude.ai/login?email=' + encodeURIComponent(ACCOUNTS[currentIndex]);
+            }, 500);
+        }, 500);
     }
 
-    function closeAllPopups() {
-        if (!confirm('✖ Tutup semua popup Claude?')) return;
-        addLog('✖ Menutup semua popup...', 'warn');
-        ACCOUNTS.forEach(acc => {
-            if (popups[acc.id] && !popups[acc.id].closed) {
-                popups[acc.id].close();
-            }
-            popupStatus[acc.id] = 'idle';
-        });
-        renderGrid();
-        updateStatusBar();
-        addLog('✅ Semua popup ditutup', 'hl');
+    function openLogin() {
+        const email = ACCOUNTS[currentIndex];
+        window.location.href = 'https://claude.ai/login?email=' + encodeURIComponent(email);
+        addLog(`🔐 Buka login: ${email}`, '');
     }
 
-    function focusCurrent() {
-        const acc = ACCOUNTS[currentIndex];
-        const win = popups[acc.id];
-        if (win && !win.closed) {
-            win.focus();
-            addLog(`🎯 Focus ke ${acc.label}`, 'hl');
-        } else {
-            openPopup(acc.id);
+    function resetToFirst() {
+        if (confirm('⟳ Reset ke akun 1?')) {
+            currentIndex = 0;
+            switchCount = 0;
+            ACCOUNTS.forEach((_, i) => {
+                localStorage.setItem(`claude_status_${i}`, 'idle');
+            });
+            updateUI();
+            addLog('⟳ Reset ke akun 1', 'warn');
         }
     }
 
-    // ==================== DETECT LIMIT ====================
-    function detectLimitFromTitle(accountId, title) {
-        const lower = title.toLowerCase();
-        const limitPatterns = [
-            'limit', 'exceeded', 'too many', 'try again',
-            'rate limit', 'unavailable', 'usage limit',
-            'monthly limit', 'daily limit', 'message limit',
-            'reached', 'can\'t send', 'request failed',
-            'over quota', 'throttled', 'blocked', 'error'
-        ];
-
-        let isLimit = false;
-        for (const pattern of limitPatterns) {
-            if (lower.includes(pattern)) {
-                isLimit = true;
-                break;
+    // ==================== DETECT LIMIT DI HALAMAN CLAUDE ====================
+    function detectLimit() {
+        const body = document.body?.innerText || '';
+        const patterns = ['limit','exceeded','too many','rate limit','unavailable','usage limit'];
+        for (const p of patterns) {
+            if (body.toLowerCase().includes(p)) {
+                const idx = parseInt(localStorage.getItem('claude_hp_idx') || '0');
+                localStorage.setItem(`claude_status_${idx}`, 'limit');
+                renderAccounts();
+                addLog(`🚨 Akun ${idx+1} KENA LIMIT!`, 'err');
+                return true;
             }
         }
-
-        // Cek juga kalo title mengandung "Claude" tapi bukan error — berarti online
-        const isOnline = lower.includes('claude') && !isLimit;
-
-        if (isLimit) {
-            if (popupStatus[accountId] !== 'limit') {
-                popupStatus[accountId] = 'limit';
-                const acc = ACCOUNTS.find(a => a.id === accountId);
-                addLog(`🚨 ${acc.label} KENA LIMIT! (title: "${title}")`, 'err');
-                renderGrid();
-                updateStatusBar();
-                // Auto-switch kalo ini akun aktif
-                if (accountId === ACCOUNTS[currentIndex].id && !isSwitching) {
-                    isSwitching = true;
-                    setTimeout(() => {
-                        nextAccount();
-                        isSwitching = false;
-                    }, 2000);
-                }
-            }
-        } else if (isOnline) {
-            if (popupStatus[accountId] !== 'online') {
-                popupStatus[accountId] = 'online';
-                const acc = ACCOUNTS.find(a => a.id === accountId);
-                addLog(`✅ ${acc.label} Online`, 'hl');
-                renderGrid();
-                updateStatusBar();
-            }
-        }
-    }
-
-    function detectLimitFromURL(accountId, url) {
-        const lower = url.toLowerCase();
-        if (lower.includes('limit') || lower.includes('error') || lower.includes('blocked')) {
-            if (popupStatus[accountId] !== 'limit') {
-                popupStatus[accountId] = 'limit';
-                const acc = ACCOUNTS.find(a => a.id === accountId);
-                addLog(`🚨 ${acc.label} KENA LIMIT! (URL: "${url}")`, 'err');
-                renderGrid();
-                updateStatusBar();
-                if (accountId === ACCOUNTS[currentIndex].id && !isSwitching) {
-                    isSwitching = true;
-                    setTimeout(() => {
-                        nextAccount();
-                        isSwitching = false;
-                    }, 2000);
-                }
-            }
-        }
-    }
-
-    // ==================== SCAN ALL POPUPS ====================
-    function scanAllPopups() {
-        ACCOUNTS.forEach(acc => {
-            const win = popups[acc.id];
-            if (!win || win.closed) {
-                if (popupStatus[acc.id] !== 'idle') {
-                    popupStatus[acc.id] = 'idle';
-                    renderGrid();
-                    updateStatusBar();
-                }
-                return;
-            }
-
-            try {
-                const title = win.document.title || '';
-                if (title) {
-                    detectLimitFromTitle(acc.id, title);
-                }
-            } catch(e) {
-                try {
-                    const url = win.location.href || '';
-                    detectLimitFromURL(acc.id, url);
-                } catch(e2) {}
-            }
-        });
+        return false;
     }
 
     // ==================== INIT ====================
     function init() {
-        // Load saved index
-        try {
-            const saved = localStorage.getItem('claude_11_index_v3');
-            if (saved !== null) {
-                const idx = parseInt(saved);
-                if (!isNaN(idx) && idx >= 0 && idx < ACCOUNTS.length) {
-                    currentIndex = idx;
+        // Cek kalo di halaman Claude
+        if (window.location.hostname.includes('claude')) {
+            // Cek limit
+            setTimeout(() => {
+                if (detectLimit()) {
+                    // Auto-switch
+                    setTimeout(() => {
+                        nextAccount();
+                        setTimeout(() => {
+                            window.location.href = 'https://claude.ai/login?email=' + encodeURIComponent(ACCOUNTS[currentIndex]);
+                        }, 500);
+                    }, 1500);
+                } else {
+                    // Tandai online
+                    const idx = parseInt(localStorage.getItem('claude_hp_idx') || '0');
+                    localStorage.setItem(`claude_status_${idx}`, 'online');
+                    renderAccounts();
+                    addLog(`✅ Akun ${idx+1} Online`, 'hl');
                 }
-            }
-        } catch(e) {}
+            }, 2000);
+        }
 
-        renderGrid();
-        updateStatusBar();
-
-        // Events
-        document.getElementById('btnNext').addEventListener('click', () => {
-            if (!isSwitching) nextAccount();
-        });
-        document.getElementById('btnPrev').addEventListener('click', () => {
-            if (!isSwitching) prevAccount();
-        });
-        document.getElementById('btnOpenAll').addEventListener('click', openAllPopups);
-        document.getElementById('btnCloseAll').addEventListener('click', closeAllPopups);
-        document.getElementById('btnFocus').addEventListener('click', focusCurrent);
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight' && e.ctrlKey) {
-                e.preventDefault();
-                if (!isSwitching) nextAccount();
-            }
-            if (e.key === 'ArrowLeft' && e.ctrlKey) {
-                e.preventDefault();
-                if (!isSwitching) prevAccount();
-            }
-            if (e.key === 'f' && e.ctrlKey) {
-                e.preventDefault();
-                focusCurrent();
-            }
-        });
-
-        // Auto-scan
-        setInterval(scanAllPopups, CHECK_INTERVAL);
-
-        // Save index
-        setInterval(() => {
-            try {
-                localStorage.setItem('claude_11_index_v3', currentIndex);
-            } catch(e) {}
-        }, 5000);
-
-        addLog(`🔥 CLAUDE 11 AKUN v3 siap! Total ${ACCOUNTS.length} akun.`, 'hl');
-        addLog(`💡 Klik "Buka Semua" → izinkan popup → login semua akun.`, '');
-        addLog(`⌨️ Ctrl+→ / Ctrl+← = ganti akun | Ctrl+F = focus`, '');
+        updateUI();
+        addLog(`🔥 Claude HP Switcher siap! ${ACCOUNTS.length} akun`, 'hl');
+        addLog(`📌 Aktif: ${ACCOUNTS[currentIndex]}`, '');
+        addLog(`💡 Tap "Switch" buat pindah + buka Claude`, '');
     }
 
+    // ==================== EVENT ====================
+    document.getElementById('btnNext').addEventListener('click', () => {
+        nextAccount();
+        addLog(`⏩ Next ke akun ${currentIndex+1}`, '');
+    });
+    document.getElementById('btnPrev').addEventListener('click', () => {
+        prevAccount();
+        addLog(`⏪ Prev ke akun ${currentIndex+1}`, '');
+    });
+    document.getElementById('btnSwitch').addEventListener('click', switchAndGo);
+    document.getElementById('btnOpenLogin').addEventListener('click', openLogin);
+    document.getElementById('btnReset').addEventListener('click', resetToFirst);
+
+    // ==================== RUN ====================
     init();
 
     // ==================== GLOBAL ====================
-    window.__claude11 = {
+    window.__claudeHP = {
         accounts: ACCOUNTS,
-        switchTo: switchToAccount,
+        current: () => ACCOUNTS[currentIndex],
+        switchTo: switchTo,
         next: nextAccount,
         prev: prevAccount,
-        openAll: openAllPopups,
-        closeAll: closeAllPopups,
-        focus: focusCurrent,
-        status: popupStatus,
-        popups: popups,
-        scan: scanAllPopups
+        switchAndGo: switchAndGo,
+        detectLimit: detectLimit
     };
 
-    console.log('🔥 CLAUDE 11 AKUN v3 loaded!');
-    console.log('💡 Panggil __claude11.openAll() buka semua popup');
-    console.log('💡 Panggil __claude11.next() next akun');
+    console.log('🔥 CLAUDE HP SWITCHER loaded!');
+    console.log('💡 Panggil __claudeHP.switchAndGo() buat pindah akun');
 </script>
 
 </body>
