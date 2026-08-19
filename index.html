@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Browser Matrix - In-App Embedded</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
+        }
+
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-900 text-slate-100 antialiased overflow-x-hidden">
+
+    <!-- Top Header Navigation -->
+    <header class="bg-slate-800/90 backdrop-blur border-b border-slate-700/80 px-4 sm:px-6 py-3 sticky top-0 z-40 shadow-xl flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 bg-gradient-to-tr from-blue-600 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-base sm:text-lg font-bold text-white leading-tight flex items-center gap-2">
+                    Multi-Browser Matrix
+                    <span class="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-normal">10 In-Page Panels</span>
+                </h1>
+                <p class="text-xs text-slate-400 hidden sm:block">Semua panel berjalan langsung di dalam website ini</p>
+            </div>
+        </div>
+
+        <!-- Quick Switcher & Global Actions -->
+        <div class="flex items-center gap-2 flex-wrap">
+            <!-- Quick Jump Dropdown -->
+            <div class="flex items-center gap-1.5 bg-slate-900/80 border border-slate-700/80 rounded-lg px-2 py-1 text-xs">
+                <span class="text-slate-400 hidden md:inline">Lompat ke:</span>
+                <select id="quick-jump-select" class="bg-transparent text-blue-400 font-semibold focus:outline-none cursor-pointer">
+                    <option value="" class="bg-slate-800 text-slate-300">Pilih Browser...</option>
+                </select>
+            </div>
+
+            <!-- Reload All -->
+            <button id="refresh-all-btn" class="px-3 py-1.5 bg-slate-700/80 hover:bg-slate-600 text-xs font-medium rounded-lg text-slate-200 transition-all border border-slate-600/80 flex items-center gap-1.5 active:scale-95">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                <span>Muat Ulang Semua</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 p-4 sm:p-6 overflow-y-auto">
+        
+        <!-- Status & Tip Alert -->
+        <div class="mb-6 p-4 bg-slate-800/60 border border-slate-700/70 rounded-xl shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs sm:text-sm">
+            <div class="flex items-start gap-3">
+                <div class="p-2 bg-blue-500/10 text-blue-400 rounded-lg flex-shrink-0 mt-0.5 md:mt-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <span class="font-semibold text-slate-200">Semua browser aktif di dalam halaman ini.</span>
+                    <p class="text-slate-400 mt-0.5">
+                        Klik tombol <span class="text-blue-400 font-mono font-medium">🔍 Fokus Layar Penuh</span> di setiap browser untuk memperbesar tampilannya secara langsung di dalam website tanpa berpindah halaman.
+                    </p>
+                </div>
+            </div>
+            <div class="text-slate-400 text-xs bg-slate-900/60 px-3 py-1.5 rounded-lg border border-slate-700/50 self-stretch md:self-auto text-center">
+                Sesi Simpan Permanen: <span class="text-emerald-400 font-medium">Aktif (Local Device)</span>
+            </div>
+        </div>
+
+        <!-- 10 Browser Grid -->
+        <div id="browser-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-5">
+            <!-- Dynamic Browser Instances Will Be Inserted Here -->
+        </div>
+    </main>
+
+    <!-- In-Page Fullscreen / Focus Overlay Modal -->
+    <div id="focus-modal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex-col transition-all duration-300">
+        <!-- Modal Top Bar -->
+        <div class="bg-slate-900 border-b border-slate-800 px-4 py-3 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3 min-w-0">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0"></span>
+                <h2 id="modal-title" class="text-sm font-bold text-white truncate">Browser Fokus</h2>
+                <span id="modal-badge" class="text-[10px] bg-blue-500/20 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded font-mono hidden sm:inline">Mode Layar Penuh Dalam App</span>
+            </div>
+
+            <!-- Address Bar inside Modal -->
+            <div class="flex-1 max-w-xl mx-2 hidden md:flex items-center bg-slate-950 border border-slate-800 rounded-lg px-3 py-1 text-xs text-slate-300">
+                <svg class="w-3.5 h-3.5 text-emerald-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+                <input id="modal-url-input" type="text" readonly class="bg-transparent w-full focus:outline-none text-slate-300 font-mono text-xs">
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button id="modal-reload-btn" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 rounded-lg border border-slate-700 flex items-center gap-1 transition-all">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    <span>Refresh</span>
+                </button>
+                <button id="close-modal-btn" class="px-3 py-1.5 bg-red-600/80 hover:bg-red-600 text-xs text-white rounded-lg transition-all font-medium flex items-center gap-1 shadow-lg shadow-red-600/20">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    <span>Tutup Fokus</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal Iframe Container -->
+        <div id="modal-iframe-box" class="flex-1 bg-white relative">
+            <!-- Iframe injected dynamically when focus is clicked -->
+        </div>
+    </div>
+
+    <script>
+        const TARGET_URL = "https://claude.ai/new";
+        const BROWSER_COUNT = 10;
+
+        const browserGrid = document.getElementById('browser-grid');
+        const refreshAllBtn = document.getElementById('refresh-all-btn');
+        const quickJumpSelect = document.getElementById('quick-jump-select');
+        
+        // Modal Elements
+        const focusModal = document.getElementById('focus-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const modalTitle = document.getElementById('modal-title');
+        const modalUrlInput = document.getElementById('modal-url-input');
+        const modalIframeBox = document.getElementById('modal-iframe-box');
+        const modalReloadBtn = document.getElementById('modal-reload-btn');
+
+        let currentFocusedIndex = null;
+
+        function initBrowsers() {
+            browserGrid.innerHTML = '';
+            quickJumpSelect.innerHTML = '<option value="" class="bg-slate-800 text-slate-300">Pilih Browser...</option>';
+
+            for (let i = 1; i <= BROWSER_COUNT; i++) {
+                // Populate quick jump options
+                const option = document.createElement('option');
+                option.value = i;
+                option.className = 'bg-slate-800 text-slate-200';
+                option.textContent = `Browser #${i}`;
+                quickJumpSelect.appendChild(option);
+
+                // Load stored note from localStorage
+                const savedNote = localStorage.getItem(`browser_note_${i}`) || '';
+
+                const cardHTML = `
+                    <div id="browser-card-${i}" class="flex flex-col bg-slate-800/90 rounded-2xl border border-slate-700/80 shadow-xl hover:border-slate-600 transition-all overflow-hidden h-[520px] group">
+                        
+                        <!-- Panel Control Bar -->
+                        <div class="bg-slate-900/90 px-3 py-2.5 border-b border-slate-700/80 flex flex-col gap-2">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>
+                                    <span class="text-xs font-bold text-slate-200">Browser #${i}</span>
+                                </div>
+                                <button onclick="openInPageFocus(${i})" 
+                                        class="text-[11px] bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1 rounded-md font-medium transition-all flex items-center gap-1 shadow-md shadow-blue-600/20 active:scale-95">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4"></path>
+                                    </svg>
+                                    <span>Fokus</span>
+                                </button>
+                            </div>
+
+                            <!-- Address Bar -->
+                            <div class="flex items-center justify-between bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-[11px] text-slate-400 gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                </svg>
+                                <span class="truncate font-mono text-slate-300 flex-1">${TARGET_URL}</span>
+                                <button onclick="reloadIframe(${i})" title="Reload Browser ${i}" class="text-slate-400 hover:text-white transition-colors">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Embedded Web View Frame -->
+                        <div class="flex-1 bg-white relative overflow-hidden">
+                            <iframe 
+                                id="iframe-${i}"
+                                src="${TARGET_URL}" 
+                                class="w-full h-full border-0 absolute inset-0 z-10 bg-white"
+                                title="Browser Instance ${i}"
+                                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
+                            ></iframe>
+                        </div>
+
+                        <!-- Permanent Session / Profile Note Bar -->
+                        <div class="bg-slate-900/95 px-3 py-2 border-t border-slate-700/80 flex items-center gap-2">
+                            <span class="text-[10px] text-slate-400 font-medium flex-shrink-0">Catatan/Akun:</span>
+                            <input 
+                                id="note-input-${i}"
+                                type="text" 
+                                value="${savedNote}" 
+                                placeholder="Cth: Akun Claude A..." 
+                                oninput="saveNote(${i}, this.value)"
+                                class="bg-slate-950 border border-slate-800 text-slate-200 text-xs px-2 py-0.5 rounded w-full focus:outline-none focus:border-blue-500 transition-colors"
+                            />
+                        </div>
+                    </div>
+                `;
+                browserGrid.insertAdjacentHTML('beforeend', cardHTML);
+            }
+        }
+
+        function reloadIframe(index) {
+            const iframe = document.getElementById(`iframe-${index}`);
+            if (iframe) {
+                const currentSrc = iframe.src;
+                iframe.src = 'about:blank';
+                setTimeout(() => {
+                    iframe.src = currentSrc;
+                }, 100);
+            }
+        }
+
+        function openInPageFocus(index) {
+            currentFocusedIndex = index;
+            modalTitle.textContent = `Browser #${index} - Mode Fokus In-Page`;
+            modalUrlInput.value = TARGET_URL;
+
+            // Clear previous iframe in modal
+            modalIframeBox.innerHTML = '';
+
+            // Inject full-screen embedded iframe directly inside the modal
+            const iframe = document.createElement('iframe');
+            iframe.src = TARGET_URL;
+            iframe.className = "w-full h-full border-0 absolute inset-0 z-10 bg-white";
+            iframe.title = `Focused Browser ${index}`;
+            iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-forms allow-popups allow-modals');
+            
+            modalIframeBox.appendChild(iframe);
+
+            // Show Modal
+            focusModal.classList.remove('hidden');
+            focusModal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeInPageFocus() {
+            focusModal.classList.add('hidden');
+            focusModal.classList.remove('flex');
+            modalIframeBox.innerHTML = '';
+            currentFocusedIndex = null;
+            document.body.style.overflow = 'auto';
+        }
+
+        function saveNote(index, value) {
+            localStorage.setItem(`browser_note_${index}`, value);
+        }
+
+        // Event Listeners
+        refreshAllBtn.addEventListener('click', () => {
+            for (let i = 1; i <= BROWSER_COUNT; i++) {
+                reloadIframe(i);
+            }
+        });
+
+        quickJumpSelect.addEventListener('change', (e) => {
+            const val = e.target.value;
+            if (val) {
+                const el = document.getElementById(`browser-card-${val}`);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    el.classList.add('ring-2', 'ring-blue-500');
+                    setTimeout(() => el.classList.remove('ring-2', 'ring-blue-500'), 2000);
+                }
+            }
+        });
+
+        closeModalBtn.addEventListener('click', closeInPageFocus);
+
+        modalReloadBtn.addEventListener('click', () => {
+            if (currentFocusedIndex) {
+                openInPageFocus(currentFocusedIndex);
+            }
+        });
+
+        // Close focus modal with Escape key
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !focusModal.classList.contains('hidden')) {
+                closeInPageFocus();
+            }
+        });
+
+        // Initialize application on load
+        window.addEventListener('DOMContentLoaded', initBrowsers);
+    </script>
+</body>
+</html>
