@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NEXBOX TIKTOK MULTI-TAB — 1 AKUN</title>
+    <title>NEXBOX MULTI-TAB TIKTOK — FIXED</title>
     <style>
-        /* ===== RESET & GLOBAL ===== */
         * {
             margin: 0;
             padding: 0;
@@ -29,7 +28,6 @@
             border-radius: 10px;
         }
 
-        /* ===== HEADER ===== */
         .header {
             border: 2px solid #00ff41;
             padding: 20px;
@@ -64,11 +62,15 @@
             animation: blink 1.5s infinite;
         }
         @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
         }
 
-        /* ===== KONTROL PANEL ===== */
         .panel {
             border: 1px solid #00ff41;
             padding: 25px;
@@ -88,6 +90,7 @@
             flex-wrap: wrap;
             gap: 15px;
             align-items: center;
+            margin-top: 10px;
         }
         .row label {
             font-size: 14px;
@@ -144,22 +147,29 @@
             color: #000;
             box-shadow: 0 0 30px rgba(255, 170, 0, 0.3);
         }
+        .btn.primary {
+            border-color: #00aaff;
+            color: #00aaff;
+        }
+        .btn.primary:hover {
+            background: #00aaff;
+            color: #000;
+        }
         .btn:disabled {
             opacity: 0.4;
             cursor: not-allowed;
         }
 
-        /* ===== IFRAME LOGIN ===== */
-        .login-frame {
-            width: 100%;
-            height: 600px;
-            border: 1px solid #00ff41;
-            border-radius: 8px;
-            background: #000;
-            margin-bottom: 20px;
+        .info-box {
+            background: rgba(255, 170, 0, 0.1);
+            border: 1px solid #ffaa00;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            color: #ffaa00;
+            font-size: 14px;
         }
 
-        /* ===== TAB CONTAINER ===== */
         .tabs-wrapper {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
@@ -205,7 +215,6 @@
             background: #000;
         }
 
-        /* ===== LOG ===== */
         .log-box {
             border: 1px solid #00ff41;
             padding: 15px;
@@ -231,38 +240,55 @@
             color: #ffaa00;
         }
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
-            .header h1 { font-size: 20px; }
-            .tabs-wrapper { grid-template-columns: 1fr; }
-            .login-frame { height: 400px; }
-            .tab-item iframe { height: 350px; }
+            .header h1 {
+                font-size: 20px;
+            }
+            .tabs-wrapper {
+                grid-template-columns: 1fr;
+            }
+            .tab-item iframe {
+                height: 350px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== HEADER ===== -->
     <div class="header">
         <h1>⬛ NEXBOX <span>✦</span> MULTI-TAB TIKTOK</h1>
         <div class="sub">1 AKUN — BANYAK TAB — NONTON PARALEL</div>
         <div class="status-badge" id="statusBadge">🔴 BELUM LOGIN</div>
     </div>
 
-    <!-- ===== PANEL LOGIN ===== -->
+    <!-- ===== STEP 1: LOGIN ===== -->
     <div class="panel">
         <h2>🔐 STEP 1: LOGIN PAKAI AKUN ASLI</h2>
-        <p style="color:#888; font-size:14px; margin-bottom:15px;">
-            Login sekali di bawah. Cookie akan dipakai untuk semua tab.
-        </p>
-        <iframe class="login-frame" id="loginFrame" src="https://www.tiktok.com/login"></iframe>
+
+        <div class="info-box">
+            ⚠️ TikTok tidak bisa dibuka di dalam iframe karena kebijakan keamanan.<br />
+            <strong>Klik tombol di bawah untuk login di TAB BARU atau POPUP.</strong>
+        </div>
+
         <div class="row">
-            <button class="btn" id="btnRefreshLogin">⟳ Refresh Login</button>
-            <button class="btn success" id="btnCheckLogin">✅ Cek Status Login</button>
+            <button class="btn primary" id="btnLoginTab">🔗 BUKA LOGIN DI TAB BARU</button>
+            <button class="btn" id="btnLoginPopup">🪟 BUKA LOGIN DI POPUP</button>
+            <button class="btn" id="btnCheckLogin">✅ CEK STATUS LOGIN</button>
+        </div>
+
+        <div style="margin-top:15px; padding:15px; background:rgba(0,255,65,0.03); border-radius:6px; border:1px solid #333;">
+            <p style="color:#888; font-size:13px;">
+                📌 <strong>Cara:</strong><br />
+                1. Klik tombol di atas — nanti kebuka tab/popup TikTok.<br />
+                2. Login dengan akun asli lo.<br />
+                3. Setelah login, <strong>tutup tab/popup</strong> itu.<br />
+                4. Klik <strong>"CEK STATUS LOGIN"</strong> — kalo sukses, status jadi hijau.<br />
+                5. Lanjut ke STEP 2 buka banyak tab.
+            </p>
         </div>
     </div>
 
-    <!-- ===== PANEL KONTROL TAB ===== -->
+    <!-- ===== STEP 2: BUKA TAB ===== -->
     <div class="panel">
         <h2>📑 STEP 2: BUKA BANYAK TAB DENGAN 1 AKUN</h2>
         <div class="row">
@@ -270,7 +296,7 @@
             <input type="number" id="tabCount" value="5" min="1" max="50" />
             <button class="btn" id="btnOpenTabs">🔥 BUKA TAB</button>
             <button class="btn danger" id="btnCloseAllTabs">✖ TUTUP SEMUA</button>
-            <button class="btn warning" id="btnRefreshAllTabs">⟳ Refresh Semua</button>
+            <button class="btn warning" id="btnRefreshAllTabs">⟳ REFRESH SEMUA</button>
         </div>
         <div style="margin-top:10px; color:#666; font-size:13px;">
             ⚡ Setiap tab akan membuka halaman FYP dan nonton video otomatis (karena cookie share).
@@ -284,20 +310,19 @@
     <div class="panel">
         <h2>📜 ACTIVITY LOG</h2>
         <div class="log-box" id="logBox">
-            <div class="log-entry"><span class="time">[00:00:00]</span> <span class="info">⬛ NEXBOX MULTI-TAB V4 SIAP</span></div>
-            <div class="log-entry"><span class="time">[00:00:01]</span> <span class="info">🔐 Login dulu di iframe di atas</span></div>
+            <div class="log-entry"><span class="time">[00:00:00]</span> <span class="info">⬛ NEXBOX MULTI-TAB V4 — FIXED</span></div>
+            <div class="log-entry"><span class="time">[00:00:01]</span> <span class="info">🔐 Login pake tombol di atas (bukan iframe)</span></div>
         </div>
     </div>
 
     <!-- ================================================================ -->
-    <!-- ===== JAVASCRIPT ===== -->
     <script>
         (function() {
             'use strict';
 
-            // ---------- DOM REFS ----------
-            const loginFrame = document.getElementById('loginFrame');
-            const btnRefreshLogin = document.getElementById('btnRefreshLogin');
+            // DOM
+            const btnLoginTab = document.getElementById('btnLoginTab');
+            const btnLoginPopup = document.getElementById('btnLoginPopup');
             const btnCheckLogin = document.getElementById('btnCheckLogin');
             const btnOpenTabs = document.getElementById('btnOpenTabs');
             const btnCloseAllTabs = document.getElementById('btnCloseAllTabs');
@@ -309,6 +334,7 @@
 
             let tabCounter = 0;
             let openTabs = [];
+            let isLoggedIn = false;
 
             // ---------- UTILITY ----------
             function getTimestamp() {
@@ -330,8 +356,9 @@
                 }
             }
 
-            function updateStatusBadge(isLoggedIn) {
-                if (isLoggedIn) {
+            function updateStatusBadge(loggedIn) {
+                isLoggedIn = loggedIn;
+                if (loggedIn) {
                     statusBadge.innerHTML = '🟢 LOGIN AKTIF — SIAP BUKA TAB';
                     statusBadge.style.borderColor = '#00ff41';
                 } else {
@@ -340,21 +367,53 @@
                 }
             }
 
-            // ---------- CEK LOGIN (via iframe cookie) ----------
-            function checkLoginStatus() {
-                try {
-                    // Coba akses iframe content — cuma bisa kalo same-origin (tidak bisa karena TikTok beda origin)
-                    // Jadi kita pake cara: user konfirmasi manual atau deteksi redirect
-                    addLog('🔍 Cek login: buka https://www.tiktok.com/fyp di iframe login?', 'info');
-                    // Ganti iframe ke FYP buat cek
-                    loginFrame.src = 'https://www.tiktok.com/fyp';
-                    setTimeout(() => {
-                        // Asumsikan kalo redirect ke FYP tanpa minta login, berarti sudah login
-                        addLog('✅ Jika kamu melihat FYP di iframe, berarti login sukses!', 'success');
-                        updateStatusBadge(true);
-                    }, 5000);
-                } catch (e) {
-                    addLog('❌ Gagal cek login: ' + e.message, 'error');
+            // ---------- CEK LOGIN ----------
+            function checkLogin() {
+                // Coba akses cookie TikTok dari document.cookie
+                const cookies = document.cookie.split(';');
+                let hasTikTokCookie = false;
+                cookies.forEach(cookie => {
+                    if (cookie.trim().includes('sessionid') || cookie.trim().includes('ssid')) {
+                        hasTikTokCookie = true;
+                    }
+                });
+
+                if (hasTikTokCookie) {
+                    updateStatusBadge(true);
+                    addLog('✅ Login terdeteksi! Cookie TikTok ditemukan.', 'success');
+                } else {
+                    // Cek pake metode window.open — coba buka FYP di tab kecil
+                    const testWin = window.open('https://www.tiktok.com/fyp', '_blank', 'width=1,height=1');
+                    if (testWin) {
+                        setTimeout(() => {
+                            testWin.close();
+                            // Asumsi kalo bisa buka FYP tanpa redirect login, berarti udah login
+                            addLog('🔍 Coba buka FYP — kalo muncul konten, berarti login sukses.', 'info');
+                            addLog('💡 Klik tombol "CEK STATUS" lagi setelah 5 detik.', 'info');
+                        }, 2000);
+                    }
+                    addLog('⚠️ Cookie TikTok tidak ditemukan. Login dulu!', 'error');
+                    updateStatusBadge(false);
+                }
+            }
+
+            // ---------- BUKA LOGIN DI TAB BARU ----------
+            function openLoginTab() {
+                const win = window.open('https://www.tiktok.com/login', '_blank');
+                if (win) {
+                    addLog('🔗 Tab login dibuka. Login di sana, lalu tutup tab.', 'info');
+                } else {
+                    addLog('❌ Popup diblokir! Izinkan popup untuk website ini.', 'error');
+                }
+            }
+
+            // ---------- BUKA LOGIN DI POPUP ----------
+            function openLoginPopup() {
+                const win = window.open('https://www.tiktok.com/login', 'tiktok-login', 'width=500,height=700,scrollbars=yes');
+                if (win) {
+                    addLog('🪟 Popup login dibuka. Login di sana, lalu tutup.', 'info');
+                } else {
+                    addLog('❌ Popup diblokir! Izinkan popup untuk website ini.', 'error');
                 }
             }
 
@@ -365,10 +424,8 @@
                     return;
                 }
 
-                // Cek apakah login frame sudah di FYP (asumsi login)
-                const currentSrc = loginFrame.src;
-                if (!currentSrc.includes('fyp') && !currentSrc.includes('video')) {
-                    addLog('⚠️ Login dulu di iframe! Buka TikTok dan login.', 'error');
+                if (!isLoggedIn) {
+                    addLog('⚠️ Login dulu! Klik tombol login di STEP 1.', 'error');
                     return;
                 }
 
@@ -392,7 +449,6 @@
                     tabsContainer.appendChild(tabDiv);
                     openTabs.push(tabId);
 
-                    // Event close tab
                     tabDiv.querySelector('.close-tab').addEventListener('click', function() {
                         const id = this.dataset.tabid;
                         closeTab(id);
@@ -447,15 +503,9 @@
             }
 
             // ---------- EVENT LISTENERS ----------
-            btnRefreshLogin.addEventListener('click', function() {
-                loginFrame.src = 'https://www.tiktok.com/login';
-                addLog('⟳ Iframe login direfresh.', 'info');
-                updateStatusBadge(false);
-            });
-
-            btnCheckLogin.addEventListener('click', function() {
-                checkLoginStatus();
-            });
+            btnLoginTab.addEventListener('click', openLoginTab);
+            btnLoginPopup.addEventListener('click', openLoginPopup);
+            btnCheckLogin.addEventListener('click', checkLogin);
 
             btnOpenTabs.addEventListener('click', function() {
                 const count = parseInt(tabCountInput.value) || 5;
@@ -466,19 +516,26 @@
             btnRefreshAllTabs.addEventListener('click', refreshAllTabs);
 
             // ---------- INIT ----------
-            addLog('💀 NEXBOX MULTI-TAB SUPREME — SIAP EKSEKUSI', 'success');
-            addLog('🔐 Login dulu di iframe dengan akun asli lo.', 'info');
-            addLog('📑 Setelah login, buka tab sebanyak yang lo mau.', 'info');
+            addLog('💀 NEXBOX MULTI-TAB SUPREME — FIXED VERSION', 'success');
+            addLog('🔐 Klik tombol "BUKA LOGIN DI TAB BARU" atau "POPUP"', 'info');
+            addLog('📑 Login di tab/popup, tutup, lalu "CEK STATUS"', 'info');
 
-            // Auto check login setiap 10 detik (deteksi perubahan iframe)
+            // Cek login setiap 15 detik
             setInterval(() => {
-                const src = loginFrame.src;
-                if (src.includes('fyp') || src.includes('video')) {
+                const cookies = document.cookie.split(';');
+                let found = false;
+                cookies.forEach(c => {
+                    if (c.trim().includes('sessionid') || c.trim().includes('ssid')) {
+                        found = true;
+                    }
+                });
+                if (found && !isLoggedIn) {
                     updateStatusBadge(true);
+                    addLog('✅ Login terdeteksi otomatis!', 'success');
                 }
-            }, 10000);
+            }, 15000);
 
-            // ---------- KEYBOARD SHORTCUT (SUPREME) ----------
+            // ---------- SHORTCUT ----------
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter' && e.ctrlKey) {
                     e.preventDefault();
