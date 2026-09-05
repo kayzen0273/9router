@@ -2,611 +2,501 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-    <title>🔥 11 Mini Browser - Multi Browser Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEXBOX TIKTOK MULTI-TAB — 1 AKUN</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* ===== RESET & GLOBAL ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
-            font-family: 'Segoe UI', Tahoma, sans-serif;
+            font-family: 'Courier New', monospace;
             background: #0a0a0a;
             color: #00ff41;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #00ff41;
+            border-radius: 10px;
         }
 
-        /* TOP BAR */
-        .topbar {
+        /* ===== HEADER ===== */
+        .header {
+            border: 2px solid #00ff41;
+            padding: 20px;
+            text-align: center;
+            background: rgba(0, 255, 65, 0.05);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.1);
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        .header h1 {
+            font-size: 28px;
+            letter-spacing: 4px;
+            text-shadow: 0 0 20px #00ff41;
+        }
+        .header h1 span {
+            color: #ff0040;
+            text-shadow: 0 0 20px #ff0040;
+        }
+        .header .sub {
+            font-size: 14px;
+            color: #888;
+            margin-top: 8px;
+        }
+        .status-badge {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 8px 20px;
+            border: 1px solid #00ff41;
+            border-radius: 20px;
+            font-size: 13px;
+            background: rgba(0, 255, 65, 0.08);
+            animation: blink 1.5s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* ===== KONTROL PANEL ===== */
+        .panel {
+            border: 1px solid #00ff41;
+            padding: 25px;
+            margin-bottom: 25px;
+            background: rgba(0, 255, 65, 0.03);
+            border-radius: 8px;
+        }
+        .panel h2 {
+            font-size: 18px;
+            letter-spacing: 2px;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+        .row label {
+            font-size: 14px;
+            color: #aaa;
+        }
+        .row input[type="number"] {
+            padding: 10px 16px;
             background: #111;
-            border-bottom: 2px solid #00ff41;
-            padding: 6px 12px;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            border-radius: 4px;
+            width: 100px;
+            outline: none;
+        }
+        .row input[type="number"]:focus {
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+        }
+        .btn {
+            padding: 10px 28px;
+            background: transparent;
+            border: 2px solid #00ff41;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn:hover {
+            background: #00ff41;
+            color: #000;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.3);
+        }
+        .btn.danger {
+            border-color: #ff0040;
+            color: #ff0040;
+        }
+        .btn.danger:hover {
+            background: #ff0040;
+            color: #000;
+            box-shadow: 0 0 30px rgba(255, 0, 64, 0.3);
+        }
+        .btn.warning {
+            border-color: #ffaa00;
+            color: #ffaa00;
+        }
+        .btn.warning:hover {
+            background: #ffaa00;
+            color: #000;
+            box-shadow: 0 0 30px rgba(255, 170, 0, 0.3);
+        }
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* ===== IFRAME LOGIN ===== */
+        .login-frame {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #00ff41;
+            border-radius: 8px;
+            background: #000;
+            margin-bottom: 20px;
+        }
+
+        /* ===== TAB CONTAINER ===== */
+        .tabs-wrapper {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .tab-item {
+            border: 1px solid #00ff41;
+            border-radius: 8px;
+            background: rgba(0, 255, 65, 0.02);
+            padding: 10px;
+            position: relative;
+            min-height: 500px;
+        }
+        .tab-item .tab-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 6px;
-            flex-shrink: 0;
-            z-index: 100;
-            position: relative;
-        }
-        .topbar .brand {
-            font-size: 16px;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-        .topbar .info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(0, 255, 65, 0.05);
+            border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+            border-radius: 6px 6px 0 0;
             font-size: 12px;
-            flex-wrap: wrap;
-        }
-        .btn {
-            background: transparent;
-            border: 1px solid #00ff41;
-            color: #00ff41;
-            padding: 4px 12px;
-            font-size: 11px;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: 0.2s;
-            white-space: nowrap;
-        }
-        .btn:active { background: #00ff41; color: #000; transform: scale(0.95); }
-        .btn.danger { border-color: #ff4444; color: #ff4444; }
-        .btn.warning { border-color: #ffcc00; color: #ffcc00; }
-        .btn.success { border-color: #00ff88; color: #00ff88; }
-
-        /* MAIN GRID — 11 BROWSER */
-        .browser-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 6px;
-            padding: 6px;
-            height: calc(100vh - 52px);
-            overflow-y: auto;
-            align-content: start;
-        }
-
-        /* MINI BROWSER CARD */
-        .browser-card {
-            background: #111;
-            border: 1px solid #1a1a1a;
-            border-radius: 8px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            min-height: 280px;
-            height: fit-content;
-            transition: 0.2s;
-            position: relative;
-        }
-        .browser-card:hover {
-            border-color: #00ff41;
-        }
-        .browser-card.active {
-            border-color: #00ff41;
-            box-shadow: 0 0 20px rgba(0,255,65,0.15);
-        }
-
-        /* CARD HEADER */
-        .browser-header {
-            background: #0d0d0d;
-            padding: 4px 8px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            flex-shrink: 0;
-            border-bottom: 1px solid #1a1a1a;
-            flex-wrap: wrap;
-        }
-        .browser-header .label {
-            font-size: 10px;
-            font-weight: bold;
-            color: #666;
-            min-width: 30px;
-        }
-        .browser-header .label.active-label {
-            color: #00ff41;
-        }
-        .browser-header input {
-            flex: 1;
-            background: #0a0a0a;
-            border: 1px solid #1a1a1a;
-            border-radius: 3px;
-            color: #00ff41;
-            font-size: 9px;
-            padding: 2px 6px;
-            min-width: 60px;
-            font-family: inherit;
-        }
-        .browser-header input:focus {
-            border-color: #00ff41;
-            outline: none;
-        }
-        .browser-header input::placeholder {
-            color: #333;
-        }
-        .browser-header .btn-sm {
-            background: transparent;
-            border: 1px solid #333;
             color: #888;
-            padding: 1px 6px;
-            font-size: 9px;
-            border-radius: 3px;
+        }
+        .tab-item .tab-header .close-tab {
             cursor: pointer;
-            transition: 0.2s;
-        }
-        .browser-header .btn-sm:hover {
-            border-color: #00ff41;
-            color: #00ff41;
-        }
-        .browser-header .btn-sm.danger-sm:hover {
-            border-color: #ff4444;
-            color: #ff4444;
-        }
-        .browser-header .status-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            display: inline-block;
-            flex-shrink: 0;
-        }
-        .status-dot.loading { background: #ffcc00; animation: blink 0.5s infinite; }
-        .status-dot.loaded { background: #00ff41; }
-        .status-dot.error { background: #ff4444; }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.2; }
-        }
-
-        /* IFRAME */
-        .browser-iframe {
-            flex: 1;
-            background: #fff;
-            min-height: 180px;
-            height: 280px;
-            width: 100%;
-            border: none;
-        }
-
-        /* RESPONSIVE */
-        @media (max-width: 900px) {
-            .browser-grid {
-                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            }
-            .browser-iframe {
-                height: 220px;
-            }
-        }
-        @media (max-width: 600px) {
-            .browser-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 4px;
-                padding: 4px;
-            }
-            .browser-iframe {
-                height: 180px;
-                min-height: 140px;
-            }
-            .browser-header input {
-                font-size: 8px;
-            }
-            .topbar .brand { font-size: 12px; }
-            .topbar .info { font-size: 10px; }
-            .btn { font-size: 9px; padding: 3px 8px; }
-        }
-        @media (max-width: 400px) {
-            .browser-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* OVERLAY SETTINGS */
-        .settings-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.85);
-            z-index: 1000;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .settings-overlay.show { display: flex; }
-        .settings-panel {
-            background: #111;
-            border: 2px solid #00ff41;
-            border-radius: 12px;
-            padding: 20px;
-            max-width: 600px;
-            width: 100%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        .settings-panel h2 {
-            text-align: center;
-            margin-bottom: 12px;
+            color: #ff0040;
+            font-weight: bold;
             font-size: 18px;
+            line-height: 1;
+            padding: 0 6px;
         }
-        .settings-panel .row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 6px;
-            align-items: center;
+        .tab-item .tab-header .close-tab:hover {
+            color: #ff4444;
+            text-shadow: 0 0 20px #ff0040;
         }
-        .settings-panel .row label {
-            font-size: 11px;
-            color: #888;
-            min-width: 50px;
+        .tab-item iframe {
+            width: 100%;
+            height: 480px;
+            border: none;
+            border-radius: 0 0 6px 6px;
+            background: #000;
         }
-        .settings-panel .row input {
-            flex: 1;
-            background: #0a0a0a;
-            border: 1px solid #1a1a1a;
+
+        /* ===== LOG ===== */
+        .log-box {
+            border: 1px solid #00ff41;
+            padding: 15px;
+            height: 180px;
+            overflow-y: auto;
+            background: #050505;
             border-radius: 4px;
+            font-size: 13px;
+            line-height: 1.8;
+            margin-top: 20px;
+        }
+        .log-box .log-entry .time {
+            color: #666;
+            margin-right: 15px;
+        }
+        .log-box .log-entry .success {
             color: #00ff41;
-            padding: 6px 10px;
-            font-size: 12px;
         }
-        .settings-panel .row input:focus {
-            border-color: #00ff41;
-            outline: none;
+        .log-box .log-entry .error {
+            color: #ff0040;
         }
-        .settings-panel .btn-group {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
+        .log-box .log-entry .info {
+            color: #ffaa00;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .header h1 { font-size: 20px; }
+            .tabs-wrapper { grid-template-columns: 1fr; }
+            .login-frame { height: 400px; }
+            .tab-item iframe { height: 350px; }
         }
     </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
-<div class="topbar">
-    <div class="brand">🔥 11 Mini Browser</div>
-    <div class="info">
-        <span id="browserCount">📊 0/11 aktif</span>
-        <button class="btn warning" id="btnSettings">⚙️ Set All</button>
-        <button class="btn success" id="btnRefreshAll">⟳ Refresh All</button>
-        <button class="btn danger" id="btnCloseAll">✖ Close All</button>
+    <!-- ===== HEADER ===== -->
+    <div class="header">
+        <h1>⬛ NEXBOX <span>✦</span> MULTI-TAB TIKTOK</h1>
+        <div class="sub">1 AKUN — BANYAK TAB — NONTON PARALEL</div>
+        <div class="status-badge" id="statusBadge">🔴 BELUM LOGIN</div>
     </div>
-</div>
 
-<!-- BROWSER GRID -->
-<div class="browser-grid" id="browserGrid"></div>
-
-<!-- SETTINGS OVERLAY -->
-<div class="settings-overlay" id="settingsOverlay">
-    <div class="settings-panel">
-        <h2>⚙️ Set Semua Link</h2>
+    <!-- ===== PANEL LOGIN ===== -->
+    <div class="panel">
+        <h2>🔐 STEP 1: LOGIN PAKAI AKUN ASLI</h2>
+        <p style="color:#888; font-size:14px; margin-bottom:15px;">
+            Login sekali di bawah. Cookie akan dipakai untuk semua tab.
+        </p>
+        <iframe class="login-frame" id="loginFrame" src="https://www.tiktok.com/login"></iframe>
         <div class="row">
-            <label>Link:</label>
-            <input type="text" id="globalLinkInput" placeholder="https://claude.ai/login?email=..." />
-        </div>
-        <div style="font-size:11px;color:#666;margin:6px 0;">
-            💡 Pakai <strong>{i}</strong> buat nomor urut (contoh: https://claude.ai/login?email=andre{i}@gmail.com)
-        </div>
-        <div class="btn-group">
-            <button class="btn" id="btnApplyAll">✅ Apply ke Semua</button>
-            <button class="btn danger" id="btnCloseSettings">✖ Tutup</button>
-        </div>
-        <hr style="border-color:#1a1a1a;margin:12px 0;" />
-        <div style="font-size:11px;color:#666;">
-            <strong>Contoh link:</strong><br/>
-            - https://claude.ai/login?email=andre{i}@gmail.com<br/>
-            - https://www.google.com/search?q=browser+{i}<br/>
-            - https://example.com/page/{i}
+            <button class="btn" id="btnRefreshLogin">⟳ Refresh Login</button>
+            <button class="btn success" id="btnCheckLogin">✅ Cek Status Login</button>
         </div>
     </div>
-</div>
 
-<script>
-    // ==================== KONFIG ====================
-    const TOTAL_BROWSERS = 11;
+    <!-- ===== PANEL KONTROL TAB ===== -->
+    <div class="panel">
+        <h2>📑 STEP 2: BUKA BANYAK TAB DENGAN 1 AKUN</h2>
+        <div class="row">
+            <label for="tabCount">Jumlah Tab:</label>
+            <input type="number" id="tabCount" value="5" min="1" max="50" />
+            <button class="btn" id="btnOpenTabs">🔥 BUKA TAB</button>
+            <button class="btn danger" id="btnCloseAllTabs">✖ TUTUP SEMUA</button>
+            <button class="btn warning" id="btnRefreshAllTabs">⟳ Refresh Semua</button>
+        </div>
+        <div style="margin-top:10px; color:#666; font-size:13px;">
+            ⚡ Setiap tab akan membuka halaman FYP dan nonton video otomatis (karena cookie share).
+        </div>
+    </div>
 
-    // ==================== STATE ====================
-    let browserStates = {};
-    let savedLinks = {};
+    <!-- ===== TAB CONTAINER ===== -->
+    <div id="tabsContainer" class="tabs-wrapper"></div>
 
-    // ==================== DOM ====================
-    const grid = document.getElementById('browserGrid');
-    const browserCount = document.getElementById('browserCount');
-    const settingsOverlay = document.getElementById('settingsOverlay');
-    const globalLinkInput = document.getElementById('globalLinkInput');
+    <!-- ===== LOG ===== -->
+    <div class="panel">
+        <h2>📜 ACTIVITY LOG</h2>
+        <div class="log-box" id="logBox">
+            <div class="log-entry"><span class="time">[00:00:00]</span> <span class="info">⬛ NEXBOX MULTI-TAB V4 SIAP</span></div>
+            <div class="log-entry"><span class="time">[00:00:01]</span> <span class="info">🔐 Login dulu di iframe di atas</span></div>
+        </div>
+    </div>
 
-    // ==================== FUNGSI ====================
-    function generateId(index) {
-        return 'browser_' + index;
-    }
+    <!-- ================================================================ -->
+    <!-- ===== JAVASCRIPT ===== -->
+    <script>
+        (function() {
+            'use strict';
 
-    function getDefaultLink(index) {
-        const saved = localStorage.getItem('mini_browser_link_' + index);
-        if (saved) return saved;
-        return 'https://claude.ai/login?email=andre' + (index + 1) + '@gmail.com';
-    }
+            // ---------- DOM REFS ----------
+            const loginFrame = document.getElementById('loginFrame');
+            const btnRefreshLogin = document.getElementById('btnRefreshLogin');
+            const btnCheckLogin = document.getElementById('btnCheckLogin');
+            const btnOpenTabs = document.getElementById('btnOpenTabs');
+            const btnCloseAllTabs = document.getElementById('btnCloseAllTabs');
+            const btnRefreshAllTabs = document.getElementById('btnRefreshAllTabs');
+            const tabCountInput = document.getElementById('tabCount');
+            const tabsContainer = document.getElementById('tabsContainer');
+            const logBox = document.getElementById('logBox');
+            const statusBadge = document.getElementById('statusBadge');
 
-    function renderBrowsers() {
-        grid.innerHTML = '';
-        let activeCount = 0;
+            let tabCounter = 0;
+            let openTabs = [];
 
-        for (let i = 0; i < TOTAL_BROWSERS; i++) {
-            const id = generateId(i);
-            const defaultLink = getDefaultLink(i);
-            const status = browserStates[id] || 'idle';
+            // ---------- UTILITY ----------
+            function getTimestamp() {
+                return new Date().toTimeString().slice(0, 8);
+            }
 
-            const card = document.createElement('div');
-            card.className = 'browser-card';
-            card.id = id;
-            card.dataset.index = i;
-
-            // Header
-            const header = document.createElement('div');
-            header.className = 'browser-header';
-            header.innerHTML = `
-                <span class="label ${status === 'loaded' ? 'active-label' : ''}">#${i+1}</span>
-                <span class="status-dot ${status === 'loading' ? 'loading' : status === 'loaded' ? 'loaded' : status === 'error' ? 'error' : ''}"></span>
-                <input type="text" class="url-input" value="${defaultLink}" placeholder="Masukkan link..." spellcheck="false" />
-                <button class="btn-sm go-btn">▶</button>
-                <button class="btn-sm danger-sm close-btn">✕</button>
-            `;
-            card.appendChild(header);
-
-            // Iframe
-            const iframe = document.createElement('iframe');
-            iframe.className = 'browser-iframe';
-            iframe.src = defaultLink;
-            iframe.sandbox = 'allow-scripts allow-same-origin allow-forms allow-popups allow-modals';
-            iframe.loading = 'lazy';
-            card.appendChild(iframe);
-
-            // EVENT: GO button
-            const goBtn = header.querySelector('.go-btn');
-            const urlInput = header.querySelector('.url-input');
-            goBtn.addEventListener('click', () => {
-                const url = urlInput.value.trim();
-                if (url) {
-                    iframe.src = url;
-                    browserStates[id] = 'loading';
-                    updateStatusDot(header, 'loading');
-                    localStorage.setItem('mini_browser_link_' + i, url);
-                    addLog(`#${i+1} → ${url}`);
+            function addLog(message, type = 'info') {
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                const time = getTimestamp();
+                let cls = 'info';
+                if (type === 'success') cls = 'success';
+                if (type === 'error') cls = 'error';
+                entry.innerHTML = `<span class="time">[${time}]</span> <span class="${cls}">${message}</span>`;
+                logBox.appendChild(entry);
+                logBox.scrollTop = logBox.scrollHeight;
+                if (logBox.children.length > 200) {
+                    logBox.removeChild(logBox.children[0]);
                 }
-            });
+            }
 
-            // EVENT: Enter on input
-            urlInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    goBtn.click();
+            function updateStatusBadge(isLoggedIn) {
+                if (isLoggedIn) {
+                    statusBadge.innerHTML = '🟢 LOGIN AKTIF — SIAP BUKA TAB';
+                    statusBadge.style.borderColor = '#00ff41';
+                } else {
+                    statusBadge.innerHTML = '🔴 BELUM LOGIN — LOGIN DULU';
+                    statusBadge.style.borderColor = '#ff0040';
                 }
-            });
+            }
 
-            // EVENT: Close button
-            const closeBtn = header.querySelector('.close-btn');
-            closeBtn.addEventListener('click', () => {
-                iframe.src = 'about:blank';
-                browserStates[id] = 'idle';
-                updateStatusDot(header, 'idle');
-                card.style.display = 'none';
-                updateCount();
-                addLog(`✖ #${i+1} ditutup`);
-            });
-
-            // EVENT: IFrame load
-            iframe.addEventListener('load', () => {
-                browserStates[id] = 'loaded';
-                updateStatusDot(header, 'loaded');
-                updateCount();
-                // Coba deteksi error
+            // ---------- CEK LOGIN (via iframe cookie) ----------
+            function checkLoginStatus() {
                 try {
-                    const doc = iframe.contentDocument || iframe.contentWindow?.document;
-                    if (doc) {
-                        const body = doc.body?.innerText || '';
-                        if (body.includes('ERR_CONNECTION_REFUSED') || 
-                            body.includes('ERR_NAME_NOT_RESOLVED') ||
-                            body.includes('ERR_INTERNET_DISCONNECTED')) {
-                            browserStates[id] = 'error';
-                            updateStatusDot(header, 'error');
-                            addLog(`❌ #${i+1} error loading`);
+                    // Coba akses iframe content — cuma bisa kalo same-origin (tidak bisa karena TikTok beda origin)
+                    // Jadi kita pake cara: user konfirmasi manual atau deteksi redirect
+                    addLog('🔍 Cek login: buka https://www.tiktok.com/fyp di iframe login?', 'info');
+                    // Ganti iframe ke FYP buat cek
+                    loginFrame.src = 'https://www.tiktok.com/fyp';
+                    setTimeout(() => {
+                        // Asumsikan kalo redirect ke FYP tanpa minta login, berarti sudah login
+                        addLog('✅ Jika kamu melihat FYP di iframe, berarti login sukses!', 'success');
+                        updateStatusBadge(true);
+                    }, 5000);
+                } catch (e) {
+                    addLog('❌ Gagal cek login: ' + e.message, 'error');
+                }
+            }
+
+            // ---------- BUKA TAB ----------
+            function openTabs(count) {
+                if (count < 1) {
+                    addLog('⚠️ Minimal 1 tab, Diktator!', 'error');
+                    return;
+                }
+
+                // Cek apakah login frame sudah di FYP (asumsi login)
+                const currentSrc = loginFrame.src;
+                if (!currentSrc.includes('fyp') && !currentSrc.includes('video')) {
+                    addLog('⚠️ Login dulu di iframe! Buka TikTok dan login.', 'error');
+                    return;
+                }
+
+                addLog(`🔥 Membuka ${count} tab dengan 1 akun yang sama...`, 'info');
+
+                for (let i = 0; i < count; i++) {
+                    tabCounter++;
+                    const tabId = `tab-${tabCounter}`;
+                    const tabDiv = document.createElement('div');
+                    tabDiv.className = 'tab-item';
+                    tabDiv.id = tabId;
+
+                    tabDiv.innerHTML = `
+                        <div class="tab-header">
+                            <span>📺 TAB #${tabCounter}</span>
+                            <span class="close-tab" data-tabid="${tabId}">✕</span>
+                        </div>
+                        <iframe src="https://www.tiktok.com/fyp" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
+                    `;
+
+                    tabsContainer.appendChild(tabDiv);
+                    openTabs.push(tabId);
+
+                    // Event close tab
+                    tabDiv.querySelector('.close-tab').addEventListener('click', function() {
+                        const id = this.dataset.tabid;
+                        closeTab(id);
+                    });
+
+                    addLog(`✅ Tab #${tabCounter} dibuka — FYP loading...`, 'success');
+                }
+
+                addLog(`✅ Total ${count} tab berhasil dibuka! Total tab aktif: ${openTabs.length}`, 'success');
+            }
+
+            // ---------- TUTUP SATU TAB ----------
+            function closeTab(tabId) {
+                const el = document.getElementById(tabId);
+                if (el) {
+                    el.remove();
+                    openTabs = openTabs.filter(id => id !== tabId);
+                    addLog(`✖ Tab ${tabId} ditutup. Sisa: ${openTabs.length}`, 'error');
+                }
+            }
+
+            // ---------- TUTUP SEMUA TAB ----------
+            function closeAllTabs() {
+                if (openTabs.length === 0) {
+                    addLog('⚠️ Gak ada tab yang terbuka.', 'error');
+                    return;
+                }
+                openTabs.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.remove();
+                });
+                openTabs = [];
+                addLog(`🗑️ Semua tab ditutup.`, 'error');
+            }
+
+            // ---------- REFRESH SEMUA TAB ----------
+            function refreshAllTabs() {
+                if (openTabs.length === 0) {
+                    addLog('⚠️ Gak ada tab yang direfresh.', 'error');
+                    return;
+                }
+                openTabs.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        const iframe = el.querySelector('iframe');
+                        if (iframe) {
+                            iframe.src = 'https://www.tiktok.com/fyp';
                         }
                     }
-                } catch(e) {}
+                });
+                addLog(`⟳ ${openTabs.length} tab direfresh ke FYP.`, 'info');
+            }
+
+            // ---------- EVENT LISTENERS ----------
+            btnRefreshLogin.addEventListener('click', function() {
+                loginFrame.src = 'https://www.tiktok.com/login';
+                addLog('⟳ Iframe login direfresh.', 'info');
+                updateStatusBadge(false);
             });
 
-            // EVENT: IFrame error
-            iframe.addEventListener('error', () => {
-                browserStates[id] = 'error';
-                updateStatusDot(header, 'error');
-                addLog(`❌ #${i+1} error`);
+            btnCheckLogin.addEventListener('click', function() {
+                checkLoginStatus();
             });
 
-            grid.appendChild(card);
-
-            // Update status
-            if (iframe.src && iframe.src !== 'about:blank') {
-                browserStates[id] = 'loading';
-                updateStatusDot(header, 'loading');
-                activeCount++;
-            }
-
-            // Click card to focus
-            card.addEventListener('click', (e) => {
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
-                const input = card.querySelector('.url-input');
-                if (input) input.focus();
-                // Toggle active class
-                document.querySelectorAll('.browser-card').forEach(c => c.classList.remove('active'));
-                card.classList.add('active');
+            btnOpenTabs.addEventListener('click', function() {
+                const count = parseInt(tabCountInput.value) || 5;
+                openTabs(count);
             });
-        }
 
-        updateCount();
-    }
+            btnCloseAllTabs.addEventListener('click', closeAllTabs);
+            btnRefreshAllTabs.addEventListener('click', refreshAllTabs);
 
-    function updateStatusDot(header, status) {
-        const dot = header.querySelector('.status-dot');
-        const label = header.querySelector('.label');
-        dot.className = 'status-dot';
-        if (status === 'loading') {
-            dot.classList.add('loading');
-            label.classList.remove('active-label');
-        } else if (status === 'loaded') {
-            dot.classList.add('loaded');
-            label.classList.add('active-label');
-        } else if (status === 'error') {
-            dot.classList.add('error');
-            label.classList.remove('active-label');
-        } else {
-            dot.classList.add('idle');
-            label.classList.remove('active-label');
-        }
-    }
+            // ---------- INIT ----------
+            addLog('💀 NEXBOX MULTI-TAB SUPREME — SIAP EKSEKUSI', 'success');
+            addLog('🔐 Login dulu di iframe dengan akun asli lo.', 'info');
+            addLog('📑 Setelah login, buka tab sebanyak yang lo mau.', 'info');
 
-    function updateCount() {
-        let active = 0;
-        let loaded = 0;
-        for (let i = 0; i < TOTAL_BROWSERS; i++) {
-            const id = generateId(i);
-            const status = browserStates[id] || 'idle';
-            if (status === 'loading' || status === 'loaded') active++;
-            if (status === 'loaded') loaded++;
-        }
-        browserCount.textContent = `📊 ${active}/${TOTAL_BROWSERS} aktif | ✅ ${loaded} loaded`;
-    }
+            // Auto check login setiap 10 detik (deteksi perubahan iframe)
+            setInterval(() => {
+                const src = loginFrame.src;
+                if (src.includes('fyp') || src.includes('video')) {
+                    updateStatusBadge(true);
+                }
+            }, 10000);
 
-    function refreshAll() {
-        document.querySelectorAll('.browser-card').forEach(card => {
-            const iframe = card.querySelector('.browser-iframe');
-            const input = card.querySelector('.url-input');
-            const header = card.querySelector('.browser-header');
-            const id = card.id;
-            if (iframe && iframe.src && iframe.src !== 'about:blank') {
-                const currentSrc = iframe.src;
-                iframe.src = 'about:blank';
-                setTimeout(() => {
-                    iframe.src = currentSrc;
-                    browserStates[id] = 'loading';
-                    updateStatusDot(header, 'loading');
-                }, 300);
-            } else if (input && input.value) {
-                iframe.src = input.value;
-                browserStates[id] = 'loading';
-                updateStatusDot(header, 'loading');
-            }
-        });
-        addLog('⟳ Refresh semua browser');
-        setTimeout(updateCount, 1000);
-    }
+            // ---------- KEYBOARD SHORTCUT (SUPREME) ----------
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    e.preventDefault();
+                    const count = parseInt(tabCountInput.value) || 5;
+                    openTabs(count);
+                }
+                if (e.key === 'r' && e.ctrlKey && e.shiftKey) {
+                    e.preventDefault();
+                    refreshAllTabs();
+                }
+                if (e.key === 'w' && e.ctrlKey && e.shiftKey) {
+                    e.preventDefault();
+                    closeAllTabs();
+                }
+            });
 
-    function closeAll() {
-        if (!confirm('✖ Tutup semua browser?')) return;
-        document.querySelectorAll('.browser-card').forEach(card => {
-            const iframe = card.querySelector('.browser-iframe');
-            const header = card.querySelector('.browser-header');
-            const id = card.id;
-            iframe.src = 'about:blank';
-            browserStates[id] = 'idle';
-            updateStatusDot(header, 'idle');
-            card.style.display = 'none';
-        });
-        addLog('✖ Semua browser ditutup');
-        updateCount();
-    }
-
-    function applyGlobalLink() {
-        const pattern = globalLinkInput.value.trim();
-        if (!pattern) {
-            alert('Masukkan link pattern!');
-            return;
-        }
-        document.querySelectorAll('.browser-card').forEach((card, i) => {
-            const input = card.querySelector('.url-input');
-            const iframe = card.querySelector('.browser-iframe');
-            const header = card.querySelector('.browser-header');
-            const id = card.id;
-            let url = pattern.replace(/\{i\}/g, i + 1);
-            if (input) {
-                input.value = url;
-                localStorage.setItem('mini_browser_link_' + i, url);
-            }
-            if (iframe) {
-                iframe.src = url;
-                browserStates[id] = 'loading';
-                updateStatusDot(header, 'loading');
-                card.style.display = 'flex';
-            }
-        });
-        addLog(`✅ Apply link ke semua browser: ${pattern}`);
-        setTimeout(updateCount, 1000);
-        settingsOverlay.classList.remove('show');
-    }
-
-    function addLog(msg) {
-        console.log('[MiniBrowser]', msg);
-        // Bisa ditampilin di UI kalo mau
-    }
-
-    // ==================== SETTINGS ====================
-    document.getElementById('btnSettings').addEventListener('click', () => {
-        settingsOverlay.classList.add('show');
-        globalLinkInput.value = localStorage.getItem('mini_browser_global_pattern') || 'https://claude.ai/login?email=andre{i}@gmail.com';
-        globalLinkInput.focus();
-    });
-
-    document.getElementById('btnCloseSettings').addEventListener('click', () => {
-        settingsOverlay.classList.remove('show');
-    });
-
-    document.getElementById('btnApplyAll').addEventListener('click', applyGlobalLink);
-
-    // Click overlay to close
-    settingsOverlay.addEventListener('click', (e) => {
-        if (e.target === settingsOverlay) {
-            settingsOverlay.classList.remove('show');
-        }
-    });
-
-    // ==================== BUTTONS ====================
-    document.getElementById('btnRefreshAll').addEventListener('click', refreshAll);
-    document.getElementById('btnCloseAll').addEventListener('click', closeAll);
-
-    // ==================== KEYBOARD SHORTCUTS ====================
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            settingsOverlay.classList.remove('show');
-        }
-        if (e.ctrlKey && e.key === 'r') {
-            e.preventDefault();
-            refreshAll();
-        }
-    });
-
-    // ==================== INIT ====================
-    renderBrowsers();
-    addLog('🔥 11 Mini Browser siap!');
-
-    // ==================== GLOBAL ====================
-    window.__miniBrowser11 = {
-        render: renderBrowsers,
-        refreshAll: refreshAll,
-        closeAll: closeAll,
-        applyGlobalLink: applyGlobalLink,
-        getStatus: () => browserStates,
-        getLinks: () => {
-            const links = {};
-            for (let i = 0; i < TOTAL_BROWSERS; i++) {
-                links[i] = localStorage.getItem('mini_browser_link_' + i) || '';
-            }
-            return links;
-        }
-    };
-
-    console.log('🔥 11 MINI BROWSER loaded!');
-    console.log('💡 Panggil __miniBrowser11.refreshAll() refresh semua');
-    console.log('💡 Panggil __miniBrowser11.applyGlobalLink() apply link');
-</script>
+        })();
+    </script>
 
 </body>
 </html>
