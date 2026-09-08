@@ -163,6 +163,61 @@ body{
 }
 .hidden{display:none !important;}
 
+/* ---------- master list ---------- */
+.master-entry{
+  margin:14px auto 0;
+  max-width:480px;
+  text-align:left;
+}
+.master-entry summary{
+  cursor:pointer;
+  font-size:13px;
+  color:var(--paper);
+  opacity:0.6;
+  text-align:center;
+  list-style:none;
+}
+.master-entry summary::-webkit-details-marker{display:none;}
+.master-entry[open] summary{margin-bottom:10px;}
+.master-box{
+  border:1px dashed var(--line);
+  border-radius:8px;
+  padding:12px;
+}
+.master-status{
+  font-size:12.5px;
+  color:var(--paper);
+  opacity:0.7;
+  margin:0 0 10px;
+  line-height:1.5;
+}
+.master-status strong{color:var(--stamp-amber);opacity:1;}
+.master-actions{display:flex;gap:8px;align-items:center;}
+.master-file-label{
+  flex:1;
+  text-align:center;
+  padding:9px 10px;
+  border-radius:7px;
+  border:1px solid var(--line);
+  background:transparent;
+  color:var(--paper);
+  font-size:12.5px;
+  cursor:pointer;
+}
+.master-file-label:hover{background:var(--bg-soft);}
+.master-clear-btn{
+  padding:9px 12px;
+  border-radius:7px;
+  border:1px solid var(--line);
+  background:transparent;
+  color:var(--stamp-red);
+  font-size:12.5px;
+  cursor:pointer;
+  font-family:var(--font-body);
+}
+.master-clear-btn:hover{background:var(--bg-soft);}
+.master-clear-btn.hidden{display:none !important;}
+
 /* ---------- draft card ---------- */
 .draft-section{margin-bottom:36px;}
 .draft-card{
@@ -400,6 +455,18 @@ body{
       <textarea id="manualInput" placeholder="Contoh: jual sepeda gunung Polygon warna merah, kondisi masih bagus, jarang dipakai, ban masih tebal"></textarea>
       <button id="manualBtn">Proses jadi listing</button>
     </details>
+
+    <details class="master-entry" id="masterEntry">
+      <summary>daftar nama barang (Excel) — biar penamaan akurat</summary>
+      <div class="master-box">
+        <p class="master-status" id="masterStatus">Belum ada daftar. Upload file Excel (.xlsx/.xls/.csv) berisi nama-nama barang kamu, nanti hasil listing dari suara akan dicocokkan ke nama persis dari daftar itu kalau ada yang mirip.</p>
+        <div class="master-actions">
+          <label class="master-file-label" for="masterFileInput" id="masterFileLabel">Upload file Excel</label>
+          <input type="file" id="masterFileInput" accept=".xlsx,.xls,.csv" class="hidden">
+          <button class="master-clear-btn hidden" id="masterClearBtn">Hapus daftar</button>
+        </div>
+      </div>
+    </details>
   </div>
 
   <div class="draft-section hidden" id="draftSection">
@@ -452,6 +519,7 @@ body{
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 const KATEGORI = ['Elektronik','Fashion','Rumah Tangga','Hobi & Mainan','Otomotif','Buku & Alat Tulis','Olahraga','Lainnya'];
 const KONDISI = ['Baru','Seperti Baru','Bekas - Baik','Bekas - Cukup Baik','Rusak Ringan'];
@@ -459,6 +527,8 @@ const KONDISI = ['Baru','Seperti Baru','Bekas - Baik','Bekas - Cukup Baik','Rusa
 let items = [];
 let editingId = null;
 let currentDraft = null;
+let masterList = [];
+let masterFileName = '';
 
 const micBtn = document.getElementById('micBtn');
 const statusEl = document.getElementById('status');
@@ -473,6 +543,9 @@ const emptyState = document.getElementById('emptyState');
 const itemCount = document.getElementById('itemCount');
 const exportBtn = document.getElementById('exportBtn');
 const toastEl = document.getElementById('toast');
+const masterFileInput = document.getElementById('masterFileInput');
+const masterStatus = document.getElementById('masterStatus');
+const masterClearBtn = document.getElementById('masterClearBtn');
 
 const fJudul = document.getElementById('fJudul');
 const fKategori = document.getElementById('fKategori');
@@ -524,6 +597,117 @@ async function saveItems(){
   }catch(e){
     showToast('Gagal menyimpan, coba lagi');
   }
+}
+
+/* ---------------- master list (nama barang dari Excel) ---------------- */
+async function loadMasterList(){
+  try{
+    const res = await window.storage.get('masterList', false);
+    if(res && res.value){
+      const parsed = JSON.parse(res.value);
+      masterList = Array.isArray(parsed.list) ? parsed.list : [];
+      masterFileName = parsed.fileName || '';
+    }
+  }catch(e){
+    masterList = [];
+    masterFileName = '';
+  }
+  renderMasterStatus();
+}
+
+async function saveMasterList(){
+  try{
+    await window.storage.set('masterList', JSON.stringify({ list: masterList, fileName: masterFileName }), false);
+  }catch(e){
+    showToast('Gagal menyimpan daftar');
+  }
+}
+
+function renderMasterStatus(){
+  if(masterList.length){
+    masterStatus.innerHTML = `<strong>${masterList.length} nama barang</strong> dimuat dari "${escapeHtml(masterFileName)}". Hasil dari suara akan dicocokkan ke nama persis dari daftar ini kalau mirip.`;
+    masterClearBtn.classList.remove('hidden');
+  }else{
+    masterStatus.textContent = 'Belum ada daftar. Upload file Excel (.xlsx/.xls/.csv) berisi nama-nama barang kamu, nanti hasil listing dari suara akan dicocokkan ke nama persis dari daftar itu kalau ada yang mirip.';
+    masterClearBtn.classList.add('hidden');
+  }
+}
+
+masterFileInput.addEventListener('change', async (e) => {
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  masterStatus.textContent = 'Membaca file...';
+  try{
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, { type: 'array' });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+
+    let names = [];
+    for(const row of rows){
+      for(const cell of row){
+        const val = String(cell || '').trim();
+        if(val) names.push(val);
+        break; // ambil hanya kolom pertama tiap baris
+      }
+    }
+    // buang kemungkinan baris header (kata umum seperti "nama", "nama barang", dll di baris pertama)
+    if(names.length && /^(nama( barang)?|item|produk|sku)$/i.test(names[0])){
+      names = names.slice(1);
+    }
+    // rapikan & buang duplikat
+    const seen = new Set();
+    names = names.filter(n => {
+      const key = n.toLowerCase();
+      if(seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    if(!names.length){
+      masterStatus.textContent = 'Tidak ada nama barang yang terbaca dari file ini. Pastikan kolom pertama berisi nama barang.';
+      e.target.value = '';
+      return;
+    }
+
+    masterList = names;
+    masterFileName = file.name;
+    await saveMasterList();
+    renderMasterStatus();
+    showToast(`${names.length} nama barang dimuat`);
+  }catch(err){
+    masterStatus.textContent = 'Gagal membaca file. Pastikan formatnya .xlsx, .xls, atau .csv.';
+  }finally{
+    e.target.value = '';
+  }
+});
+
+masterClearBtn.addEventListener('click', async () => {
+  masterList = [];
+  masterFileName = '';
+  await saveMasterList();
+  renderMasterStatus();
+  showToast('Daftar dihapus');
+});
+
+// pilih kandidat nama barang paling relevan dari masterList berdasarkan transkrip,
+// supaya tidak mengirim ribuan nama ke AI sekaligus
+function getRelevantMasterNames(text, limit){
+  if(!masterList.length) return [];
+  if(masterList.length <= 60) return masterList;
+
+  const tokens = text.toLowerCase().match(/[a-z0-9]{3,}/g) || [];
+  if(!tokens.length) return masterList.slice(0, limit);
+
+  const scored = masterList.map(name => {
+    const lower = name.toLowerCase();
+    let score = 0;
+    for(const t of tokens){ if(lower.includes(t)) score++; }
+    return { name, score };
+  }).filter(x => x.score > 0);
+
+  scored.sort((a, b) => b.score - a.score);
+  return scored.slice(0, limit).map(x => x.name);
 }
 
 /* ---------------- speech recognition ---------------- */
@@ -615,10 +799,15 @@ async function processTranscript(text){
   statusEl.textContent = 'Menyusun listing dari ucapanmu...';
   liveTranscriptEl.textContent = text;
 
+  const relevantNames = getRelevantMasterNames(text, 50);
+  const masterRefBlock = relevantNames.length
+    ? `\n\nPENTING - Referensi nama barang resmi:\nBerikut daftar nama barang baku milik penjual (diambil dari file Excel yang diupload). Jika salah satu di antaranya cocok atau sangat mirip dengan barang yang dideskripsikan pengguna, gunakan PERSIS nama tersebut apa adanya (ejaan, kapitalisasi, singkatan) sebagai nilai "judul" — jangan diparafrase. Jika tidak ada yang benar-benar cocok, buat judul baru seperti biasa dari deskripsi.\nDaftar referensi:\n${relevantNames.map(n => '- ' + n).join('\n')}`
+    : '';
+
   const systemPrompt = `Kamu mengubah deskripsi lisan tentang barang bekas/barang jual menjadi data listing terstruktur untuk marketplace Indonesia.
 Balas HANYA dengan satu objek JSON valid, tanpa teks lain, tanpa markdown code fence, tanpa penjelasan.
 Format persis:
-{"judul": "judul singkat menarik maksimal 8 kata", "kategori": "salah satu dari: ${KATEGORI.join(', ')}", "kondisi": "salah satu dari: ${KONDISI.join(', ')}", "harga_estimasi": angka_rupiah_tanpa_titik_atau_koma_boleh_0_jika_tidak_disebutkan, "deskripsi": "deskripsi listing 2-3 kalimat siap pakai, ditulis rapi dari transkrip", "tag_pencarian": ["maks 5 kata kunci"]}`;
+{"judul": "judul singkat menarik maksimal 8 kata", "kategori": "salah satu dari: ${KATEGORI.join(', ')}", "kondisi": "salah satu dari: ${KONDISI.join(', ')}", "harga_estimasi": angka_rupiah_tanpa_titik_atau_koma_boleh_0_jika_tidak_disebutkan, "deskripsi": "deskripsi listing 2-3 kalimat siap pakai, ditulis rapi dari transkrip", "tag_pencarian": ["maks 5 kata kunci"]}${masterRefBlock}`;
 
   try{
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -831,6 +1020,7 @@ exportBtn.addEventListener('click', async () => {
 });
 
 loadItems();
+loadMasterList();
 </script>
 </body>
 </html>
