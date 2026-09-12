@@ -16,7 +16,7 @@
     text-align: center; padding: 40px;
     background: #1a1a1a; border-radius: 16px;
     border: 1px solid #2a2a2a;
-    min-width: 320px; max-width: 440px;
+    min-width: 320px; max-width: 440px; width: 100%;
   }
   h1 { font-size: 20px; margin-bottom: 8px; color: #fff; }
   .subtitle { font-size: 13px; color: #666; margin-bottom: 24px; }
@@ -71,24 +71,16 @@
     <div class="log" id="log">> Menunggu server...</div>
   </div>
 
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+<script>
+// ============================================================
+// GANTI INI KE URL SERVER BOT LO
+// ============================================================
+const BOT_WS_URL = '9router-production-46d3.up.railway.app';
+// ============================================================
 
-// ==================== KONFIGURASI ====================
-const SUPABASE_URL = 'https://zwqwomfrgtqyaiiugryg.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind3cXdvbWZyZ3RxeWFpaXVncnlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyMDUzODAsImV4cCI6MjEwNDc4MTM4MH0.Zs2egViPPVec5OeAUgCI0-nUG1ABCDi2fyhVTvHNmao';
-
-// Ganti ke URL bot server lo (Railway/VPS)
-const BOT_WS_URL = 'wss://your-bot-server.railway.app';
-
-// ==================== SUPABASE ====================
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// ==================== STATE ====================
 let ws = null;
 let reconnectTimer = null;
 
-// ==================== DOM ====================
 const statusEl = document.getElementById('status');
 const statusText = document.getElementById('status-text');
 const qrContainer = document.getElementById('qr-container');
@@ -96,72 +88,33 @@ const logEl = document.getElementById('log');
 
 function log(msg) {
   logEl.textContent = '> ' + msg;
-  console.log(msg);
 }
 
-// ==================== CEK SUPABASE ====================
-async function testSupabase() {
-  try {
-    const { data, error } = await supabase
-      .from('sessions')
-      .select('count')
-      .limit(1);
-    
-    if (error) {
-      log('⚠️ Supabase: ' + error.message);
-      return false;
-    }
-    log('✅ Supabase konek');
-    return true;
-  } catch (e) {
-    log('❌ Supabase error: ' + e.message);
-    return false;
-  }
-}
-
-// ==================== WEBSOCKET KE BOT SERVER ====================
 function connectWS() {
-  log('Nyambung ke bot server...');
+  log('Nyambung ke server...');
   ws = new WebSocket(BOT_WS_URL);
 
   ws.onopen = () => {
-    log('✅ WebSocket konek');
-    statusEl.className = 'status disconnected';
+    log('✅ Server konek');
     statusText.textContent = '⏳ Nunggu QR dari server';
   };
 
-  ws.onmessage = async (event) => {
+  ws.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data);
 
       if (data.type === 'qr') {
         log('📱 QR Code diterima');
-        qrContainer.innerHTML = `<img src="${data.qr}" alt="QR">`;
+        qrContainer.innerHTML = '<img src="' + data.qr + '" alt="QR">';
         statusEl.className = 'status disconnected';
         statusText.textContent = '⏳ Scan QR di WhatsApp';
-
-        // Simpan QR ke Supabase (opsional)
-        await supabase.from('sessions').upsert({
-          id: 'current',
-          qr: data.qr,
-          status: 'waiting',
-          updated_at: new Date().toISOString()
-        });
       }
 
       if (data.type === 'connected') {
         log('✅ WhatsApp terhubung!');
         statusEl.className = 'status connected';
         statusText.textContent = '✅ Perangkat tertaut';
-        qrContainer.innerHTML =
-          '<div class="placeholder" style="border-color:#4ade80;color:#4ade80;">✅ Terhubung</div>';
-
-        await supabase.from('sessions').upsert({
-          id: 'current',
-          qr: null,
-          status: 'connected',
-          updated_at: new Date().toISOString()
-        });
+        qrContainer.innerHTML = '<div class="placeholder" style="border-color:#4ade80;color:#4ade80;">✅ Terhubung</div>';
       }
 
       if (data.type === 'disconnected') {
@@ -174,26 +127,21 @@ function connectWS() {
         log(data.message);
       }
     } catch (e) {
-      console.error('Parse error:', e);
+      console.error(e);
     }
   };
 
-  ws.onerror = () => log('❌ WebSocket error');
-
+  ws.onerror = () => log('❌ Server error');
   ws.onclose = () => {
-    log('🔌 WebSocket tertutup, reconnect 3 detik...');
+    log('🔌 Terputus, reconnect...');
     statusEl.className = 'status disconnected';
-    statusText.textContent = '🔌 Terputus dari server';
+    statusText.textContent = '🔌 Terputus';
     clearTimeout(reconnectTimer);
     reconnectTimer = setTimeout(connectWS, 3000);
   };
 }
 
-// ==================== START ====================
-(async () => {
-  await testSupabase();
-  connectWS();
-})();
+connectWS();
 </script>
 </body>
 </html>
