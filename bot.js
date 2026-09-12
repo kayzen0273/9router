@@ -23,8 +23,7 @@ const server = app.listen(PORT, () => {
 const wss = new WebSocketServer({ server });
 
 wss.on("connection", (ws) => {
-  console.log("Client WebSocket konek");
-  // Kirim QR kalau udah ada
+  console.log("🔌 Client WebSocket konek");
   if (qrCodeData) {
     qrcode.toDataURL(qrCodeData).then(dataUrl => {
       ws.send(JSON.stringify({ type: "qr", qr: dataUrl }));
@@ -51,9 +50,31 @@ app.get("/", (req, res) => {
   res.send("WA RVO Bot Server — Jalan!");
 });
 
+// ==================== HELPER: DETEKSI VIEW ONCE ====================
+function extractViewOnce(content) {
+  // Cek semua kemungkinan format view once
+  let vo = content.viewOnceMessageV2 || 
+           content.viewOnceMessageV2Extension || 
+           content.viewOnceMessage;
+  
+  // Cek di dalam ephemeralMessage
+  if (!vo && content.ephemeralMessage?.message) {
+    vo = content.ephemeralMessage.message.viewOnceMessageV2 || 
+         content.ephemeralMessage.message.viewOnceMessageV2Extension || 
+         content.ephemeralMessage.message.viewOnceMessage;
+  }
+  
+  // Cek di dalam viewOnceMessageV2.message (nested)
+  if (vo && !vo.message && vo.viewOnceMessageV2) {
+    vo = vo.viewOnceMessageV2;
+  }
+  
+  return vo;
+}
+
 // ==================== WHATSAPP BOT ====================
 async function startBot() {
-  console.log("Mulai konek ke WhatsApp...");
+  console.log("🚀 Mulai konek ke WhatsApp...");
   
   const { state, saveCreds } = await useMultiFileAuthState("auth_info");
   const sock = makeWASocket({
@@ -97,33 +118,64 @@ async function startBot() {
       const jid = msg.key.remoteJid;
       const content = msg.message;
       if (!content) continue;
-      const text = content.conversation || content.extendedTextMessage?.text || "";
+      
+      // Get text
+      const text = content.conversation || 
+                   content.extendedTextMessage?.text || 
+                   content.ephemeralMessage?.message?.conversation ||
+                   content.ephemeralMessage?.message?.extendedTextMessage?.text ||
+                   "";
 
-      const vo = content.viewOnceMessageV2 || content.viewOnceMessage;
+      // 🔍 DEBUG: Log semua pesan masuk
+      console.log("📩 PESAN MASUK dari " + jid);
+      console.log("📋 Format:", Object.keys(content).join(", "));
+      
+      // 🔥 DETEKSI VIEW ONCE (pake helper)
+      const vo = extractViewOnce(content);
+      
       if (vo) {
+        console.log("🎯 VIEW ONCE TERDETEKSI!");
         const inner = vo.message;
-        const type = inner?.imageMessage ? "image" : inner?.videoMessage ? "video" : null;
-        if (type) {
-          viewOnceCache.set(jid, { type, content: inner });
-          console.log("📸 View once " + type + " dari " + jid);
+        console.log("📦 Inner keys:", inner ? Object.keys(inner).join(", ") : "kosong");
+        
+        if (inner) {
+          const type = inner.imageMessage ? "image" : 
+                       inner.videoMessage ? "video" : 
+                       inner.audioMessage ? "audio" : null;
+          
+          if (type) {
+            viewOnceCache.set(jid, { type, content: inner, ts: Date.now() });
+            console.log("✅ View once " + type + " DISIMPAN dari " + jid);
+            broadcast({ type: "log", message: "📸 View once " + type + " tertangkap" });
+          } else {
+            console.log("⚠️ Tipe media gak dikenal:", Object.keys(inner).join(", "));
+          }
         }
       }
 
+      // 🔥 COMMAND .rvo
       if (text.trim() === ".rvo") {
+        console.log("🔍 Command .rvo dari " + jid);
         const cached = viewOnceCache.get(jid);
+        
         if (!cached) {
+          console.log("❌ Gak ada cache untuk " + jid);
           await sock.sendMessage(jid, { text: "❌ Gak ada view once" });
           continue;
         }
+        
         try {
+          console.log("📤 Ngirim ulang " + cached.type + " ke " + jid);
           const buf = await sock.downloadMediaMessage({ message: cached.content });
           await sock.sendMessage(jid, {
             [cached.type]: buf,
             caption: "🔓 .rvo — Diambil dari View Once",
           });
           viewOnceCache.delete(jid);
+          console.log("✅ Berhasil kirim ulang");
         } catch (e) {
-          await sock.sendMessage(jid, { text: "❌ Gagal ambil media" });
+          console.log("❌ Gagal ambil media:", e.message);
+          await sock.sendMessage(jid, { text: "❌ Gagal ambil media: " + e.message });
         }
       }
     }
