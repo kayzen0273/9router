@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>🔥 WA Bot Control - QR & Pairing</title>
+    <title>🔥 WA Bot - QR, Pairing & View Once</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -13,13 +13,10 @@
             min-height: 100vh;
             padding: 15px;
         }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
+        .container { max-width: 900px; margin: 0 auto; }
         h1 {
             text-align: center;
-            font-size: 24px;
+            font-size: 22px;
             letter-spacing: 2px;
             border-bottom: 2px solid #00ff41;
             padding-bottom: 12px;
@@ -49,12 +46,7 @@
         .badge.loading { background: #ffcc00; color: #000; animation: blink 0.8s infinite; }
         @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
 
-        .tabs {
-            display: flex;
-            gap: 4px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
+        .tabs { display: flex; gap: 4px; margin-bottom: 15px; flex-wrap: wrap; }
         .tab {
             flex: 1;
             background: #111;
@@ -65,18 +57,12 @@
             cursor: pointer;
             text-align: center;
             font-weight: bold;
-            font-size: 13px;
+            font-size: 12px;
             transition: 0.2s;
-            min-width: 120px;
+            min-width: 100px;
         }
-        .tab.active {
-            background: #1a1a1a;
-            border-color: #00ff41;
-            color: #00ff41;
-        }
-        .tab:hover {
-            border-color: #00ff41;
-        }
+        .tab.active { background: #1a1a1a; border-color: #00ff41; color: #00ff41; }
+        .tab:hover { border-color: #00ff41; }
 
         .panel {
             display: none;
@@ -87,11 +73,7 @@
         }
         .panel.active { display: block; }
 
-        /* QR Panel */
-        .qr-container {
-            text-align: center;
-            padding: 20px;
-        }
+        .qr-container { text-align: center; padding: 20px; }
         .qr-container img {
             max-width: 300px;
             width: 100%;
@@ -100,18 +82,9 @@
             padding: 10px;
             background: #fff;
         }
-        .qr-info {
-            margin-top: 15px;
-            font-size: 12px;
-            color: #666;
-            line-height: 1.8;
-        }
+        .qr-info { margin-top: 15px; font-size: 12px; color: #666; line-height: 1.8; }
 
-        /* Pairing Panel */
-        .pairing-container {
-            text-align: center;
-            padding: 20px;
-        }
+        .pairing-container { text-align: center; padding: 20px; }
         .pairing-code {
             font-size: 42px;
             font-weight: bold;
@@ -125,12 +98,7 @@
             font-family: 'Courier New', monospace;
             word-break: break-all;
         }
-        .pairing-input {
-            display: flex;
-            gap: 8px;
-            margin: 15px 0;
-            flex-wrap: wrap;
-        }
+        .pairing-input { display: flex; gap: 8px; margin: 15px 0; flex-wrap: wrap; }
         .pairing-input input {
             flex: 1;
             padding: 12px;
@@ -142,10 +110,8 @@
             font-family: inherit;
             min-width: 200px;
         }
-        .pairing-input input:focus {
-            border-color: #00ff41;
-            outline: none;
-        }
+        .pairing-input input:focus { border-color: #00ff41; outline: none; }
+
         .btn {
             background: transparent;
             border: 1px solid #00ff41;
@@ -163,15 +129,8 @@
         .btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .btn.warning { border-color: #ffcc00; color: #ffcc00; }
         .btn.warning:hover { background: #ffcc00; color: #000; }
-        .btn.danger { border-color: #ff4444; color: #ff4444; }
-        .btn.danger:hover { background: #ff4444; color: #000; }
 
-        /* Send Panel */
-        .send-form {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+        .send-form { display: flex; flex-direction: column; gap: 10px; }
         .send-form input, .send-form textarea {
             padding: 12px;
             background: #0a0a0a;
@@ -181,32 +140,34 @@
             font-family: inherit;
             font-size: 14px;
         }
-        .send-form input:focus, .send-form textarea:focus {
-            border-color: #00ff41;
-            outline: none;
-        }
-        .send-form textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
+        .send-form input:focus, .send-form textarea:focus { border-color: #00ff41; outline: none; }
+        .send-form textarea { min-height: 100px; resize: vertical; }
 
-        /* Logs Panel */
-        .logs {
+        .viewonce-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .viewonce-item {
             background: #0a0a0a;
             border: 1px solid #1a1a1a;
-            border-radius: 6px;
-            padding: 12px;
-            max-height: 400px;
-            overflow-y: auto;
-            font-size: 12px;
-            color: #888;
-            font-family: 'Courier New', monospace;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: 0.2s;
         }
-        .logs div {
-            padding: 4px 0;
-            border-bottom: 1px solid #0d0d0d;
+        .viewonce-item:hover { border-color: #00ff41; }
+        .viewonce-item img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
         }
-        .logs div:last-child { border-bottom: none; }
+        .viewonce-item .info {
+            padding: 6px 8px;
+            font-size: 10px;
+            color: #666;
+        }
 
         .info-box {
             background: #1a1a1a;
@@ -220,9 +181,9 @@
         }
 
         @media (max-width: 600px) {
-            h1 { font-size: 18px; }
+            h1 { font-size: 16px; }
             .pairing-code { font-size: 28px; letter-spacing: 4px; padding: 20px 10px; }
-            .tab { font-size: 11px; padding: 10px 6px; }
+            .tab { font-size: 10px; padding: 10px 4px; min-width: 80px; }
         }
     </style>
 </head>
@@ -231,7 +192,7 @@
 <div class="container">
     <h1>🔥 WA BOT CONTROL</h1>
 
-    <!-- Status Bar -->
+    <!-- Status -->
     <div class="status-bar">
         <span>📡 Status: <span class="badge loading" id="statusBadge">CHECKING...</span></span>
         <span>📱 <span id="phoneInfo">-</span></span>
@@ -240,85 +201,82 @@
 
     <!-- Tabs -->
     <div class="tabs">
-        <div class="tab active" data-tab="qr">📷 QR Code</div>
-        <div class="tab" data-tab="pairing">🔢 Kode Pairing</div>
-        <div class="tab" data-tab="send">💬 Kirim Pesan</div>
-        <div class="tab" data-tab="logs">📋 Logs</div>
+        <div class="tab active" data-tab="qr">📷 QR</div>
+        <div class="tab" data-tab="pairing">🔢 Pairing</div>
+        <div class="tab" data-tab="send">💬 Kirim</div>
+        <div class="tab" data-tab="viewonce">📸 View Once</div>
     </div>
 
-    <!-- QR PANEL -->
+    <!-- QR Panel -->
     <div class="panel active" id="panel-qr">
         <div class="qr-container">
             <div id="qrLoading" style="padding:20px;color:#666;">⏳ Loading QR...</div>
             <img id="qrImage" style="display:none;" />
             <div class="qr-info">
                 <p>📱 <b>Cara Scan:</b></p>
-                <p>1. Buka WhatsApp di HP lo</p>
+                <p>1. Buka WhatsApp di HP</p>
                 <p>2. Settings → Linked Devices → Link a Device</p>
                 <p>3. Scan QR di atas</p>
-                <p style="margin-top:10px;color:#ffcc00;">⚠️ QR refresh otomatis tiap 5 detik</p>
+                <p style="color:#ffcc00;">⚠️ QR refresh tiap 5 detik</p>
             </div>
         </div>
     </div>
 
-    <!-- PAIRING PANEL -->
+    <!-- Pairing Panel -->
     <div class="panel" id="panel-pairing">
         <div class="pairing-container">
-            <h3 style="margin-bottom:15px;">🔢 Kode Pairing WhatsApp</h3>
-            
+            <h3>🔢 Kode Pairing</h3>
             <div class="info-box">
-                💡 <b>Kode Pairing</b> alternatif kalo QR gak bisa di-scan.<br/>
-                Masukin nomor HP lo, nanti dapet kode 8 digit.<br/>
-                Masukin kode itu di WhatsApp HP lo.
+                💡 Kode Pairing alternatif kalo QR gak bisa di-scan.<br/>
+                Masukin nomor HP lo, dapet kode 8 digit.
             </div>
-
             <div class="pairing-input">
                 <input type="tel" id="phoneInput" placeholder="Contoh: 6281234567890" />
                 <button class="btn warning" id="btnRequestPairing">🔢 Minta Kode</button>
             </div>
-
             <div id="pairingResult" style="display:none;">
-                <p style="color:#666;margin-top:10px;">Kode Pairing Lo:</p>
+                <p style="color:#666;margin-top:10px;">Kode Pairing:</p>
                 <div class="pairing-code" id="pairingCode">-</div>
                 <div class="info-box">
                     📱 <b>Cara pakai:</b><br/>
-                    1. Buka WhatsApp → Settings → Linked Devices<br/>
+                    1. WhatsApp → Settings → Linked Devices<br/>
                     2. Tap "Link with phone number instead"<br/>
-                    3. Masukin kode di atas<br/>
-                    4. Tunggu sampai connected
+                    3. Masukin kode di atas
                 </div>
             </div>
-
             <div id="pairingLoading" style="display:none;margin-top:15px;color:#ffcc00;">
-                ⏳ Generating pairing code...
+                ⏳ Generating...
             </div>
         </div>
     </div>
 
-    <!-- SEND PANEL -->
+    <!-- Send Panel -->
     <div class="panel" id="panel-send">
         <div class="send-form">
             <input type="text" id="sendTarget" placeholder="Target (contoh: 6281234567890)" />
-            <textarea id="sendMessage" placeholder="Pesan yang mau dikirim..."></textarea>
-            <button class="btn" id="btnSend">🚀 Kirim Pesan</button>
+            <textarea id="sendMessage" placeholder="Pesan..."></textarea>
+            <button class="btn" id="btnSend">🚀 Kirim</button>
         </div>
     </div>
 
-    <!-- LOGS PANEL -->
-    <div class="panel" id="panel-logs">
-        <div class="logs" id="logsContainer">-</div>
-        <button class="btn danger" style="margin-top:10px;" id="btnLogout">🚪 Logout</button>
+    <!-- View Once Panel -->
+    <div class="panel" id="panel-viewonce">
+        <h3 style="margin-bottom:10px;">📸 View Once Cache</h3>
+        <div class="info-box">
+            💡 Semua View Once yang masuk otomatis tersimpan di sini.<br/>
+            Klik item buat lihat full size.
+        </div>
+        <button class="btn" id="btnRefreshViewOnce" style="margin-bottom:10px;">🔄 Refresh</button>
+        <div class="viewonce-grid" id="viewonceGrid">
+            <p style="color:#666;grid-column:1/-1;text-align:center;">Belum ada View Once</p>
+        </div>
     </div>
 </div>
 
 <script>
-    // ==================== STATE ====================
     let currentTab = 'qr';
-    let statusCheckInterval = null;
-    let qrCheckInterval = null;
-    let logsInterval = null;
 
-    // ==================== TAB SWITCHING ====================
+    // Tab switching
     document.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', () => {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -326,22 +284,19 @@
             tab.classList.add('active');
             currentTab = tab.dataset.tab;
             document.getElementById('panel-' + currentTab).classList.add('active');
-            
-            // Load data tab
             if (currentTab === 'qr') checkQR();
             if (currentTab === 'pairing') checkPairing();
-            if (currentTab === 'logs') loadLogs();
+            if (currentTab === 'viewonce') loadViewOnce();
         });
     });
 
-    // ==================== STATUS ====================
+    // Status
     async function checkStatus() {
         try {
             const res = await fetch('/api/status');
             const data = await res.json();
             const badge = document.getElementById('statusBadge');
             const phoneInfo = document.getElementById('phoneInfo');
-
             if (data.connected) {
                 badge.textContent = '✅ CONNECTED';
                 badge.className = 'badge online';
@@ -352,35 +307,30 @@
                 phoneInfo.textContent = '-';
             }
         } catch (e) {
-            const badge = document.getElementById('statusBadge');
-            badge.textContent = '⚠️ ERROR';
-            badge.className = 'badge offline';
+            document.getElementById('statusBadge').textContent = '⚠️ ERROR';
         }
     }
 
-    // ==================== QR ====================
+    // QR
     async function checkQR() {
         try {
             const res = await fetch('/api/qr');
             const data = await res.json();
             const img = document.getElementById('qrImage');
             const loading = document.getElementById('qrLoading');
-
             if (data.qr) {
                 img.src = data.qr;
                 img.style.display = 'block';
                 loading.style.display = 'none';
             } else {
                 img.style.display = 'none';
-                loading.textContent = '✅ Bot sudah connected! Gak butuh QR.';
+                loading.textContent = '✅ Bot sudah connected!';
                 loading.style.display = 'block';
             }
-        } catch (e) {
-            console.error('QR error:', e);
-        }
+        } catch (e) {}
     }
 
-    // ==================== PAIRING ====================
+    // Pairing
     async function checkPairing() {
         try {
             const res = await fetch('/api/pairing');
@@ -412,13 +362,12 @@
                 body: JSON.stringify({ phone })
             });
             const data = await res.json();
-
             if (data.code) {
                 document.getElementById('pairingCode').textContent = data.code;
                 result.style.display = 'block';
                 loading.style.display = 'none';
             } else {
-                alert('❌ ' + (data.error || 'Gagal generate kode'));
+                alert('❌ ' + (data.error || 'Gagal'));
                 loading.style.display = 'none';
             }
         } catch (e) {
@@ -428,7 +377,7 @@
         btn.disabled = false;
     }
 
-    // ==================== SEND ====================
+    // Send
     async function sendMessage() {
         const target = document.getElementById('sendTarget').value.trim();
         const message = document.getElementById('sendMessage').value.trim();
@@ -442,7 +391,7 @@
             });
             const data = await res.json();
             if (data.status === 'ok') {
-                alert('✅ Pesan terkirim!');
+                alert('✅ Terkirim!');
                 document.getElementById('sendMessage').value = '';
             } else {
                 alert('❌ ' + (data.error || 'Gagal'));
@@ -452,48 +401,46 @@
         }
     }
 
-    // ==================== LOGS ====================
-    async function loadLogs() {
+    // View Once
+    async function loadViewOnce() {
         try {
-            const res = await fetch('/api/logs');
+            const res = await fetch('/api/viewonce');
             const data = await res.json();
-            const container = document.getElementById('logsContainer');
-            container.innerHTML = data.logs.map(l => `<div>${l}</div>`).join('') || '<div>-</div>';
-            container.scrollTop = container.scrollHeight;
+            const grid = document.getElementById('viewonceGrid');
+            if (data.messages && data.messages.length > 0) {
+                grid.innerHTML = data.messages.map(m => `
+                    <div class="viewonce-item" onclick="window.open('${m.media_url}', '_blank')">
+                        ${m.media_type === 'image' 
+                            ? `<img src="${m.media_url}" />` 
+                            : `<div style="height:120px;display:flex;align-items:center;justify-content:center;color:#666;">🎥 Video</div>`}
+                        <div class="info">
+                            ${new Date(m.timestamp).toLocaleString()}<br/>
+                            ${m.sender.split('@')[0]}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                grid.innerHTML = '<p style="color:#666;grid-column:1/-1;text-align:center;">Belum ada View Once</p>';
+            }
         } catch (e) {}
     }
 
-    async function logout() {
-        if (!confirm('🚪 Logout dari WhatsApp?')) return;
-        try {
-            await fetch('/api/logout', { method: 'POST' });
-            alert('✅ Logout berhasil');
-            location.reload();
-        } catch (e) {
-            alert('Error: ' + e.message);
-        }
-    }
-
-    // ==================== CLOCK ====================
+    // Clock
     function updateClock() {
         document.getElementById('clock').textContent = new Date().toLocaleTimeString();
     }
 
-    // ==================== EVENT ====================
+    // Events
     document.getElementById('btnRequestPairing').addEventListener('click', requestPairing);
     document.getElementById('btnSend').addEventListener('click', sendMessage);
-    document.getElementById('btnLogout').addEventListener('click', logout);
+    document.getElementById('btnRefreshViewOnce').addEventListener('click', loadViewOnce);
 
-    // ==================== INIT ====================
+    // Init
     checkStatus();
     checkQR();
     updateClock();
-
-    // Interval
-    statusCheckInterval = setInterval(checkStatus, 5000);
-    qrCheckInterval = setInterval(() => {
-        if (currentTab === 'qr') checkQR();
-    }, 5000);
+    setInterval(checkStatus, 5000);
+    setInterval(() => { if (currentTab === 'qr') checkQR(); }, 5000);
     setInterval(updateClock, 1000);
 
     console.log('🔥 WA Bot Control loaded!');
