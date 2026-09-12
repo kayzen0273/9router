@@ -1,450 +1,212 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>🔥 WA Bot - QR, Pairing & View Once</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Courier New', monospace;
-            background: #0a0a0a;
-            color: #00ff41;
-            min-height: 100vh;
-            padding: 15px;
-        }
-        .container { max-width: 900px; margin: 0 auto; }
-        h1 {
-            text-align: center;
-            font-size: 22px;
-            letter-spacing: 2px;
-            border-bottom: 2px solid #00ff41;
-            padding-bottom: 12px;
-            margin-bottom: 15px;
-        }
-        .status-bar {
-            background: #111;
-            border: 1px solid #1a1a1a;
-            border-radius: 8px;
-            padding: 10px 15px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-            font-size: 12px;
-        }
-        .badge {
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-        .badge.online { background: #00ff41; color: #000; }
-        .badge.offline { background: #ff4444; color: #fff; }
-        .badge.loading { background: #ffcc00; color: #000; animation: blink 0.8s infinite; }
-        @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
-
-        .tabs { display: flex; gap: 4px; margin-bottom: 15px; flex-wrap: wrap; }
-        .tab {
-            flex: 1;
-            background: #111;
-            border: 1px solid #1a1a1a;
-            color: #666;
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: center;
-            font-weight: bold;
-            font-size: 12px;
-            transition: 0.2s;
-            min-width: 100px;
-        }
-        .tab.active { background: #1a1a1a; border-color: #00ff41; color: #00ff41; }
-        .tab:hover { border-color: #00ff41; }
-
-        .panel {
-            display: none;
-            background: #111;
-            border: 1px solid #1a1a1a;
-            border-radius: 12px;
-            padding: 20px;
-        }
-        .panel.active { display: block; }
-
-        .qr-container { text-align: center; padding: 20px; }
-        .qr-container img {
-            max-width: 300px;
-            width: 100%;
-            border: 2px solid #00ff41;
-            border-radius: 12px;
-            padding: 10px;
-            background: #fff;
-        }
-        .qr-info { margin-top: 15px; font-size: 12px; color: #666; line-height: 1.8; }
-
-        .pairing-container { text-align: center; padding: 20px; }
-        .pairing-code {
-            font-size: 42px;
-            font-weight: bold;
-            letter-spacing: 8px;
-            color: #ffcc00;
-            background: #0a0a0a;
-            border: 2px dashed #ffcc00;
-            border-radius: 12px;
-            padding: 25px 15px;
-            margin: 20px 0;
-            font-family: 'Courier New', monospace;
-            word-break: break-all;
-        }
-        .pairing-input { display: flex; gap: 8px; margin: 15px 0; flex-wrap: wrap; }
-        .pairing-input input {
-            flex: 1;
-            padding: 12px;
-            background: #0a0a0a;
-            border: 1px solid #333;
-            border-radius: 6px;
-            color: #00ff41;
-            font-size: 14px;
-            font-family: inherit;
-            min-width: 200px;
-        }
-        .pairing-input input:focus { border-color: #00ff41; outline: none; }
-
-        .btn {
-            background: transparent;
-            border: 1px solid #00ff41;
-            color: #00ff41;
-            padding: 12px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 13px;
-            font-family: inherit;
-            transition: 0.2s;
-            white-space: nowrap;
-        }
-        .btn:hover { background: #00ff41; color: #000; }
-        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        .btn.warning { border-color: #ffcc00; color: #ffcc00; }
-        .btn.warning:hover { background: #ffcc00; color: #000; }
-
-        .send-form { display: flex; flex-direction: column; gap: 10px; }
-        .send-form input, .send-form textarea {
-            padding: 12px;
-            background: #0a0a0a;
-            border: 1px solid #333;
-            border-radius: 6px;
-            color: #00ff41;
-            font-family: inherit;
-            font-size: 14px;
-        }
-        .send-form input:focus, .send-form textarea:focus { border-color: #00ff41; outline: none; }
-        .send-form textarea { min-height: 100px; resize: vertical; }
-
-        .viewonce-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 10px;
-            margin-top: 15px;
-        }
-        .viewonce-item {
-            background: #0a0a0a;
-            border: 1px solid #1a1a1a;
-            border-radius: 8px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .viewonce-item:hover { border-color: #00ff41; }
-        .viewonce-item img {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-        }
-        .viewonce-item .info {
-            padding: 6px 8px;
-            font-size: 10px;
-            color: #666;
-        }
-
-        .info-box {
-            background: #1a1a1a;
-            border-left: 3px solid #ffcc00;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            color: #aaa;
-            margin: 15px 0;
-            line-height: 1.6;
-        }
-
-        @media (max-width: 600px) {
-            h1 { font-size: 16px; }
-            .pairing-code { font-size: 28px; letter-spacing: 4px; padding: 20px 10px; }
-            .tab { font-size: 10px; padding: 10px 4px; min-width: 80px; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WA RVO Bot</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #0a0a0a; color: #e0e0e0;
+    display: flex; justify-content: center; align-items: center;
+    min-height: 100vh; padding: 20px;
+  }
+  .container {
+    text-align: center; padding: 40px;
+    background: #1a1a1a; border-radius: 16px;
+    border: 1px solid #2a2a2a;
+    min-width: 320px; max-width: 440px; width: 100%;
+  }
+  h1 { font-size: 20px; margin-bottom: 8px; color: #fff; }
+  .subtitle { font-size: 13px; color: #666; margin-bottom: 24px; }
+  .status {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 20px;
+    font-size: 13px; margin-bottom: 20px;
+  }
+  .status.connected { background: #0a2e1a; color: #4ade80; }
+  .status.disconnected { background: #2e0a0a; color: #f87171; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; animation: pulse 1.5s infinite; }
+  .connected .dot { background: #4ade80; }
+  .disconnected .dot { background: #f87171; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  #qr-container { margin: 20px 0; }
+  #qr-container img {
+    width: 240px; height: 240px;
+    border-radius: 12px; background: #fff; padding: 12px;
+  }
+  .placeholder {
+    width: 240px; height: 240px; margin: 0 auto;
+    border-radius: 12px; background: #0d0d0d;
+    border: 2px dashed #333;
+    display: flex; align-items: center; justify-content: center;
+    color: #555; font-size: 14px;
+  }
+  .pair-box {
+    margin-top: 20px; padding: 16px;
+    background: #0d0d0d; border-radius: 10px;
+    border: 1px solid #2a2a2a;
+  }
+  .pair-box h3 { font-size: 13px; color: #888; margin-bottom: 12px; font-weight: 500; }
+  .pair-input {
+    width: 100%; padding: 10px 12px;
+    background: #1a1a1a; border: 1px solid #333;
+    border-radius: 8px; color: #fff; font-size: 14px;
+    margin-bottom: 10px; outline: none;
+  }
+  .pair-input:focus { border-color: #c084fc; }
+  .pair-btn {
+    width: 100%; padding: 10px;
+    background: #c084fc; color: #0a0a0a;
+    border: none; border-radius: 8px;
+    font-weight: 600; font-size: 14px;
+    cursor: pointer;
+  }
+  .pair-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .pair-code {
+    margin-top: 12px; padding: 12px;
+    background: #0a2e1a; color: #4ade80;
+    border-radius: 8px; font-size: 18px;
+    font-weight: 700; letter-spacing: 2px;
+    font-family: monospace;
+  }
+  .hint { font-size: 12px; color: #555; margin-top: 16px; line-height: 1.6; }
+  .hint code { background: #252525; padding: 2px 6px; border-radius: 4px; color: #c084fc; }
+  .log {
+    margin-top: 16px; padding: 12px; background: #0d0d0d;
+    border-radius: 8px; font-size: 11px; color: #666;
+    text-align: left; max-height: 120px; overflow-y: auto;
+    font-family: monospace;
+  }
+</style>
 </head>
 <body>
-
-<div class="container">
-    <h1>🔥 WA BOT CONTROL</h1>
-
-    <!-- Status -->
-    <div class="status-bar">
-        <span>📡 Status: <span class="badge loading" id="statusBadge">CHECKING...</span></span>
-        <span>📱 <span id="phoneInfo">-</span></span>
-        <span>⏱ <span id="clock">-</span></span>
+  <div class="container">
+    <h1>🤖 WA RVO Bot</h1>
+    <p class="subtitle">Scan QR atau pake kode 8 digit</p>
+    
+    <div class="status disconnected" id="status">
+      <span class="dot"></span>
+      <span id="status-text">Nunggu koneksi...</span>
     </div>
 
-    <!-- Tabs -->
-    <div class="tabs">
-        <div class="tab active" data-tab="qr">📷 QR</div>
-        <div class="tab" data-tab="pairing">🔢 Pairing</div>
-        <div class="tab" data-tab="send">💬 Kirim</div>
-        <div class="tab" data-tab="viewonce">📸 View Once</div>
+    <div id="qr-container">
+      <div class="placeholder">Loading...</div>
     </div>
 
-    <!-- QR Panel -->
-    <div class="panel active" id="panel-qr">
-        <div class="qr-container">
-            <div id="qrLoading" style="padding:20px;color:#666;">⏳ Loading QR...</div>
-            <img id="qrImage" style="display:none;" />
-            <div class="qr-info">
-                <p>📱 <b>Cara Scan:</b></p>
-                <p>1. Buka WhatsApp di HP</p>
-                <p>2. Settings → Linked Devices → Link a Device</p>
-                <p>3. Scan QR di atas</p>
-                <p style="color:#ffcc00;">⚠️ QR refresh tiap 5 detik</p>
-            </div>
-        </div>
+    <div class="pair-box">
+      <h3>🔑 Pairing Code (8 Digit)</h3>
+      <input class="pair-input" id="phoneInput" type="tel" placeholder="62812xxxxxxx" />
+      <button class="pair-btn" id="pairBtn">Minta Kode</button>
+      <div id="pairCodeDisplay"></div>
     </div>
 
-    <!-- Pairing Panel -->
-    <div class="panel" id="panel-pairing">
-        <div class="pairing-container">
-            <h3>🔢 Kode Pairing</h3>
-            <div class="info-box">
-                💡 Kode Pairing alternatif kalo QR gak bisa di-scan.<br/>
-                Masukin nomor HP lo, dapet kode 8 digit.
-            </div>
-            <div class="pairing-input">
-                <input type="tel" id="phoneInput" placeholder="Contoh: 6281234567890" />
-                <button class="btn warning" id="btnRequestPairing">🔢 Minta Kode</button>
-            </div>
-            <div id="pairingResult" style="display:none;">
-                <p style="color:#666;margin-top:10px;">Kode Pairing:</p>
-                <div class="pairing-code" id="pairingCode">-</div>
-                <div class="info-box">
-                    📱 <b>Cara pakai:</b><br/>
-                    1. WhatsApp → Settings → Linked Devices<br/>
-                    2. Tap "Link with phone number instead"<br/>
-                    3. Masukin kode di atas
-                </div>
-            </div>
-            <div id="pairingLoading" style="display:none;margin-top:15px;color:#ffcc00;">
-                ⏳ Generating...
-            </div>
-        </div>
-    </div>
-
-    <!-- Send Panel -->
-    <div class="panel" id="panel-send">
-        <div class="send-form">
-            <input type="text" id="sendTarget" placeholder="Target (contoh: 6281234567890)" />
-            <textarea id="sendMessage" placeholder="Pesan..."></textarea>
-            <button class="btn" id="btnSend">🚀 Kirim</button>
-        </div>
-    </div>
-
-    <!-- View Once Panel -->
-    <div class="panel" id="panel-viewonce">
-        <h3 style="margin-bottom:10px;">📸 View Once Cache</h3>
-        <div class="info-box">
-            💡 Semua View Once yang masuk otomatis tersimpan di sini.<br/>
-            Klik item buat lihat full size.
-        </div>
-        <button class="btn" id="btnRefreshViewOnce" style="margin-bottom:10px;">🔄 Refresh</button>
-        <div class="viewonce-grid" id="viewonceGrid">
-            <p style="color:#666;grid-column:1/-1;text-align:center;">Belum ada View Once</p>
-        </div>
-    </div>
-</div>
+    <p class="hint">
+      Setelah konek, kirim <code>.rvo</code> di chat
+    </p>
+    <div class="log" id="log">> Menunggu server...</div>
+  </div>
 
 <script>
-    let currentTab = 'qr';
+const BOT_WS_URL = 'wss://9router-production-46d3.up.railway.app';
+const BOT_HTTP_URL = 'https://9router-production-46d3.up.railway.app';
 
-    // Tab switching
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-            tab.classList.add('active');
-            currentTab = tab.dataset.tab;
-            document.getElementById('panel-' + currentTab).classList.add('active');
-            if (currentTab === 'qr') checkQR();
-            if (currentTab === 'pairing') checkPairing();
-            if (currentTab === 'viewonce') loadViewOnce();
-        });
-    });
+let ws = null;
+let reconnectTimer = null;
 
-    // Status
-    async function checkStatus() {
-        try {
-            const res = await fetch('/api/status');
-            const data = await res.json();
-            const badge = document.getElementById('statusBadge');
-            const phoneInfo = document.getElementById('phoneInfo');
-            if (data.connected) {
-                badge.textContent = '✅ CONNECTED';
-                badge.className = 'badge online';
-                phoneInfo.textContent = data.phone || 'Connected';
-            } else {
-                badge.textContent = '❌ DISCONNECTED';
-                badge.className = 'badge offline';
-                phoneInfo.textContent = '-';
-            }
-        } catch (e) {
-            document.getElementById('statusBadge').textContent = '⚠️ ERROR';
-        }
+const statusEl = document.getElementById('status');
+const statusText = document.getElementById('status-text');
+const qrContainer = document.getElementById('qr-container');
+const logEl = document.getElementById('log');
+const phoneInput = document.getElementById('phoneInput');
+const pairBtn = document.getElementById('pairBtn');
+const pairCodeDisplay = document.getElementById('pairCodeDisplay');
+
+function log(msg) { logEl.textContent = '> ' + msg; }
+
+// ==================== PAIRING CODE ====================
+pairBtn.addEventListener('click', async () => {
+  const phone = phoneInput.value.trim();
+  if (!phone) {
+    log('❌ Isi nomor HP dulu');
+    return;
+  }
+  
+  pairBtn.disabled = true;
+  pairBtn.textContent = 'Loading...';
+  pairCodeDisplay.innerHTML = '';
+  
+  try {
+    log('🔑 Minta kode pairing...');
+    const res = await fetch(BOT_HTTP_URL + '/pair?phone=' + encodeURIComponent(phone));
+    const data = await res.json();
+    
+    if (data.error) {
+      log('❌ ' + data.error);
+      pairCodeDisplay.innerHTML = '<div style="color:#f87171;font-size:13px;">❌ ' + data.error + '</div>';
+    } else {
+      log('✅ Kode: ' + data.code);
+      pairCodeDisplay.innerHTML = '<div class="pair-code">' + data.code + '</div>';
     }
+  } catch (e) {
+    log('❌ Error: ' + e.message);
+  }
+  
+  pairBtn.disabled = false;
+  pairBtn.textContent = 'Minta Kode';
+});
 
-    // QR
-    async function checkQR() {
-        try {
-            const res = await fetch('/api/qr');
-            const data = await res.json();
-            const img = document.getElementById('qrImage');
-            const loading = document.getElementById('qrLoading');
-            if (data.qr) {
-                img.src = data.qr;
-                img.style.display = 'block';
-                loading.style.display = 'none';
-            } else {
-                img.style.display = 'none';
-                loading.textContent = '✅ Bot sudah connected!';
-                loading.style.display = 'block';
-            }
-        } catch (e) {}
-    }
+// ==================== WEBSOCKET ====================
+function connectWS() {
+  log('Nyambung ke server...');
+  ws = new WebSocket(BOT_WS_URL);
 
-    // Pairing
-    async function checkPairing() {
-        try {
-            const res = await fetch('/api/pairing');
-            const data = await res.json();
-            if (data.code) {
-                document.getElementById('pairingCode').textContent = data.code;
-                document.getElementById('pairingResult').style.display = 'block';
-                document.getElementById('pairingLoading').style.display = 'none';
-            }
-        } catch (e) {}
-    }
+  ws.onopen = () => {
+    log('✅ Server konek');
+    statusText.textContent = '⏳ Nunggu QR / Pairing';
+  };
 
-    async function requestPairing() {
-        const phone = document.getElementById('phoneInput').value.trim();
-        if (!phone) return alert('Masukin nomor HP dulu!');
+  ws.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      
+      if (data.type === 'qr') {
+        log('📱 QR Code diterima');
+        qrContainer.innerHTML = '<img src="' + data.qr + '" alt="QR">';
+        statusText.textContent = '⏳ Scan QR / pake pairing code';
+      }
+      
+      if (data.type === 'pairing') {
+        log('🔑 Kode pairing: ' + data.code);
+        pairCodeDisplay.innerHTML = '<div class="pair-code">' + data.code + '</div>';
+      }
+      
+      if (data.type === 'connected') {
+        log('✅ WhatsApp terhubung!');
+        statusEl.className = 'status connected';
+        statusText.textContent = '✅ Perangkat tertaut';
+        qrContainer.innerHTML = '<div class="placeholder" style="border-color:#4ade80;color:#4ade80;">✅ Terhubung</div>';
+        pairCodeDisplay.innerHTML = '';
+      }
+      
+      if (data.type === 'disconnected') {
+        log('❌ Terputus');
+        statusEl.className = 'status disconnected';
+        statusText.textContent = '❌ Terputus';
+      }
+    } catch (e) { console.error(e); }
+  };
 
-        const loading = document.getElementById('pairingLoading');
-        const result = document.getElementById('pairingResult');
-        const btn = document.getElementById('btnRequestPairing');
+  ws.onerror = () => log('❌ Server error');
+  ws.onclose = () => {
+    log('🔌 Terputus, reconnect...');
+    clearTimeout(reconnectTimer);
+    reconnectTimer = setTimeout(connectWS, 3000);
+  };
+}
 
-        loading.style.display = 'block';
-        result.style.display = 'none';
-        btn.disabled = true;
-
-        try {
-            const res = await fetch('/api/request-pairing', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone })
-            });
-            const data = await res.json();
-            if (data.code) {
-                document.getElementById('pairingCode').textContent = data.code;
-                result.style.display = 'block';
-                loading.style.display = 'none';
-            } else {
-                alert('❌ ' + (data.error || 'Gagal'));
-                loading.style.display = 'none';
-            }
-        } catch (e) {
-            alert('❌ Error: ' + e.message);
-            loading.style.display = 'none';
-        }
-        btn.disabled = false;
-    }
-
-    // Send
-    async function sendMessage() {
-        const target = document.getElementById('sendTarget').value.trim();
-        const message = document.getElementById('sendMessage').value.trim();
-        if (!target || !message) return alert('Isi target & pesan!');
-
-        try {
-            const res = await fetch('/api/send', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ target, message })
-            });
-            const data = await res.json();
-            if (data.status === 'ok') {
-                alert('✅ Terkirim!');
-                document.getElementById('sendMessage').value = '';
-            } else {
-                alert('❌ ' + (data.error || 'Gagal'));
-            }
-        } catch (e) {
-            alert('❌ Error: ' + e.message);
-        }
-    }
-
-    // View Once
-    async function loadViewOnce() {
-        try {
-            const res = await fetch('/api/viewonce');
-            const data = await res.json();
-            const grid = document.getElementById('viewonceGrid');
-            if (data.messages && data.messages.length > 0) {
-                grid.innerHTML = data.messages.map(m => `
-                    <div class="viewonce-item" onclick="window.open('${m.media_url}', '_blank')">
-                        ${m.media_type === 'image' 
-                            ? `<img src="${m.media_url}" />` 
-                            : `<div style="height:120px;display:flex;align-items:center;justify-content:center;color:#666;">🎥 Video</div>`}
-                        <div class="info">
-                            ${new Date(m.timestamp).toLocaleString()}<br/>
-                            ${m.sender.split('@')[0]}
-                        </div>
-                    </div>
-                `).join('');
-            } else {
-                grid.innerHTML = '<p style="color:#666;grid-column:1/-1;text-align:center;">Belum ada View Once</p>';
-            }
-        } catch (e) {}
-    }
-
-    // Clock
-    function updateClock() {
-        document.getElementById('clock').textContent = new Date().toLocaleTimeString();
-    }
-
-    // Events
-    document.getElementById('btnRequestPairing').addEventListener('click', requestPairing);
-    document.getElementById('btnSend').addEventListener('click', sendMessage);
-    document.getElementById('btnRefreshViewOnce').addEventListener('click', loadViewOnce);
-
-    // Init
-    checkStatus();
-    checkQR();
-    updateClock();
-    setInterval(checkStatus, 5000);
-    setInterval(() => { if (currentTab === 'qr') checkQR(); }, 5000);
-    setInterval(updateClock, 1000);
-
-    console.log('🔥 WA Bot Control loaded!');
+connectWS();
 </script>
-
 </body>
 </html>
