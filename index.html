@@ -43,6 +43,34 @@
     display: flex; align-items: center; justify-content: center;
     color: #555; font-size: 14px;
   }
+  .pair-box {
+    margin-top: 20px; padding: 16px;
+    background: #0d0d0d; border-radius: 10px;
+    border: 1px solid #2a2a2a;
+  }
+  .pair-box h3 { font-size: 13px; color: #888; margin-bottom: 12px; font-weight: 500; }
+  .pair-input {
+    width: 100%; padding: 10px 12px;
+    background: #1a1a1a; border: 1px solid #333;
+    border-radius: 8px; color: #fff; font-size: 14px;
+    margin-bottom: 10px; outline: none;
+  }
+  .pair-input:focus { border-color: #c084fc; }
+  .pair-btn {
+    width: 100%; padding: 10px;
+    background: #c084fc; color: #0a0a0a;
+    border: none; border-radius: 8px;
+    font-weight: 600; font-size: 14px;
+    cursor: pointer;
+  }
+  .pair-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .pair-code {
+    margin-top: 12px; padding: 12px;
+    background: #0a2e1a; color: #4ade80;
+    border-radius: 8px; font-size: 18px;
+    font-weight: 700; letter-spacing: 2px;
+    font-family: monospace;
+  }
   .hint { font-size: 12px; color: #555; margin-top: 16px; line-height: 1.6; }
   .hint code { background: #252525; padding: 2px 6px; border-radius: 4px; color: #c084fc; }
   .log {
@@ -56,27 +84,33 @@
 <body>
   <div class="container">
     <h1>🤖 WA RVO Bot</h1>
-    <p class="subtitle">Scan QR buat konek WhatsApp</p>
+    <p class="subtitle">Scan QR atau pake kode 8 digit</p>
+    
     <div class="status disconnected" id="status">
       <span class="dot"></span>
       <span id="status-text">Nunggu koneksi...</span>
     </div>
+
     <div id="qr-container">
       <div class="placeholder">Loading...</div>
     </div>
+
+    <div class="pair-box">
+      <h3>🔑 Pairing Code (8 Digit)</h3>
+      <input class="pair-input" id="phoneInput" type="tel" placeholder="62812xxxxxxx" />
+      <button class="pair-btn" id="pairBtn">Minta Kode</button>
+      <div id="pairCodeDisplay"></div>
+    </div>
+
     <p class="hint">
-      Setelah konek, kirim <code>.rvo</code> di chat<br>
-      buat ngambil pesan "sekali lihat" terakhir
+      Setelah konek, kirim <code>.rvo</code> di chat
     </p>
     <div class="log" id="log">> Menunggu server...</div>
   </div>
 
 <script>
-// ============================================================
-// GANTI INI KE URL RAILWAY LO
-// ============================================================
 const BOT_WS_URL = 'wss://9router-production-46d3.up.railway.app';
-// ============================================================
+const BOT_HTTP_URL = 'https://9router-production-46d3.up.railway.app';
 
 let ws = null;
 let reconnectTimer = null;
@@ -85,32 +119,77 @@ const statusEl = document.getElementById('status');
 const statusText = document.getElementById('status-text');
 const qrContainer = document.getElementById('qr-container');
 const logEl = document.getElementById('log');
+const phoneInput = document.getElementById('phoneInput');
+const pairBtn = document.getElementById('pairBtn');
+const pairCodeDisplay = document.getElementById('pairCodeDisplay');
 
 function log(msg) { logEl.textContent = '> ' + msg; }
 
+// ==================== PAIRING CODE ====================
+pairBtn.addEventListener('click', async () => {
+  const phone = phoneInput.value.trim();
+  if (!phone) {
+    log('❌ Isi nomor HP dulu');
+    return;
+  }
+  
+  pairBtn.disabled = true;
+  pairBtn.textContent = 'Loading...';
+  pairCodeDisplay.innerHTML = '';
+  
+  try {
+    log('🔑 Minta kode pairing...');
+    const res = await fetch(BOT_HTTP_URL + '/pair?phone=' + encodeURIComponent(phone));
+    const data = await res.json();
+    
+    if (data.error) {
+      log('❌ ' + data.error);
+      pairCodeDisplay.innerHTML = '<div style="color:#f87171;font-size:13px;">❌ ' + data.error + '</div>';
+    } else {
+      log('✅ Kode: ' + data.code);
+      pairCodeDisplay.innerHTML = '<div class="pair-code">' + data.code + '</div>';
+    }
+  } catch (e) {
+    log('❌ Error: ' + e.message);
+  }
+  
+  pairBtn.disabled = false;
+  pairBtn.textContent = 'Minta Kode';
+});
+
+// ==================== WEBSOCKET ====================
 function connectWS() {
   log('Nyambung ke server...');
   ws = new WebSocket(BOT_WS_URL);
 
   ws.onopen = () => {
     log('✅ Server konek');
-    statusText.textContent = '⏳ Nunggu QR';
+    statusText.textContent = '⏳ Nunggu QR / Pairing';
   };
 
   ws.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data);
+      
       if (data.type === 'qr') {
         log('📱 QR Code diterima');
         qrContainer.innerHTML = '<img src="' + data.qr + '" alt="QR">';
-        statusText.textContent = '⏳ Scan QR di WhatsApp';
+        statusText.textContent = '⏳ Scan QR / pake pairing code';
       }
+      
+      if (data.type === 'pairing') {
+        log('🔑 Kode pairing: ' + data.code);
+        pairCodeDisplay.innerHTML = '<div class="pair-code">' + data.code + '</div>';
+      }
+      
       if (data.type === 'connected') {
         log('✅ WhatsApp terhubung!');
         statusEl.className = 'status connected';
         statusText.textContent = '✅ Perangkat tertaut';
         qrContainer.innerHTML = '<div class="placeholder" style="border-color:#4ade80;color:#4ade80;">✅ Terhubung</div>';
+        pairCodeDisplay.innerHTML = '';
       }
+      
       if (data.type === 'disconnected') {
         log('❌ Terputus');
         statusEl.className = 'status disconnected';
