@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WA RVO Bot</title>
+<title>WA RVO Bot — Pairing</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -31,148 +31,168 @@
   .connected .dot { background: #4ade80; }
   .disconnected .dot { background: #f87171; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-  #qr-container { margin: 20px 0; }
-  #qr-container img {
-    width: 240px; height: 240px;
-    border-radius: 12px; background: #fff; padding: 12px;
+  input {
+    width: 100%; padding: 14px;
+    background: #0d0d0d; border: 1px solid #333;
+    border-radius: 8px; color: #fff;
+    font-size: 16px; margin-bottom: 12px;
+    text-align: center; letter-spacing: 1px;
   }
-  .placeholder {
-    width: 240px; height: 240px; margin: 0 auto;
-    border-radius: 12px; background: #0d0d0d;
-    border: 2px dashed #333;
-    display: flex; align-items: center; justify-content: center;
-    color: #555; font-size: 14px;
+  input:focus { outline: none; border-color: #25D366; }
+  button {
+    width: 100%; padding: 14px;
+    background: #25D366; color: #fff;
+    border: none; border-radius: 8px;
+    font-size: 16px; font-weight: 600;
+    cursor: pointer; transition: transform 0.1s;
+  }
+  button:hover { transform: scale(1.02); }
+  button:disabled { background: #333; cursor: not-allowed; }
+  .code-box {
+    margin: 20px 0; padding: 24px;
+    background: #0d0d0d; border-radius: 12px;
+    border: 2px dashed #25D366;
+    display: none;
+  }
+  .code-box.show { display: block; }
+  .code {
+    font-size: 36px; font-weight: 700;
+    color: #25D366; letter-spacing: 8px;
+    font-family: monospace;
   }
   .hint { font-size: 12px; color: #555; margin-top: 16px; line-height: 1.6; }
   .hint code { background: #252525; padding: 2px 6px; border-radius: 4px; color: #c084fc; }
   .log {
     margin-top: 16px; padding: 12px; background: #0d0d0d;
     border-radius: 8px; font-size: 11px; color: #666;
-    text-align: left; max-height: 120px; overflow-y: auto;
+    text-align: left; max-height: 80px; overflow-y: auto;
     font-family: monospace;
-  }
-  .btn {
-    display: inline-block;
-    margin: 8px 4px 0;
-    padding: 10px 20px;
-    background: #25D366;
-    color: #fff;
-    text-decoration: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    transition: transform 0.1s;
-  }
-  .btn:hover { transform: scale(1.05); }
-  .btn.secondary {
-    background: #2a2a2a;
-    color: #aaa;
-    border: 1px solid #333;
   }
 </style>
 </head>
 <body>
   <div class="container">
     <h1>🤖 WA RVO Bot</h1>
-    <p class="subtitle">Scan QR buat konek WhatsApp</p>
+    <p class="subtitle">Masukin nomor WA lo, dapet kode unik</p>
+    
     <div class="status disconnected" id="status">
       <span class="dot"></span>
-      <span id="status-text">Nunggu koneksi...</span>
+      <span id="status-text">Belum terhubung</span>
     </div>
-    <div id="qr-container">
-      <div class="placeholder" id="placeholder">Loading...</div>
+
+    <input type="tel" id="numberInput" placeholder="6281234567890" maxlength="15">
+    <button id="pairBtn" onclick="requestPair()">🔗 Minta Kode Pairing</button>
+
+    <div class="code-box" id="codeBox">
+      <p style="font-size:12px;color:#666;margin-bottom:8px;">Kode Pairing Lo:</p>
+      <div class="code" id="pairingCode">----</div>
+      <p style="font-size:11px;color:#555;margin-top:12px;">
+        Buka WhatsApp → Perangkat Tertaut → Tautkan dengan Nomor Telepon → Masukin kode ini
+      </p>
     </div>
+
     <p class="hint">
       Setelah konek, kirim <code>.rvo</code> di chat<br>
       buat ngambil pesan "sekali lihat" terakhir
     </p>
-
-    <!-- TOMBOL TAMBAHAN -->
-    <div style="margin-top: 20px;">
-      <a href="https://web.whatsapp.com" target="_blank" class="btn">
-        📱 Buka WhatsApp Web
-      </a>
-      <a href="https://wa.me/6281234567890" target="_blank" class="btn secondary">
-        💬 Chat Admin
-      </a>
-    </div>
-
-    <div class="log" id="log">> Menunggu server...</div>
+    <div class="log" id="log">> Siap...</div>
   </div>
 
 <script>
-// ============================================================
-// GANTI URL INI KE URL RAILWAY LO
-// ============================================================
 const BOT_WS_URL = 'wss://9router-production-46d3.up.railway.app';
-// ============================================================
 
 let ws = null;
-let reconnectTimer = null;
-
 const statusEl = document.getElementById('status');
 const statusText = document.getElementById('status-text');
-const qrContainer = document.getElementById('qr-container');
+const codeBox = document.getElementById('codeBox');
+const pairingCodeEl = document.getElementById('pairingCode');
 const logEl = document.getElementById('log');
+const pairBtn = document.getElementById('pairBtn');
 
-function log(msg) {
-  logEl.textContent = '> ' + msg;
+function log(msg) { logEl.textContent = '> ' + msg; }
+
+function requestPair() {
+  const number = document.getElementById('numberInput').value.trim();
+  if (!number) return alert('Masukin nomor dulu, GOBLOK!');
+  
+  // Format nomor: hapus non-digit
+  const clean = number.replace(/[^0-9]/g, '');
+  if (clean.length < 10) return alert('Nomor gak valid!');
+
+  pairBtn.disabled = true;
+  pairBtn.textContent = '⏳ Minta kode...';
+  log('Minta kode buat ' + clean + '...');
+
+  // Kirim lewat WebSocket
+  if (ws && ws.readyState === 1) {
+    ws.send(JSON.stringify({ action: 'pair', number: clean }));
+  } else {
+    // Fallback: HTTP
+    fetch('/pair?number=' + clean)
+      .then(r => r.json())
+      .then(d => {
+        if (d.code) {
+          pairingCodeEl.textContent = d.code.match(/.{1,4}/g).join('-');
+          codeBox.classList.add('show');
+          log('✅ Kode diterima: ' + d.code);
+        } else {
+          log('❌ Error: ' + d.error);
+        }
+        pairBtn.disabled = false;
+        pairBtn.textContent = '🔗 Minta Kode Pairing';
+      })
+      .catch(e => {
+        log('❌ Gagal: ' + e.message);
+        pairBtn.disabled = false;
+        pairBtn.textContent = '🔗 Minta Kode Pairing';
+      });
+  }
 }
 
 function connectWS() {
   log('Nyambung ke server...');
-  try {
-    ws = new WebSocket(BOT_WS_URL);
-  } catch (e) {
-    log('❌ URL salah: ' + e.message);
-    return;
-  }
+  ws = new WebSocket(BOT_WS_URL);
 
   ws.onopen = () => {
     log('✅ Server konek');
-    statusEl.className = 'status disconnected';
-    statusText.textContent = '⏳ Nunggu QR dari server';
+    statusEl.className = 'status connected';
+    statusText.textContent = '✅ Server siap';
   };
 
   ws.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data);
+    const data = JSON.parse(event.data);
+    
+    if (data.type === 'pairing_code') {
+      pairingCodeEl.textContent = data.code.match(/.{1,4}/g).join('-');
+      codeBox.classList.add('show');
+      log('✅ Kode diterima: ' + data.code);
+      pairBtn.disabled = false;
+      pairBtn.textContent = '🔗 Minta Kode Pairing';
+    }
 
-      if (data.type === 'qr') {
-        log('📱 QR Code diterima');
-        qrContainer.innerHTML = '<img src="' + data.qr + '" alt="QR">';
-        statusEl.className = 'status disconnected';
-        statusText.textContent = '⏳ Scan QR di WhatsApp';
-      }
+    if (data.type === 'connected') {
+      statusEl.className = 'status connected';
+      statusText.textContent = '✅ Perangkat tertaut';
+      codeBox.classList.remove('show');
+      log('🎉 WhatsApp terhubung!');
+    }
 
-      if (data.type === 'connected') {
-        log('✅ WhatsApp terhubung!');
-        statusEl.className = 'status connected';
-        statusText.textContent = '✅ Perangkat tertaut';
-        qrContainer.innerHTML = '<div class="placeholder" style="border-color:#4ade80;color:#4ade80;">✅ Terhubung</div>';
-      }
+    if (data.type === 'disconnected') {
+      statusEl.className = 'status disconnected';
+      statusText.textContent = '❌ Terputus';
+    }
 
-      if (data.type === 'disconnected') {
-        log('❌ Terputus');
-        statusEl.className = 'status disconnected';
-        statusText.textContent = '❌ Terputus';
-      }
-
-      if (data.type === 'log') {
-        log(data.message);
-      }
-    } catch (e) {
-      console.error(e);
+    if (data.type === 'error') {
+      log('❌ ' + data.message);
+      pairBtn.disabled = false;
+      pairBtn.textContent = '🔗 Minta Kode Pairing';
     }
   };
 
-  ws.onerror = () => log('❌ Server error — cek Railway lo');
   ws.onclose = () => {
-    log('🔌 Terputus, reconnect 3 detik...');
     statusEl.className = 'status disconnected';
     statusText.textContent = '🔌 Terputus';
-    clearTimeout(reconnectTimer);
-    reconnectTimer = setTimeout(connectWS, 3000);
+    setTimeout(connectWS, 3000);
   };
 }
 
