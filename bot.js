@@ -13,6 +13,7 @@ const PORT = process.env.PORT || 8080;
 
 let qrCodeData = null;
 let isConnected = false;
+let pairingCode = null;
 let botSocket = null;
 const viewOnceCache = new Map();
 
@@ -30,6 +31,9 @@ wss.on("connection", (ws) => {
       ws.send(JSON.stringify({ type: "qr", qr: dataUrl }));
     });
   }
+  if (pairingCode) {
+    ws.send(JSON.stringify({ type: "pairing", code: pairingCode }));
+  }
   if (isConnected) {
     ws.send(JSON.stringify({ type: "connected" }));
   }
@@ -42,11 +46,48 @@ function broadcast(data) {
   });
 }
 
+// ==================== ENDPOINTS ====================
 app.get("/status", (req, res) => {
-  res.json({ connected: isConnected, qr: qrCodeData ? "ada" : null });
+  res.json({ 
+    connected: isConnected, 
+    qr: qrCodeData ? "ada" : null,
+    pairing: pairingCode || null
+  });
 });
 
-app.get("/", (req, res) => res.send("Bot jalan!"));
+app.get("/pair", async (req, res) => {
+  if (!botSocket) {
+    return res.json({ error: "Bot belum siap, tunggu 10 detik" });
+  }
+  if (botSocket.authState.creds.registered) {
+    return res.json({ error: "Bot udah terdaftar" });
+  }
+  
+  const phone = req.query.phone;
+  if (!phone) {
+    return res.json({ error: "Kasih nomor: /pair?phone=62812..." });
+  }
+  
+  try {
+    const cleanPhone = phone.replace(/\D/g, '');
+    const code = await botSocket.requestPairingCode(cleanPhone);
+    pairingCode = code;
+    console.log("🔑 Pairing code: " + code);
+    broadcast({ type: "pairing", code: code });
+    res.json({ code: code, phone: cleanPhone });
+  } catch (e) {
+    console.log("❌ Pair error:", e.message);
+    res.json({ error: e.message });
+  }
+});
+
+app.get("/", (req, res) => {
+  res.send(`
+    <h2>WA RVO Bot</h2>
+    <p><a href="/status">/status</a> — cek status</p>
+    <p><a href="/pair?phone=62812XXXXXXX">/pair?phone=62812XXXXXXX</a> — minta kode pairing</p>
+  `);
+});
 
 // ==================== HELPER ====================
 function extractViewOnce(content) {
@@ -89,6 +130,7 @@ async function startBot() {
       console.log("✅ WhatsApp terhubung!");
       isConnected = true;
       qrCodeData = null;
+      pairingCode = null;
       broadcast({ type: "connected" });
     }
     if (connection === "close") {
@@ -111,7 +153,6 @@ async function startBot() {
       const text = content.conversation || 
                    content.extendedTextMessage?.text || "";
 
-      // 🔥 DETEKSI VIEW ONCE
       const vo = extractViewOnce(content);
       if (vo) {
         const inner = vo.message;
@@ -125,7 +166,6 @@ async function startBot() {
         }
       }
 
-      // 🔥 COMMAND .rvo
       if (text.trim() === ".rvo") {
         console.log("🔍 .rvo dari " + jid);
         const cached = viewOnceCache.get(jid);
