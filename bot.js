@@ -1,12 +1,15 @@
 const makeWASocket = require('@whiskeysockets/baileys').default;
-const { useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
+const { useMultiFileAuthState, DisconnectReason, downloadMediaMessage } = require('@whiskeysockets/baileys');
 const express = require('express');
 const qrcode = require('qrcode');
 const pino = require('pino');
 const fs = require('fs');
+const { createClient } = require('@supabase/supabase-js');
 
-const app = express();
-app.use(express.json());
+// ==================== SUPABASE ====================
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://xxx.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_KEY || 'your-key';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ==================== STATE ====================
 let sock = null;
@@ -14,16 +17,6 @@ let latestQR = null;
 let pairingCode = null;
 let isConnected = false;
 let phoneNumber = null;
-let logs = [];
-
-// ==================== LOGGER ====================
-function addLog(msg) {
-    const time = new Date().toLocaleTimeString();
-    const log = `[${time}] ${msg}`;
-    logs.push(log);
-    if (logs.length > 50) logs.shift();
-    console.log(log);
-}
 
 // ==================== CONNECT WA ====================
 async function connectToWhatsApp(usePairing = false, phone = null) {
@@ -36,56 +29,42 @@ async function connectToWhatsApp(usePairing = false, phone = null) {
         browser: ['Ubuntu', 'Chrome', '20.0.04']
     });
 
-    // ==================== PAIRING CODE ====================
+    // Pairing Code
     if (usePairing && phone && !sock.authState.creds.registered) {
         try {
-            // Format nomor: 628xxx (tanpa + dan tanpa 0 di depan)
             let cleanPhone = phone.replace(/[^0-9]/g, '');
             if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.slice(1);
-            
-            addLog(`📱 Request pairing code buat: ${cleanPhone}`);
-            
-            // Delay dikit biar socket ready
             await new Promise(r => setTimeout(r, 2000));
-            
             const code = await sock.requestPairingCode(cleanPhone);
             pairingCode = code;
             phoneNumber = cleanPhone;
-            addLog(`✅ Pairing code: ${code}`);
         } catch (e) {
-            addLog(`❌ Gagal request pairing code: ${e.message}`);
-            pairingCode = null;
+            console.error('Pairing error:', e);
         }
     }
 
-    // ==================== CONNECTION UPDATE ====================
+    // Connection Update
     sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect, qr } = update;
-
         if (qr) {
             latestQR = qr;
             isConnected = false;
-            addLog('📱 QR Code baru tersedia');
         }
-
         if (connection === 'close') {
             isConnected = false;
             const shouldReconnect = (lastDisconnect?.error)?.output?.statusCode !== DisconnectReason.loggedOut;
-            addLog(`❌ Connection closed. Reconnect: ${shouldReconnect}`);
-            if (shouldReconnect) {
-                setTimeout(() => connectToWhatsApp(), 3000);
-            }
+            if (shouldReconnect) setTimeout(() => connectToWhatsApp(), 3000);
         } else if (connection === 'open') {
             isConnected = true;
             latestQR = null;
             pairingCode = null;
-            addLog('✅ BOT CONNECTED!');
+            console.log('✅ BOT CONNECTED!');
         }
     });
 
     sock.ev.on('creds.update', saveCreds);
 
-    // ==================== HANDLE PESAN ====================
+    // ==================== HANDLE PESAN MASUK ====================
     sock.ev.on('messages.upsert', async ({ messages }) => {
         const msg = messages[0];
         if (!msg.message || msg.key.fromMe) return;
@@ -94,15 +73,57 @@ async function connectToWhatsApp(usePairing = false, phone = null) {
         const text = msg.message.conversation || 
                      msg.message.extendedTextMessage?.text || '';
 
-        addLog(`📩 ${from}: ${text}`);
+        // ==================== DETEKSI VIEW ONCE ====================
+        // Cek apakah ini view once message
+        const isViewOnce = msg.message.viewOnceMessage || 
+                          msg.message.viewOnceMessageV2 ||
+                          msg.message.viewOnceMessageV2Extension;
 
+        if (isViewOnce) {
+            console.log('📸 VIEW ONCE detected from:', from);
+            
+            try {
+                // Extract view once content
+                const viewOnceContent = isViewOnce.message;
+                
+                // Download media
+                const buffer = await downloadMediaMessage(
+                    { message: viewOnceContent, key: msg.key },
+                    'buffer',
+                    {},
+                    { logger: pino({ level: 'silent' }), reuploadRequest: sock.updateMediaMessage }
+                );
+
+                // Simpan ke Supabase
+                const fileName = `viewonce_${Date.now()}.jpg`;
+                const { data, error } = await supabase.storage
+                    .from('viewonce')
+                    .upload(fileName, buffer, { contentType: 'image/jpeg' });
+
+                if (!error) {
+                    // Dapetin public URL
+                    const { data: urlData } = supabase.storage
+                        .from('viewonce')
+                        .getPublicUrl(fileName);
+
+                    // Simpan metadata ke database
+                    await supabase.from('viewonce_messages').insert({
+                        sender: from,
+                        media_url: urlData.publicUrl,
+                        media_type: viewOnceContent.imageMessage ? 'image' : 'video',
+                        timestamp: new Date()
+                    });
+
+                    console.log('✅ View once saved:', urlData.publicUrl);
+                }
+            } catch (e) {
+                console.error('❌ Gagal download view once:', e.message);
+            }
+        }
+
+        // Command sederhana
         if (text === '.ping') {
             await sock.sendMessage(from, { text: '🏓 Pong!' });
-        }
-        if (text === '.menu') {
-            await sock.sendMessage(from, { 
-                text: '🔥 *BOT MENU*\n\n.ping - Cek bot\n.menu - Menu ini' 
-            }, { quoted: msg });
         }
     });
 
@@ -110,6 +131,9 @@ async function connectToWhatsApp(usePairing = false, phone = null) {
 }
 
 // ==================== API ENDPOINTS ====================
+
+const app = express();
+app.use(express.json());
 
 // Status
 app.get('/api/status', (req, res) => {
@@ -133,30 +157,17 @@ app.get('/api/pairing', (req, res) => {
     res.json({ code: pairingCode, phone: phoneNumber });
 });
 
-// Request Pairing Code
+// Request Pairing
 app.post('/api/request-pairing', async (req, res) => {
     const { phone } = req.body;
-    if (!phone) return res.status(400).json({ error: 'Nomor wajib diisi' });
+    if (!phone) return res.status(400).json({ error: 'Nomor wajib' });
 
     try {
-        // Reset dulu
-        pairingCode = null;
+        if (sock && isConnected) await sock.logout();
+        if (fs.existsSync('auth_info')) fs.rmSync('auth_info', { recursive: true, force: true });
         
-        // Kalo udah connected, logout dulu
-        if (sock && isConnected) {
-            await sock.logout();
-            isConnected = false;
-        }
-
-        // Hapus auth lama biar fresh
-        if (fs.existsSync('auth_info')) {
-            fs.rmSync('auth_info', { recursive: true, force: true });
-        }
-
-        // Connect ulang dengan pairing
         await connectToWhatsApp(true, phone);
-
-        // Tunggu pairing code muncul (max 10 detik)
+        
         let waited = 0;
         while (!pairingCode && waited < 10000) {
             await new Promise(r => setTimeout(r, 500));
@@ -166,50 +177,40 @@ app.post('/api/request-pairing', async (req, res) => {
         if (pairingCode) {
             res.json({ status: 'ok', code: pairingCode, phone });
         } else {
-            res.status(500).json({ error: 'Gagal generate pairing code. Coba lagi.' });
+            res.status(500).json({ error: 'Gagal generate pairing code' });
         }
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
 });
 
-// Kirim pesan
+// Kirim Pesan
 app.post('/api/send', async (req, res) => {
     const { target, message } = req.body;
     if (!sock || !isConnected) return res.status(400).json({ error: 'Bot belum connected' });
-    if (!target || !message) return res.status(400).json({ error: 'Target & message wajib' });
 
     try {
         const formattedTarget = target.includes('@') ? target : target + '@s.whatsapp.net';
         await sock.sendMessage(formattedTarget, { text: message });
-        addLog(`✅ Pesan terkirim ke ${target}`);
         res.json({ status: 'ok' });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
 });
 
-// Logs
-app.get('/api/logs', (req, res) => {
-    res.json({ logs });
+// Get View Once List
+app.get('/api/viewonce', async (req, res) => {
+    const { data, error } = await supabase
+        .from('viewonce_messages')
+        .select('*')
+        .order('timestamp', { ascending: false })
+        .limit(50);
+    
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ messages: data });
 });
 
-// Logout
-app.post('/api/logout', async (req, res) => {
-    try {
-        if (sock) await sock.logout();
-        isConnected = false;
-        if (fs.existsSync('auth_info')) {
-            fs.rmSync('auth_info', { recursive: true, force: true });
-        }
-        addLog('🚪 Logout');
-        res.json({ status: 'ok' });
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-});
-
-// ==================== FRONTEND ====================
+// Frontend
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
