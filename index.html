@@ -73,7 +73,7 @@
 
 <script>
 // ============================================================
-// GANTI BARIS INI SETELAH LO DEPLOY BOT SERVER
+// GANTI URL INI KE URL RAILWAY LO
 // ============================================================
 const BOT_WS_URL = 'wss://9router-production-46d3.up.railway.app';
 // ============================================================
@@ -92,10 +92,16 @@ function log(msg) {
 
 function connectWS() {
   log('Nyambung ke server...');
-  ws = new WebSocket(BOT_WS_URL);
+  try {
+    ws = new WebSocket(BOT_WS_URL);
+  } catch (e) {
+    log('❌ URL salah: ' + e.message);
+    return;
+  }
 
   ws.onopen = () => {
     log('✅ Server konek');
+    statusEl.className = 'status disconnected';
     statusText.textContent = '⏳ Nunggu QR dari server';
   };
 
@@ -131,9 +137,9 @@ function connectWS() {
     }
   };
 
-  ws.onerror = () => log('❌ Server error');
+  ws.onerror = () => log('❌ Server error — cek Railway lo');
   ws.onclose = () => {
-    log('🔌 Terputus, reconnect...');
+    log('🔌 Terputus, reconnect 3 detik...');
     statusEl.className = 'status disconnected';
     statusText.textContent = '🔌 Terputus';
     clearTimeout(reconnectTimer);
