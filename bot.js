@@ -7,8 +7,8 @@ const fs = require('fs');
 const { createClient } = require('@supabase/supabase-js');
 
 // ==================== SUPABASE ====================
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://xxx.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_KEY || 'your-key';
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zwqwomfrgtqyaiiugryg.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp3cXdvbWZyZ3RxeWFpaXVncnlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyMDUzODAsImV4cCI6MjEwNDc4MTM4MH0.Zs2egViPPVec5OeAUgCI0-nUG1ABCDi2fyhVTvHNmao';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ==================== STATE ====================
