@@ -1,111 +1,117 @@
+// bot.js — Pairing code version
 const { 
   default: makeWASocket, 
   useMultiFileAuthState, 
-  DisconnectReason 
+  DisconnectReason,
+  Browsers 
 } = require("@whiskeysockets/baileys");
 const { WebSocketServer } = require("ws");
-const qrcode = require("qrcode");
-const pino = require("pino");
 const express = require("express");
+const pino = require("pino");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-let qrCodeData = null;
+let pairingCode = null;
 let isConnected = false;
-const viewOnceCache = new Map();
+let sock = null;
+let currentNumber = null;
 
-// HTTP server + WebSocket
-const server = app.listen(PORT, () => console.log("Server jalan di port " + PORT));
+// WebSocket
+const server = app.listen(PORT, () => console.log("Server jalan di " + PORT));
 const wss = new WebSocketServer({ server });
 
 function broadcast(data) {
   const msg = JSON.stringify(data);
-  wss.clients.forEach(c => { 
-    if (c.readyState === 1) c.send(msg); 
-  });
+  wss.clients.forEach(c => { if (c.readyState === 1) c.send(msg); });
 }
 
-// HTTP endpoint buat cek status
-app.get("/status", (req, res) => {
-  res.json({ connected: isConnected, qr: qrCodeData });
+// HTTP: Minta pairing code
+app.get("/pair", async (req, res) => {
+  const number = req.query.number;
+  if (!number) return res.status(400).json({ error: "Nomor wajib diisi" });
+
+  // Format: 628xxx (tanpa +, spasi, strip)
+  const cleanNumber = number.replace(/[^0-9]/g, '');
+  if (cleanNumber.length < 10) {
+    return res.status(400).json({ error: "Nomor gak valid" });
+  }
+
+  try {
+    currentNumber = cleanNumber;
+    const code = await generatePairingCode(cleanNumber);
+    res.json({ code: code });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
-// ==================== WHATSAPP BOT ====================
-async function startBot() {
+// HTTP: Cek status
+app.get("/status", (req, res) => {
+  res.json({ connected: isConnected, code: pairingCode });
+});
+
+async function generatePairingCode(phoneNumber) {
   const { state, saveCreds } = await useMultiFileAuthState("auth_info");
-  const sock = makeWASocket({
+  
+  // Hapus session lama kalo ada
+  // (biar bisa pairing ulang)
+  
+  sock = makeWASocket({
     auth: state,
-    printQRInTerminal: true,
+    printQRInTerminal: false,
     logger: pino({ level: "silent" }),
-    browser: ["Ubuntu", "Chrome", "20.0.04"],
+    browser: Browsers.macOS("Chrome"), // 🔥 WAJIB: format ini buat pairing code [citation:3]
   });
 
   sock.ev.on("creds.update", saveCreds);
 
-  sock.ev.on("connection.update", async ({ connection, lastDisconnect, qr }) => {
-    if (qr) {
-      qrCodeData = qr;
-      isConnected = false;
-      const dataUrl = await qrcode.toDataURL(qr);
-      broadcast({ type: "qr", qr: dataUrl });
-      console.log("📱 QR dikirim ke client");
-    }
-    if (connection === "open") {
-      isConnected = true;
-      qrCodeData = null;
-      broadcast({ type: "connected" });
-      console.log("✅ WhatsApp terhubung!");
-    }
-    if (connection === "close") {
-      isConnected = false;
-      broadcast({ type: "disconnected" });
-      if (lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut) {
-        console.log("🔄 Reconnect...");
-        startBot();
-      }
-    }
-  });
+  // Tunggu sampe socket siap, baru minta kode
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => reject(new Error("Timeout")), 30000);
 
-  sock.ev.on("messages.upsert", async (m) => {
-    for (const msg of m.messages) {
-      if (msg.key.fromMe) continue;
-      const jid = msg.key.remoteJid;
-      const content = msg.message;
-      if (!content) continue;
-      const text = content.conversation || content.extendedTextMessage?.text || "";
+    sock.ev.on("connection.update", async (update) => {
+      const { connection, qr } = update;
 
-      // Cache view once
-      const vo = content.viewOnceMessageV2 || content.viewOnceMessage;
-      if (vo) {
-        const inner = vo.message;
-        const type = inner?.imageMessage ? "image" : inner?.videoMessage ? "video" : null;
-        if (type) {
-          viewOnceCache.set(jid, { type, content: inner });
-          console.log("📸 View once " + type + " dari " + jid);
-        }
-      }
-
-      // Command .rvo
-      if (text.trim() === ".rvo") {
-        const cached = viewOnceCache.get(jid);
-        if (!cached) {
-          await sock.sendMessage(jid, { text: "❌ Gak ada view once" });
-          continue;
-        }
+      // 🔥 TRIGGER: Minta pairing code saat QR muncul [citation:10]
+      if (qr && !sock.authState.creds.registered && !pairingCode) {
         try {
-          const buf = await sock.downloadMediaMessage({ message: cached.content });
-          await sock.sendMessage(jid, {
-            [cached.type]: buf,
-            caption: "🔓 .rvo — Diambil dari View Once",
-          });
-          viewOnceCache.delete(jid);
+          const code = await sock.requestPairingCode(phoneNumber);
+          pairingCode = code;
+          clearTimeout(timeout);
+          broadcast({ type: "pairing_code", code: code });
+          resolve(code);
         } catch (e) {
-          await sock.sendMessage(jid, { text: "❌ Gagal ambil media" });
+          clearTimeout(timeout);
+          reject(e);
         }
       }
-    }
+
+      if (connection === "open") {
+        isConnected = true;
+        broadcast({ type: "connected" });
+        console.log("✅ WhatsApp terhubung!");
+      }
+
+      if (connection === "close") {
+        isConnected = false;
+        broadcast({ type: "disconnected" });
+      }
+    });
   });
 }
 
-startBot();
+// WebSocket
+wss.on("connection", (ws) => {
+  ws.on("message", async (msg) => {
+    try {
+      const data = JSON.parse(msg);
+      if (data.action === "pair" && data.number) {
+        const code = await generatePairingCode(data.number);
+        ws.send(JSON.stringify({ type: "pairing_code", code: code }));
+      }
+    } catch (e) {
+      ws.send(JSON.stringify({ type: "error", message: e.message }));
+    }
+  });
+});
