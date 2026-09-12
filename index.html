@@ -51,6 +51,24 @@
     text-align: left; max-height: 120px; overflow-y: auto;
     font-family: monospace;
   }
+  .btn {
+    display: inline-block;
+    margin: 8px 4px 0;
+    padding: 10px 20px;
+    background: #25D366;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: transform 0.1s;
+  }
+  .btn:hover { transform: scale(1.05); }
+  .btn.secondary {
+    background: #2a2a2a;
+    color: #aaa;
+    border: 1px solid #333;
+  }
 </style>
 </head>
 <body>
@@ -68,6 +86,17 @@
       Setelah konek, kirim <code>.rvo</code> di chat<br>
       buat ngambil pesan "sekali lihat" terakhir
     </p>
+
+    <!-- TOMBOL TAMBAHAN -->
+    <div style="margin-top: 20px;">
+      <a href="https://web.whatsapp.com" target="_blank" class="btn">
+        📱 Buka WhatsApp Web
+      </a>
+      <a href="https://wa.me/6281234567890" target="_blank" class="btn secondary">
+        💬 Chat Admin
+      </a>
+    </div>
+
     <div class="log" id="log">> Menunggu server...</div>
   </div>
 
