@@ -3,1024 +3,197 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Suara → Listing</title>
+<title>WA RVO Bot</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
-
-:root{
-  --bg:#1B2430;
-  --bg-soft:#232E3D;
-  --bg-softer:#2B3849;
-  --paper:#F3ECDA;
-  --paper-dim:#E7DEC5;
-  --ink:#26211A;
-  --ink-soft:#7A7262;
-  --stamp-red:#C1432E;
-  --stamp-green:#4C7A5E;
-  --stamp-amber:#B8863B;
-  --line:rgba(243,236,218,0.14);
-  --font-display:'Space Grotesk', sans-serif;
-  --font-body:'Inter', sans-serif;
-}
-
-*{box-sizing:border-box;}
-html,body{margin:0;padding:0;}
-body{
-  background:var(--bg);
-  color:var(--paper);
-  font-family:var(--font-body);
-  min-height:100vh;
-  -webkit-font-smoothing:antialiased;
-}
-
-.app{
-  max-width:960px;
-  margin:0 auto;
-  padding:28px 20px 80px;
-}
-
-/* ---------- topbar ---------- */
-.topbar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:36px;
-}
-.brand{
-  font-family:var(--font-display);
-  font-weight:700;
-  font-size:19px;
-  letter-spacing:-0.01em;
-}
-.brand span{color:var(--stamp-amber);}
-.count{
-  font-size:13px;
-  color:var(--paper);
-  opacity:0.55;
-}
-
-/* ---------- hero ---------- */
-.hero{
-  text-align:center;
-  padding:20px 0 36px;
-  border-bottom:1px solid var(--line);
-  margin-bottom:32px;
-}
-.mic-btn{
-  width:104px;
-  height:104px;
-  border-radius:50%;
-  border:none;
-  background:var(--paper);
-  color:var(--ink);
-  cursor:pointer;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  transition:transform .15s ease, box-shadow .15s ease;
-  box-shadow:0 0 0 1px var(--paper-dim);
-}
-.mic-btn:hover{transform:scale(1.04);}
-.mic-btn:active{transform:scale(0.97);}
-.mic-btn svg{width:38px;height:38px;}
-.mic-btn.recording{
-  background:var(--stamp-red);
-  color:var(--paper);
-  animation:pulse 1.4s ease-in-out infinite;
-}
-.mic-btn.thinking{
-  background:var(--stamp-amber);
-  color:var(--ink);
-}
-@keyframes pulse{
-  0%{box-shadow:0 0 0 0 rgba(193,67,46,0.45);}
-  70%{box-shadow:0 0 0 18px rgba(193,67,46,0);}
-  100%{box-shadow:0 0 0 0 rgba(193,67,46,0);}
-}
-
-.hero-status{
-  margin:18px 0 6px;
-  font-size:15px;
-  color:var(--paper);
-  opacity:0.75;
-}
-.transcript-live{
-  min-height:20px;
-  font-size:14px;
-  color:var(--stamp-amber);
-  font-style:italic;
-  margin:0 auto;
-  max-width:520px;
-}
-
-.manual-entry{
-  margin:22px auto 0;
-  max-width:480px;
-  text-align:left;
-}
-.manual-entry summary{
-  cursor:pointer;
-  font-size:13px;
-  color:var(--paper);
-  opacity:0.6;
-  text-align:center;
-  list-style:none;
-}
-.manual-entry summary::-webkit-details-marker{display:none;}
-.manual-entry[open] summary{margin-bottom:10px;}
-.manual-entry textarea{
-  width:100%;
-  min-height:70px;
-  border-radius:8px;
-  border:1px solid var(--line);
-  background:var(--bg-soft);
-  color:var(--paper);
-  padding:10px 12px;
-  font-family:var(--font-body);
-  font-size:14px;
-  resize:vertical;
-}
-.manual-entry textarea:focus{outline:2px solid var(--stamp-amber);outline-offset:1px;}
-.manual-entry button{
-  margin-top:8px;
-  width:100%;
-  padding:10px;
-  border-radius:8px;
-  border:1px solid var(--line);
-  background:transparent;
-  color:var(--paper);
-  font-family:var(--font-body);
-  font-weight:600;
-  font-size:13px;
-  cursor:pointer;
-}
-.manual-entry button:hover{background:var(--bg-soft);}
-
-.support-note{
-  margin-top:12px;
-  font-size:12px;
-  color:var(--stamp-red);
-}
-.hidden{display:none !important;}
-
-/* ---------- master list ---------- */
-.master-entry{
-  margin:14px auto 0;
-  max-width:480px;
-  text-align:left;
-}
-.master-entry summary{
-  cursor:pointer;
-  font-size:13px;
-  color:var(--paper);
-  opacity:0.6;
-  text-align:center;
-  list-style:none;
-}
-.master-entry summary::-webkit-details-marker{display:none;}
-.master-entry[open] summary{margin-bottom:10px;}
-.master-box{
-  border:1px dashed var(--line);
-  border-radius:8px;
-  padding:12px;
-}
-.master-status{
-  font-size:12.5px;
-  color:var(--paper);
-  opacity:0.7;
-  margin:0 0 10px;
-  line-height:1.5;
-}
-.master-status strong{color:var(--stamp-amber);opacity:1;}
-.master-actions{display:flex;gap:8px;align-items:center;}
-.master-file-label{
-  flex:1;
-  text-align:center;
-  padding:9px 10px;
-  border-radius:7px;
-  border:1px solid var(--line);
-  background:transparent;
-  color:var(--paper);
-  font-size:12.5px;
-  cursor:pointer;
-}
-.master-file-label:hover{background:var(--bg-soft);}
-.master-clear-btn{
-  padding:9px 12px;
-  border-radius:7px;
-  border:1px solid var(--line);
-  background:transparent;
-  color:var(--stamp-red);
-  font-size:12.5px;
-  cursor:pointer;
-  font-family:var(--font-body);
-}
-.master-clear-btn:hover{background:var(--bg-soft);}
-.master-clear-btn.hidden{display:none !important;}
-
-/* ---------- draft card ---------- */
-.draft-section{margin-bottom:36px;}
-.draft-card{
-  background:var(--paper);
-  color:var(--ink);
-  border-radius:12px;
-  padding:22px 20px 18px;
-  position:relative;
-}
-.draft-card::before{
-  content:'';
-  position:absolute;
-  top:16px;
-  right:18px;
-  width:11px;
-  height:11px;
-  border-radius:50%;
-  background:var(--bg);
-  box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);
-}
-.draft-label{
-  font-size:12px;
-  color:var(--ink-soft);
-  margin:0 0 14px;
-}
-.field-row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-  margin-bottom:12px;
-}
-.field{display:flex;flex-direction:column;gap:5px;}
-.field label{font-size:12px;color:var(--ink-soft);}
-.field input, .field select, .field textarea{
-  font-family:var(--font-body);
-  font-size:14px;
-  padding:9px 10px;
-  border-radius:7px;
-  border:1px solid var(--paper-dim);
-  background:#fff;
-  color:var(--ink);
-}
-.field textarea{min-height:64px;resize:vertical;}
-.draft-actions{
-  display:flex;
-  gap:10px;
-  margin-top:14px;
-}
-.btn-primary{
-  flex:1;
-  padding:11px;
-  border-radius:8px;
-  border:none;
-  background:var(--ink);
-  color:var(--paper);
-  font-family:var(--font-body);
-  font-weight:600;
-  font-size:14px;
-  cursor:pointer;
-}
-.btn-primary:hover{opacity:0.88;}
-.btn-secondary{
-  padding:11px 16px;
-  border-radius:8px;
-  border:1px solid var(--paper-dim);
-  background:transparent;
-  color:var(--ink-soft);
-  font-family:var(--font-body);
-  font-size:14px;
-  cursor:pointer;
-}
-.btn-secondary:hover{background:var(--paper-dim);}
-
-/* ---------- list ---------- */
-.list-section{}
-.list-header{
-  display:flex;
-  align-items:baseline;
-  justify-content:space-between;
-  margin-bottom:16px;
-}
-.list-header h2{
-  font-family:var(--font-display);
-  font-size:18px;
-  font-weight:600;
-  margin:0;
-}
-.ghost-btn{
-  background:transparent;
-  border:1px solid var(--line);
-  color:var(--paper);
-  font-size:13px;
-  padding:7px 12px;
-  border-radius:7px;
-  cursor:pointer;
-  font-family:var(--font-body);
-}
-.ghost-btn:hover{background:var(--bg-soft);}
-
-.items-grid{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:14px;
-}
-@media(min-width:640px){.items-grid{grid-template-columns:1fr 1fr;}}
-@media(min-width:960px){.items-grid{grid-template-columns:1fr 1fr 1fr;}}
-
-.item-card{
-  background:var(--paper);
-  color:var(--ink);
-  border-radius:10px;
-  padding:16px 16px 14px;
-  position:relative;
-}
-.item-card::before{
-  content:'';
-  position:absolute;
-  top:14px;
-  right:16px;
-  width:9px;
-  height:9px;
-  border-radius:50%;
-  background:var(--bg);
-  box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);
-}
-.item-title{
-  font-family:var(--font-display);
-  font-weight:600;
-  font-size:15.5px;
-  margin:0 22px 6px 0;
-  line-height:1.3;
-}
-.item-price{
-  font-size:15px;
-  font-weight:700;
-  color:var(--stamp-green);
-  margin:0 0 8px;
-}
-.item-meta{
-  display:flex;
-  gap:6px;
-  flex-wrap:wrap;
-  margin-bottom:10px;
-}
-.badge{
-  font-size:10.5px;
-  font-weight:700;
-  letter-spacing:0.02em;
-  text-transform:uppercase;
-  padding:3px 8px;
-  border-radius:5px;
-  background:var(--paper-dim);
-  color:var(--ink-soft);
-}
-.badge.cond-green{background:rgba(76,122,94,0.15);color:var(--stamp-green);}
-.badge.cond-red{background:rgba(193,67,46,0.15);color:var(--stamp-red);}
-.item-desc{
-  font-size:13px;
-  color:var(--ink-soft);
-  line-height:1.5;
-  margin:0 0 12px;
-}
-.item-actions{
-  display:flex;
-  gap:8px;
-  border-top:1px dashed var(--paper-dim);
-  padding-top:10px;
-}
-.icon-btn{
-  flex:1;
-  background:transparent;
-  border:none;
-  color:var(--ink-soft);
-  font-size:12.5px;
-  font-family:var(--font-body);
-  cursor:pointer;
-  padding:5px 0;
-  border-radius:5px;
-}
-.icon-btn:hover{background:var(--paper-dim);color:var(--ink);}
-.icon-btn.danger:hover{background:rgba(193,67,46,0.12);color:var(--stamp-red);}
-
-.empty-state{
-  text-align:center;
-  padding:30px 10px;
-  font-size:13.5px;
-  color:var(--paper);
-  opacity:0.5;
-}
-
-.toast{
-  position:fixed;
-  bottom:22px;
-  left:50%;
-  transform:translateX(-50%) translateY(10px);
-  background:var(--paper);
-  color:var(--ink);
-  padding:10px 18px;
-  border-radius:20px;
-  font-size:13px;
-  font-weight:600;
-  opacity:0;
-  pointer-events:none;
-  transition:opacity .2s ease, transform .2s ease;
-}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-@media (prefers-reduced-motion: reduce){
-  .mic-btn.recording{animation:none;}
-  *{transition:none !important;}
-}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #0a0a0a; color: #e0e0e0;
+    display: flex; justify-content: center; align-items: center;
+    min-height: 100vh; padding: 20px;
+  }
+  .container {
+    text-align: center; padding: 40px;
+    background: #1a1a1a; border-radius: 16px;
+    border: 1px solid #2a2a2a;
+    min-width: 320px; max-width: 440px;
+  }
+  h1 { font-size: 20px; margin-bottom: 8px; color: #fff; }
+  .subtitle { font-size: 13px; color: #666; margin-bottom: 24px; }
+  .status {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 20px;
+    font-size: 13px; margin-bottom: 20px;
+  }
+  .status.connected { background: #0a2e1a; color: #4ade80; }
+  .status.disconnected { background: #2e0a0a; color: #f87171; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; animation: pulse 1.5s infinite; }
+  .connected .dot { background: #4ade80; }
+  .disconnected .dot { background: #f87171; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  #qr-container { margin: 20px 0; }
+  #qr-container img {
+    width: 240px; height: 240px;
+    border-radius: 12px; background: #fff; padding: 12px;
+  }
+  .placeholder {
+    width: 240px; height: 240px; margin: 0 auto;
+    border-radius: 12px; background: #0d0d0d;
+    border: 2px dashed #333;
+    display: flex; align-items: center; justify-content: center;
+    color: #555; font-size: 14px;
+  }
+  .hint { font-size: 12px; color: #555; margin-top: 16px; line-height: 1.6; }
+  .hint code { background: #252525; padding: 2px 6px; border-radius: 4px; color: #c084fc; }
+  .log {
+    margin-top: 16px; padding: 12px; background: #0d0d0d;
+    border-radius: 8px; font-size: 11px; color: #666;
+    text-align: left; max-height: 120px; overflow-y: auto;
+    font-family: monospace;
+  }
 </style>
 </head>
 <body>
-
-<div class="app">
-  <div class="topbar">
-    <div class="brand">Suara<span>→</span>Listing</div>
-    <div class="count" id="itemCount"></div>
-  </div>
-
-  <div class="hero">
-    <button id="micBtn" class="mic-btn" aria-label="Rekam deskripsi barang">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" id="micIcon">
-        <path d="M12 15a3 3 0 003-3V6a3 3 0 10-6 0v6a3 3 0 003 3z" stroke="currentColor" stroke-width="1.8"/>
-        <path d="M19 11a7 7 0 01-14 0M12 18v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      </svg>
-    </button>
-    <p class="hero-status" id="status">Tekan tombol, lalu ucapkan deskripsi barangnya</p>
-    <p class="transcript-live" id="liveTranscript"></p>
-    <p class="support-note hidden" id="supportNote">Browser ini belum mendukung input suara — pakai ketik manual di bawah.</p>
-
-    <details class="manual-entry" id="manualEntry">
-      <summary>atau ketik manual</summary>
-      <textarea id="manualInput" placeholder="Contoh: jual sepeda gunung Polygon warna merah, kondisi masih bagus, jarang dipakai, ban masih tebal"></textarea>
-      <button id="manualBtn">Proses jadi listing</button>
-    </details>
-
-    <details class="master-entry" id="masterEntry">
-      <summary>daftar nama barang (Excel) — biar penamaan akurat</summary>
-      <div class="master-box">
-        <p class="master-status" id="masterStatus">Belum ada daftar. Upload file Excel (.xlsx/.xls/.csv) berisi nama-nama barang kamu, nanti hasil listing dari suara akan dicocokkan ke nama persis dari daftar itu kalau ada yang mirip.</p>
-        <div class="master-actions">
-          <label class="master-file-label" for="masterFileInput" id="masterFileLabel">Upload file Excel</label>
-          <input type="file" id="masterFileInput" accept=".xlsx,.xls,.csv" class="hidden">
-          <button class="master-clear-btn hidden" id="masterClearBtn">Hapus daftar</button>
-        </div>
-      </div>
-    </details>
-  </div>
-
-  <div class="draft-section hidden" id="draftSection">
-    <div class="draft-card">
-      <p class="draft-label" id="draftLabel">Cek dulu sebelum disimpan</p>
-      <div class="field-row">
-        <div class="field" style="grid-column:1/-1;">
-          <label for="fJudul">Judul</label>
-          <input type="text" id="fJudul">
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label for="fKategori">Kategori</label>
-          <select id="fKategori"></select>
-        </div>
-        <div class="field">
-          <label for="fKondisi">Kondisi</label>
-          <select id="fKondisi"></select>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field" style="grid-column:1/-1;">
-          <label for="fHarga">Harga (Rp)</label>
-          <input type="number" id="fHarga" min="0" step="1000">
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field" style="grid-column:1/-1;">
-          <label for="fDeskripsi">Deskripsi</label>
-          <textarea id="fDeskripsi"></textarea>
-        </div>
-      </div>
-      <div class="draft-actions">
-        <button class="btn-secondary" id="draftCancelBtn">Buang</button>
-        <button class="btn-primary" id="draftSaveBtn">Simpan ke daftar</button>
-      </div>
+  <div class="container">
+    <h1>🤖 WA RVO Bot</h1>
+    <p class="subtitle">Scan QR buat konek WhatsApp</p>
+    <div class="status disconnected" id="status">
+      <span class="dot"></span>
+      <span id="status-text">Nunggu koneksi...</span>
     </div>
-  </div>
-
-  <div class="list-section">
-    <div class="list-header">
-      <h2>Daftar barang</h2>
-      <button class="ghost-btn" id="exportBtn">Salin semua</button>
+    <div id="qr-container">
+      <div class="placeholder" id="placeholder">Loading...</div>
     </div>
-    <div class="items-grid" id="itemsGrid"></div>
-    <p class="empty-state" id="emptyState">Belum ada barang. Rekam suara di atas untuk mulai.</p>
+    <p class="hint">
+      Setelah konek, kirim <code>.rvo</code> di chat<br>
+      buat ngambil pesan "sekali lihat" terakhir
+    </p>
+    <div class="log" id="log">> Menunggu server...</div>
   </div>
-</div>
 
-<div class="toast" id="toast"></div>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script>
-const KATEGORI = ['Elektronik','Fashion','Rumah Tangga','Hobi & Mainan','Otomotif','Buku & Alat Tulis','Olahraga','Lainnya'];
-const KONDISI = ['Baru','Seperti Baru','Bekas - Baik','Bekas - Cukup Baik','Rusak Ringan'];
+// ==================== KONFIGURASI ====================
+const SUPABASE_URL = 'https://zwqwomfrgtqyaiiugryg.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind3cXdvbWZyZ3RxeWFpaXVncnlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyMDUzODAsImV4cCI6MjEwNDc4MTM4MH0.Zs2egViPPVec5OeAUgCI0-nUG1ABCDi2fyhVTvHNmao';
 
-let items = [];
-let editingId = null;
-let currentDraft = null;
-let masterList = [];
-let masterFileName = '';
+// Ganti ke URL bot server lo (Railway/VPS)
+const BOT_WS_URL = 'wss://your-bot-server.railway.app';
 
-const micBtn = document.getElementById('micBtn');
+// ==================== SUPABASE ====================
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ==================== STATE ====================
+let ws = null;
+let reconnectTimer = null;
+
+// ==================== DOM ====================
 const statusEl = document.getElementById('status');
-const liveTranscriptEl = document.getElementById('liveTranscript');
-const supportNote = document.getElementById('supportNote');
-const manualInput = document.getElementById('manualInput');
-const manualBtn = document.getElementById('manualBtn');
-const draftSection = document.getElementById('draftSection');
-const draftLabel = document.getElementById('draftLabel');
-const itemsGrid = document.getElementById('itemsGrid');
-const emptyState = document.getElementById('emptyState');
-const itemCount = document.getElementById('itemCount');
-const exportBtn = document.getElementById('exportBtn');
-const toastEl = document.getElementById('toast');
-const masterFileInput = document.getElementById('masterFileInput');
-const masterStatus = document.getElementById('masterStatus');
-const masterClearBtn = document.getElementById('masterClearBtn');
+const statusText = document.getElementById('status-text');
+const qrContainer = document.getElementById('qr-container');
+const logEl = document.getElementById('log');
 
-const fJudul = document.getElementById('fJudul');
-const fKategori = document.getElementById('fKategori');
-const fKondisi = document.getElementById('fKondisi');
-const fHarga = document.getElementById('fHarga');
-const fDeskripsi = document.getElementById('fDeskripsi');
-
-function fillSelect(select, options){
-  select.innerHTML = options.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('');
-}
-fillSelect(fKategori, KATEGORI);
-fillSelect(fKondisi, KONDISI);
-
-function escapeHtml(str){
-  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function log(msg) {
+  logEl.textContent = '> ' + msg;
+  console.log(msg);
 }
 
-function formatRupiah(n){
-  const num = Number(n) || 0;
-  return 'Rp ' + num.toLocaleString('id-ID');
-}
-
-function showToast(msg){
-  toastEl.textContent = msg;
-  toastEl.classList.add('show');
-  setTimeout(() => toastEl.classList.remove('show'), 1800);
-}
-
-function conditionBadgeClass(kondisi){
-  if(kondisi === 'Baru' || kondisi === 'Seperti Baru') return 'cond-green';
-  if(kondisi === 'Rusak Ringan') return 'cond-red';
-  return '';
-}
-
-/* ---------------- storage ---------------- */
-async function loadItems(){
-  try{
-    const res = await window.storage.get('items', false);
-    items = res && res.value ? JSON.parse(res.value) : [];
-  }catch(e){
-    items = [];
-  }
-  renderItems();
-}
-
-async function saveItems(){
-  try{
-    await window.storage.set('items', JSON.stringify(items), false);
-  }catch(e){
-    showToast('Gagal menyimpan, coba lagi');
-  }
-}
-
-/* ---------------- master list (nama barang dari Excel) ---------------- */
-async function loadMasterList(){
-  try{
-    const res = await window.storage.get('masterList', false);
-    if(res && res.value){
-      const parsed = JSON.parse(res.value);
-      masterList = Array.isArray(parsed.list) ? parsed.list : [];
-      masterFileName = parsed.fileName || '';
+// ==================== CEK SUPABASE ====================
+async function testSupabase() {
+  try {
+    const { data, error } = await supabase
+      .from('sessions')
+      .select('count')
+      .limit(1);
+    
+    if (error) {
+      log('⚠️ Supabase: ' + error.message);
+      return false;
     }
-  }catch(e){
-    masterList = [];
-    masterFileName = '';
-  }
-  renderMasterStatus();
-}
-
-async function saveMasterList(){
-  try{
-    await window.storage.set('masterList', JSON.stringify({ list: masterList, fileName: masterFileName }), false);
-  }catch(e){
-    showToast('Gagal menyimpan daftar');
+    log('✅ Supabase konek');
+    return true;
+  } catch (e) {
+    log('❌ Supabase error: ' + e.message);
+    return false;
   }
 }
 
-function renderMasterStatus(){
-  if(masterList.length){
-    masterStatus.innerHTML = `<strong>${masterList.length} nama barang</strong> dimuat dari "${escapeHtml(masterFileName)}". Hasil dari suara akan dicocokkan ke nama persis dari daftar ini kalau mirip.`;
-    masterClearBtn.classList.remove('hidden');
-  }else{
-    masterStatus.textContent = 'Belum ada daftar. Upload file Excel (.xlsx/.xls/.csv) berisi nama-nama barang kamu, nanti hasil listing dari suara akan dicocokkan ke nama persis dari daftar itu kalau ada yang mirip.';
-    masterClearBtn.classList.add('hidden');
-  }
-}
+// ==================== WEBSOCKET KE BOT SERVER ====================
+function connectWS() {
+  log('Nyambung ke bot server...');
+  ws = new WebSocket(BOT_WS_URL);
 
-masterFileInput.addEventListener('change', async (e) => {
-  const file = e.target.files && e.target.files[0];
-  if(!file) return;
-  masterStatus.textContent = 'Membaca file...';
-  try{
-    const buf = await file.arrayBuffer();
-    const wb = XLSX.read(buf, { type: 'array' });
-    const sheet = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+  ws.onopen = () => {
+    log('✅ WebSocket konek');
+    statusEl.className = 'status disconnected';
+    statusText.textContent = '⏳ Nunggu QR dari server';
+  };
 
-    let names = [];
-    for(const row of rows){
-      for(const cell of row){
-        const val = String(cell || '').trim();
-        if(val) names.push(val);
-        break; // ambil hanya kolom pertama tiap baris
+  ws.onmessage = async (event) => {
+    try {
+      const data = JSON.parse(event.data);
+
+      if (data.type === 'qr') {
+        log('📱 QR Code diterima');
+        qrContainer.innerHTML = `<img src="${data.qr}" alt="QR">`;
+        statusEl.className = 'status disconnected';
+        statusText.textContent = '⏳ Scan QR di WhatsApp';
+
+        // Simpan QR ke Supabase (opsional)
+        await supabase.from('sessions').upsert({
+          id: 'current',
+          qr: data.qr,
+          status: 'waiting',
+          updated_at: new Date().toISOString()
+        });
       }
-    }
-    // buang kemungkinan baris header (kata umum seperti "nama", "nama barang", dll di baris pertama)
-    if(names.length && /^(nama( barang)?|item|produk|sku)$/i.test(names[0])){
-      names = names.slice(1);
-    }
-    // rapikan & buang duplikat
-    const seen = new Set();
-    names = names.filter(n => {
-      const key = n.toLowerCase();
-      if(seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
 
-    if(!names.length){
-      masterStatus.textContent = 'Tidak ada nama barang yang terbaca dari file ini. Pastikan kolom pertama berisi nama barang.';
-      e.target.value = '';
-      return;
-    }
+      if (data.type === 'connected') {
+        log('✅ WhatsApp terhubung!');
+        statusEl.className = 'status connected';
+        statusText.textContent = '✅ Perangkat tertaut';
+        qrContainer.innerHTML =
+          '<div class="placeholder" style="border-color:#4ade80;color:#4ade80;">✅ Terhubung</div>';
 
-    masterList = names;
-    masterFileName = file.name;
-    await saveMasterList();
-    renderMasterStatus();
-    showToast(`${names.length} nama barang dimuat`);
-  }catch(err){
-    masterStatus.textContent = 'Gagal membaca file. Pastikan formatnya .xlsx, .xls, atau .csv.';
-  }finally{
-    e.target.value = '';
-  }
-});
-
-masterClearBtn.addEventListener('click', async () => {
-  masterList = [];
-  masterFileName = '';
-  await saveMasterList();
-  renderMasterStatus();
-  showToast('Daftar dihapus');
-});
-
-// pilih kandidat nama barang paling relevan dari masterList berdasarkan transkrip,
-// supaya tidak mengirim ribuan nama ke AI sekaligus
-function getRelevantMasterNames(text, limit){
-  if(!masterList.length) return [];
-  if(masterList.length <= 60) return masterList;
-
-  const tokens = text.toLowerCase().match(/[a-z0-9]{3,}/g) || [];
-  if(!tokens.length) return masterList.slice(0, limit);
-
-  const scored = masterList.map(name => {
-    const lower = name.toLowerCase();
-    let score = 0;
-    for(const t of tokens){ if(lower.includes(t)) score++; }
-    return { name, score };
-  }).filter(x => x.score > 0);
-
-  scored.sort((a, b) => b.score - a.score);
-  return scored.slice(0, limit).map(x => x.name);
-}
-
-/* ---------------- speech recognition ---------------- */
-const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recognition = null;
-let isRecording = false;
-let finalTranscript = '';
-
-if(SpeechRecognitionCtor){
-  recognition = new SpeechRecognitionCtor();
-  recognition.lang = 'id-ID';
-  recognition.continuous = false;
-  recognition.interimResults = true;
-
-  recognition.onstart = () => {
-    isRecording = true;
-    finalTranscript = '';
-    micBtn.classList.add('recording');
-    statusEl.textContent = 'Mendengarkan... ucapkan deskripsi barangnya';
-    liveTranscriptEl.textContent = '';
-  };
-
-  recognition.onresult = (event) => {
-    let interim = '';
-    for(let i = event.resultIndex; i < event.results.length; i++){
-      const transcriptPiece = event.results[i][0].transcript;
-      if(event.results[i].isFinal){
-        finalTranscript += transcriptPiece + ' ';
-      }else{
-        interim += transcriptPiece;
+        await supabase.from('sessions').upsert({
+          id: 'current',
+          qr: null,
+          status: 'connected',
+          updated_at: new Date().toISOString()
+        });
       }
-    }
-    liveTranscriptEl.textContent = (finalTranscript + interim).trim();
-  };
 
-  recognition.onerror = (event) => {
-    isRecording = false;
-    micBtn.classList.remove('recording');
-    if(event.error === 'no-speech'){
-      statusEl.textContent = 'Tidak terdengar suara, coba lagi';
-    }else if(event.error === 'not-allowed' || event.error === 'service-not-allowed'){
-      statusEl.textContent = 'Izin mikrofon ditolak — aktifkan lewat pengaturan browser';
-    }else{
-      statusEl.textContent = 'Terjadi kendala, coba lagi';
-    }
-  };
-
-  recognition.onend = () => {
-    isRecording = false;
-    micBtn.classList.remove('recording');
-    const text = finalTranscript.trim();
-    if(text){
-      processTranscript(text);
-    }else{
-      statusEl.textContent = 'Tekan tombol, lalu ucapkan deskripsi barangnya';
-    }
-  };
-
-  micBtn.addEventListener('click', () => {
-    if(isRecording){
-      recognition.stop();
-    }else{
-      liveTranscriptEl.textContent = '';
-      try{
-        recognition.start();
-      }catch(e){
-        statusEl.textContent = 'Tidak bisa mulai merekam, coba lagi';
+      if (data.type === 'disconnected') {
+        log('❌ Terputus');
+        statusEl.className = 'status disconnected';
+        statusText.textContent = '❌ Terputus';
       }
+
+      if (data.type === 'log') {
+        log(data.message);
+      }
+    } catch (e) {
+      console.error('Parse error:', e);
     }
-  });
-}else{
-  supportNote.classList.remove('hidden');
-  micBtn.disabled = true;
-  micBtn.style.opacity = '0.4';
-  micBtn.style.cursor = 'not-allowed';
-  document.getElementById('manualEntry').open = true;
-  statusEl.textContent = 'Input suara tidak tersedia di browser ini';
-}
-
-manualBtn.addEventListener('click', () => {
-  const text = manualInput.value.trim();
-  if(!text) return;
-  processTranscript(text);
-});
-
-/* ---------------- AI parsing ---------------- */
-async function processTranscript(text){
-  micBtn.classList.add('thinking');
-  statusEl.textContent = 'Menyusun listing dari ucapanmu...';
-  liveTranscriptEl.textContent = text;
-
-  const relevantNames = getRelevantMasterNames(text, 50);
-  const masterRefBlock = relevantNames.length
-    ? `\n\nPENTING - Referensi nama barang resmi:\nBerikut daftar nama barang baku milik penjual (diambil dari file Excel yang diupload). Jika salah satu di antaranya cocok atau sangat mirip dengan barang yang dideskripsikan pengguna, gunakan PERSIS nama tersebut apa adanya (ejaan, kapitalisasi, singkatan) sebagai nilai "judul" — jangan diparafrase. Jika tidak ada yang benar-benar cocok, buat judul baru seperti biasa dari deskripsi.\nDaftar referensi:\n${relevantNames.map(n => '- ' + n).join('\n')}`
-    : '';
-
-  const systemPrompt = `Kamu mengubah deskripsi lisan tentang barang bekas/barang jual menjadi data listing terstruktur untuk marketplace Indonesia.
-Balas HANYA dengan satu objek JSON valid, tanpa teks lain, tanpa markdown code fence, tanpa penjelasan.
-Format persis:
-{"judul": "judul singkat menarik maksimal 8 kata", "kategori": "salah satu dari: ${KATEGORI.join(', ')}", "kondisi": "salah satu dari: ${KONDISI.join(', ')}", "harga_estimasi": angka_rupiah_tanpa_titik_atau_koma_boleh_0_jika_tidak_disebutkan, "deskripsi": "deskripsi listing 2-3 kalimat siap pakai, ditulis rapi dari transkrip", "tag_pencarian": ["maks 5 kata kunci"]}${masterRefBlock}`;
-
-  try{
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: text }]
-      })
-    });
-
-    if(!response.ok) throw new Error('API request failed');
-    const data = await response.json();
-    const textBlock = (data.content || []).find(b => b.type === 'text');
-    if(!textBlock) throw new Error('No text in response');
-
-    let cleaned = textBlock.text.trim().replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
-    const parsed = JSON.parse(cleaned);
-
-    currentDraft = {
-      judul: parsed.judul || text.slice(0, 40),
-      kategori: KATEGORI.includes(parsed.kategori) ? parsed.kategori : 'Lainnya',
-      kondisi: KONDISI.includes(parsed.kondisi) ? parsed.kondisi : 'Bekas - Baik',
-      harga: Number(parsed.harga_estimasi) || 0,
-      deskripsi: parsed.deskripsi || text,
-      tags: Array.isArray(parsed.tag_pencarian) ? parsed.tag_pencarian : []
-    };
-    openDraft('Hasil dari suaramu — cek dulu sebelum disimpan');
-  }catch(e){
-    currentDraft = {
-      judul: text.length > 40 ? text.slice(0, 40) + '…' : text,
-      kategori: 'Lainnya',
-      kondisi: 'Bekas - Baik',
-      harga: 0,
-      deskripsi: text,
-      tags: []
-    };
-    openDraft('Gagal menyusun otomatis — isi transkrip mentah, silakan rapikan manual');
-  }finally{
-    micBtn.classList.remove('thinking');
-    statusEl.textContent = 'Tekan tombol, lalu ucapkan deskripsi barangnya';
-    liveTranscriptEl.textContent = '';
-    manualInput.value = '';
-  }
-}
-
-function openDraft(label){
-  draftLabel.textContent = label;
-  fJudul.value = currentDraft.judul;
-  fKategori.value = currentDraft.kategori;
-  fKondisi.value = currentDraft.kondisi;
-  fHarga.value = currentDraft.harga;
-  fDeskripsi.value = currentDraft.deskripsi;
-  draftSection.classList.remove('hidden');
-  draftSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
-
-document.getElementById('draftCancelBtn').addEventListener('click', () => {
-  draftSection.classList.add('hidden');
-  currentDraft = null;
-});
-
-document.getElementById('draftSaveBtn').addEventListener('click', async () => {
-  if(!fJudul.value.trim()){
-    fJudul.focus();
-    return;
-  }
-  const newItem = {
-    id: 'item_' + Date.now() + '_' + Math.floor(Math.random()*1000),
-    judul: fJudul.value.trim(),
-    kategori: fKategori.value,
-    kondisi: fKondisi.value,
-    harga: Number(fHarga.value) || 0,
-    deskripsi: fDeskripsi.value.trim(),
-    tags: currentDraft ? currentDraft.tags : [],
-    createdAt: Date.now()
   };
-  items.unshift(newItem);
-  await saveItems();
-  renderItems();
-  draftSection.classList.add('hidden');
-  currentDraft = null;
-  showToast('Tersimpan ke daftar');
-});
 
-/* ---------------- list render ---------------- */
-function renderItems(){
-  itemCount.textContent = items.length ? `${items.length} barang` : '';
-  emptyState.classList.toggle('hidden', items.length > 0);
+  ws.onerror = () => log('❌ WebSocket error');
 
-  itemsGrid.innerHTML = items.map(item => {
-    if(item.id === editingId){
-      return `
-      <div class="item-card" data-id="${item.id}">
-        <div class="field" style="margin-bottom:8px;">
-          <label>Judul</label>
-          <input type="text" class="edit-judul" value="${escapeHtml(item.judul)}">
-        </div>
-        <div class="field-row" style="margin-bottom:8px;">
-          <div class="field">
-            <label>Kategori</label>
-            <select class="edit-kategori">${KATEGORI.map(k => `<option value="${k}" ${k===item.kategori?'selected':''}>${k}</option>`).join('')}</select>
-          </div>
-          <div class="field">
-            <label>Kondisi</label>
-            <select class="edit-kondisi">${KONDISI.map(k => `<option value="${k}" ${k===item.kondisi?'selected':''}>${k}</option>`).join('')}</select>
-          </div>
-        </div>
-        <div class="field" style="margin-bottom:8px;">
-          <label>Harga (Rp)</label>
-          <input type="number" class="edit-harga" value="${item.harga}">
-        </div>
-        <div class="field" style="margin-bottom:10px;">
-          <label>Deskripsi</label>
-          <textarea class="edit-deskripsi">${escapeHtml(item.deskripsi)}</textarea>
-        </div>
-        <div class="item-actions">
-          <button class="icon-btn cancel-edit">Batal</button>
-          <button class="icon-btn save-edit" style="font-weight:700;">Simpan</button>
-        </div>
-      </div>`;
-    }
-    return `
-      <div class="item-card" data-id="${item.id}">
-        <p class="item-title">${escapeHtml(item.judul)}</p>
-        <p class="item-price">${formatRupiah(item.harga)}</p>
-        <div class="item-meta">
-          <span class="badge ${conditionBadgeClass(item.kondisi)}">${escapeHtml(item.kondisi)}</span>
-          <span class="badge">${escapeHtml(item.kategori)}</span>
-        </div>
-        <p class="item-desc">${escapeHtml(item.deskripsi)}</p>
-        <div class="item-actions">
-          <button class="icon-btn copy-item">Salin</button>
-          <button class="icon-btn edit-item">Edit</button>
-          <button class="icon-btn danger delete-item">Hapus</button>
-        </div>
-      </div>`;
-  }).join('');
+  ws.onclose = () => {
+    log('🔌 WebSocket tertutup, reconnect 3 detik...');
+    statusEl.className = 'status disconnected';
+    statusText.textContent = '🔌 Terputus dari server';
+    clearTimeout(reconnectTimer);
+    reconnectTimer = setTimeout(connectWS, 3000);
+  };
 }
 
-function itemToText(item){
-  const parts = [
-    item.judul,
-    'Harga: ' + formatRupiah(item.harga),
-    'Kondisi: ' + item.kondisi,
-    'Kategori: ' + item.kategori,
-    '',
-    item.deskripsi
-  ];
-  if(item.tags && item.tags.length){
-    parts.push('', 'Kata kunci: ' + item.tags.join(', '));
-  }
-  return parts.join('\n');
-}
-
-itemsGrid.addEventListener('click', async (e) => {
-  const card = e.target.closest('.item-card');
-  if(!card) return;
-  const id = card.dataset.id;
-  const item = items.find(i => i.id === id);
-  if(!item) return;
-
-  if(e.target.classList.contains('delete-item')){
-    if(confirm('Hapus "' + item.judul + '" dari daftar?')){
-      items = items.filter(i => i.id !== id);
-      await saveItems();
-      renderItems();
-      showToast('Dihapus');
-    }
-  }else if(e.target.classList.contains('edit-item')){
-    editingId = id;
-    renderItems();
-  }else if(e.target.classList.contains('cancel-edit')){
-    editingId = null;
-    renderItems();
-  }else if(e.target.classList.contains('save-edit')){
-    item.judul = card.querySelector('.edit-judul').value.trim() || item.judul;
-    item.kategori = card.querySelector('.edit-kategori').value;
-    item.kondisi = card.querySelector('.edit-kondisi').value;
-    item.harga = Number(card.querySelector('.edit-harga').value) || 0;
-    item.deskripsi = card.querySelector('.edit-deskripsi').value.trim();
-    editingId = null;
-    await saveItems();
-    renderItems();
-    showToast('Perubahan disimpan');
-  }else if(e.target.classList.contains('copy-item')){
-    try{
-      await navigator.clipboard.writeText(itemToText(item));
-      showToast('Listing disalin');
-    }catch(err){
-      showToast('Gagal menyalin');
-    }
-  }
-});
-
-exportBtn.addEventListener('click', async () => {
-  if(!items.length){
-    showToast('Belum ada barang');
-    return;
-  }
-  const text = items.map(itemToText).join('\n\n-----\n\n');
-  try{
-    await navigator.clipboard.writeText(text);
-    showToast('Semua listing disalin');
-  }catch(err){
-    showToast('Gagal menyalin');
-  }
-});
-
-loadItems();
-loadMasterList();
+// ==================== START ====================
+(async () => {
+  await testSupabase();
+  connectWS();
+})();
 </script>
 </body>
 </html>
