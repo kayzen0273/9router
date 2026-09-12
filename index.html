@@ -43,16 +43,6 @@
     display: flex; align-items: center; justify-content: center;
     color: #555; font-size: 14px;
   }
-  .btn {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 12px 24px; border-radius: 10px;
-    background: #c084fc; color: #0a0a0a;
-    border: none; font-weight: 600; font-size: 14px;
-    cursor: pointer; margin-top: 16px;
-    transition: opacity 0.2s;
-  }
-  .btn:hover { opacity: 0.85; }
-  .btn:disabled { opacity: 0.3; cursor: not-allowed; }
   .hint { font-size: 12px; color: #555; margin-top: 16px; line-height: 1.6; }
   .hint code { background: #252525; padding: 2px 6px; border-radius: 4px; color: #c084fc; }
   .log {
@@ -72,13 +62,8 @@
       <span id="status-text">Nunggu koneksi...</span>
     </div>
     <div id="qr-container">
-      <div class="placeholder" id="placeholder">Loading...</div>
+      <div class="placeholder">Loading...</div>
     </div>
-    
-    <button class="btn" id="printBtn" disabled>
-      🖨️ Cetak QR via Bluetooth
-    </button>
-
     <p class="hint">
       Setelah konek, kirim <code>.rvo</code> di chat<br>
       buat ngambil pesan "sekali lihat" terakhir
@@ -88,217 +73,60 @@
 
 <script>
 // ============================================================
+// GANTI INI KE URL RAILWAY LO
+// ============================================================
 const BOT_WS_URL = 'wss://9router-production-46d3.up.railway.app';
 // ============================================================
 
 let ws = null;
 let reconnectTimer = null;
-let currentQR = null;
 
 const statusEl = document.getElementById('status');
 const statusText = document.getElementById('status-text');
 const qrContainer = document.getElementById('qr-container');
 const logEl = document.getElementById('log');
-const printBtn = document.getElementById('printBtn');
 
-function log(msg) {
-  logEl.textContent = '> ' + msg;
-}
+function log(msg) { logEl.textContent = '> ' + msg; }
 
-// ==================== BLUETOOTH PRINT ====================
-async function printQRBluetooth() {
-  if (!currentQR) {
-    log('❌ QR belum ada');
-    return;
-  }
-
-  // Cek support Web Bluetooth
-  if (!navigator.bluetooth) {
-    log('❌ Browser lo gak support Bluetooth. Pakai Chrome!');
-    return;
-  }
-
-  try {
-    log('🔍 Nyari printer Bluetooth...');
-    
-    // Minta akses device Bluetooth (printer thermal umumnya pakai service 0x18F0 atau 0xFF00)
-    const device = await navigator.bluetooth.requestDevice({
-      acceptAllDevices: true,
-      optionalServices: [
-        '000018f0-0000-1000-8000-00805f9b34fb', // Printer service umum
-        '0000ff00-0000-1000-8000-00805f9b34fb', // Alternatif
-        '49535343-fe7d-4ae5-8fa9-9fafd205e455', // ISSC / Microchip
-        'e7810a71-73ae-499d-8c15-faa9aef0c3f2'  // Umum di printer Cina
-      ]
-    });
-
-    log('✅ Ketemu: ' + device.name);
-    const server = await device.gatt.connect();
-    log('🔗 Konek ke GATT...');
-
-    // Cari service yang cocok
-    const services = await server.getPrimaryServices();
-    let writeChar = null;
-
-    for (const service of services) {
-      const chars = await service.getCharacteristics();
-      for (const c of chars) {
-        if (c.properties.write || c.properties.writeWithoutResponse) {
-          writeChar = c;
-          break;
-        }
-      }
-      if (writeChar) break;
-    }
-
-    if (!writeChar) {
-      log('❌ Printer gak punya karakteristik write');
-      return;
-    }
-
-    log('📝 Nyiapin data QR...');
-
-    // Convert QR data URL ke bytes
-    const img = new Image();
-    img.src = currentQR;
-    await new Promise(r => img.onload = r);
-
-    // Convert gambar ke ESC/POS bitmap (printer thermal)
-    const escposData = await convertToESCPOS(img);
-    
-    // Kirim ke printer (chunk 100 bytes biar gak overflow)
-    const chunkSize = 100;
-    for (let i = 0; i < escposData.length; i += chunkSize) {
-      const chunk = escposData.slice(i, i + chunkSize);
-      await writeChar.writeValue(chunk);
-    }
-
-    log('✅ QR terkirim ke printer!');
-  } catch (e) {
-    log('❌ Error: ' + e.message);
-    console.error(e);
-  }
-}
-
-// Convert gambar ke ESC/POS bitmap
-async function convertToESCPOS(img) {
-  // Resize ke lebar printer (384px umumnya)
-  const targetWidth = 384;
-  const scale = targetWidth / img.width;
-  const targetHeight = Math.floor(img.height * scale);
-
-  const canvas = document.createElement('canvas');
-  canvas.width = targetWidth;
-  canvas.height = targetHeight;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0, 0, targetWidth, targetHeight);
-  ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
-
-  const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight).data;
-  const bytesPerRow = targetWidth / 8;
-  const bitmap = [];
-
-  // ESC/POS header: initialize
-  bitmap.push(0x1B, 0x40); // ESC @
-  
-  // Center align
-  bitmap.push(0x1B, 0x61, 0x01);
-
-  // GS v 0 — raster bit image
-  bitmap.push(0x1D, 0x76, 0x30, 0x00);
-  bitmap.push(bytesPerRow & 0xFF, (bytesPerRow >> 8) & 0xFF);
-  bitmap.push(targetHeight & 0xFF, (targetHeight >> 8) & 0xFF);
-
-  // Convert pixel ke bitmap 1-bit
-  for (let y = 0; y < targetHeight; y++) {
-    for (let x = 0; x < targetWidth; x += 8) {
-      let byte = 0;
-      for (let bit = 0; bit < 8; bit++) {
-        const px = x + bit;
-        if (px >= targetWidth) continue;
-        const idx = (y * targetWidth + px) * 4;
-        const r = imageData[idx];
-        const g = imageData[idx + 1];
-        const b = imageData[idx + 2];
-        const gray = (r + g + b) / 3;
-        // Kalau gelap → bit 1
-        if (gray < 128) byte |= (0x80 >> bit);
-      }
-      bitmap.push(byte);
-    }
-  }
-
-  // Feed + cut
-  bitmap.push(0x0A, 0x0A, 0x0A);
-  bitmap.push(0x1D, 0x56, 0x42, 0x00); // GS V B 0 (cut)
-
-  return new Uint8Array(bitmap);
-}
-
-// ==================== WEBSOCKET ====================
 function connectWS() {
   log('Nyambung ke server...');
-  try {
-    ws = new WebSocket(BOT_WS_URL);
-  } catch (e) {
-    log('❌ URL salah: ' + e.message);
-    return;
-  }
+  ws = new WebSocket(BOT_WS_URL);
 
   ws.onopen = () => {
     log('✅ Server konek');
-    statusEl.className = 'status disconnected';
-    statusText.textContent = '⏳ Nunggu QR dari server';
+    statusText.textContent = '⏳ Nunggu QR';
   };
 
   ws.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data);
-
       if (data.type === 'qr') {
         log('📱 QR Code diterima');
-        currentQR = data.qr;
         qrContainer.innerHTML = '<img src="' + data.qr + '" alt="QR">';
-        statusEl.className = 'status disconnected';
         statusText.textContent = '⏳ Scan QR di WhatsApp';
-        printBtn.disabled = false;
       }
-
       if (data.type === 'connected') {
         log('✅ WhatsApp terhubung!');
         statusEl.className = 'status connected';
         statusText.textContent = '✅ Perangkat tertaut';
         qrContainer.innerHTML = '<div class="placeholder" style="border-color:#4ade80;color:#4ade80;">✅ Terhubung</div>';
-        printBtn.disabled = true;
-        currentQR = null;
       }
-
       if (data.type === 'disconnected') {
         log('❌ Terputus');
         statusEl.className = 'status disconnected';
         statusText.textContent = '❌ Terputus';
       }
-
-      if (data.type === 'log') {
-        log(data.message);
-      }
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) { console.error(e); }
   };
 
-  ws.onerror = () => log('❌ Server error — cek Railway lo');
+  ws.onerror = () => log('❌ Server error');
   ws.onclose = () => {
-    log('🔌 Terputus, reconnect 3 detik...');
-    statusEl.className = 'status disconnected';
-    statusText.textContent = '🔌 Terputus';
+    log('🔌 Terputus, reconnect...');
     clearTimeout(reconnectTimer);
     reconnectTimer = setTimeout(connectWS, 3000);
   };
 }
 
-printBtn.addEventListener('click', printQRBluetooth);
 connectWS();
 </script>
 </body>
