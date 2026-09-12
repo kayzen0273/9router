@@ -1,117 +1,133 @@
-// bot.js — Pairing code version
 const { 
   default: makeWASocket, 
   useMultiFileAuthState, 
-  DisconnectReason,
-  Browsers 
+  DisconnectReason 
 } = require("@whiskeysockets/baileys");
 const { WebSocketServer } = require("ws");
-const express = require("express");
+const qrcode = require("qrcode");
 const pino = require("pino");
+const express = require("express");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
-let pairingCode = null;
+let qrCodeData = null;
 let isConnected = false;
-let sock = null;
-let currentNumber = null;
+const viewOnceCache = new Map();
 
-// WebSocket
-const server = app.listen(PORT, () => console.log("Server jalan di " + PORT));
+// ==================== HTTP + WEBSOCKET SERVER ====================
+const server = app.listen(PORT, () => {
+  console.log("Server jalan di port " + PORT);
+});
+
 const wss = new WebSocketServer({ server });
+
+wss.on("connection", (ws) => {
+  console.log("Client WebSocket konek");
+  // Kirim QR kalau udah ada
+  if (qrCodeData) {
+    qrcode.toDataURL(qrCodeData).then(dataUrl => {
+      ws.send(JSON.stringify({ type: "qr", qr: dataUrl }));
+    });
+  }
+  if (isConnected) {
+    ws.send(JSON.stringify({ type: "connected" }));
+  }
+});
 
 function broadcast(data) {
   const msg = JSON.stringify(data);
-  wss.clients.forEach(c => { if (c.readyState === 1) c.send(msg); });
+  wss.clients.forEach(c => { 
+    if (c.readyState === 1) c.send(msg); 
+  });
 }
 
-// HTTP: Minta pairing code
-app.get("/pair", async (req, res) => {
-  const number = req.query.number;
-  if (!number) return res.status(400).json({ error: "Nomor wajib diisi" });
-
-  // Format: 628xxx (tanpa +, spasi, strip)
-  const cleanNumber = number.replace(/[^0-9]/g, '');
-  if (cleanNumber.length < 10) {
-    return res.status(400).json({ error: "Nomor gak valid" });
-  }
-
-  try {
-    currentNumber = cleanNumber;
-    const code = await generatePairingCode(cleanNumber);
-    res.json({ code: code });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
-// HTTP: Cek status
+// ==================== HTTP ENDPOINTS ====================
 app.get("/status", (req, res) => {
-  res.json({ connected: isConnected, code: pairingCode });
+  res.json({ connected: isConnected, qr: qrCodeData ? "ada" : null });
 });
 
-async function generatePairingCode(phoneNumber) {
+app.get("/", (req, res) => {
+  res.send("WA RVO Bot Server — Jalan!");
+});
+
+// ==================== WHATSAPP BOT ====================
+async function startBot() {
+  console.log("Mulai konek ke WhatsApp...");
+  
   const { state, saveCreds } = await useMultiFileAuthState("auth_info");
-  
-  // Hapus session lama kalo ada
-  // (biar bisa pairing ulang)
-  
-  sock = makeWASocket({
+  const sock = makeWASocket({
     auth: state,
-    printQRInTerminal: false,
+    printQRInTerminal: true,
     logger: pino({ level: "silent" }),
-    browser: Browsers.macOS("Chrome"), // 🔥 WAJIB: format ini buat pairing code [citation:3]
+    browser: ["Ubuntu", "Chrome", "20.0.04"],
   });
 
   sock.ev.on("creds.update", saveCreds);
 
-  // Tunggu sampe socket siap, baru minta kode
-  return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error("Timeout")), 30000);
+  sock.ev.on("connection.update", async ({ connection, lastDisconnect, qr }) => {
+    if (qr) {
+      console.log("📱 QR BARU DITERIMA, ngirim ke client...");
+      qrCodeData = qr;
+      isConnected = false;
+      const dataUrl = await qrcode.toDataURL(qr);
+      broadcast({ type: "qr", qr: dataUrl });
+      console.log("✅ QR dikirim ke WebSocket client");
+    }
+    if (connection === "open") {
+      console.log("✅ WhatsApp terhubung!");
+      isConnected = true;
+      qrCodeData = null;
+      broadcast({ type: "connected" });
+    }
+    if (connection === "close") {
+      console.log("❌ Koneksi tertutup");
+      isConnected = false;
+      broadcast({ type: "disconnected" });
+      if (lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut) {
+        console.log("🔄 Reconnect...");
+        startBot();
+      }
+    }
+  });
 
-    sock.ev.on("connection.update", async (update) => {
-      const { connection, qr } = update;
+  sock.ev.on("messages.upsert", async (m) => {
+    for (const msg of m.messages) {
+      if (msg.key.fromMe) continue;
+      const jid = msg.key.remoteJid;
+      const content = msg.message;
+      if (!content) continue;
+      const text = content.conversation || content.extendedTextMessage?.text || "";
 
-      // 🔥 TRIGGER: Minta pairing code saat QR muncul [citation:10]
-      if (qr && !sock.authState.creds.registered && !pairingCode) {
-        try {
-          const code = await sock.requestPairingCode(phoneNumber);
-          pairingCode = code;
-          clearTimeout(timeout);
-          broadcast({ type: "pairing_code", code: code });
-          resolve(code);
-        } catch (e) {
-          clearTimeout(timeout);
-          reject(e);
+      const vo = content.viewOnceMessageV2 || content.viewOnceMessage;
+      if (vo) {
+        const inner = vo.message;
+        const type = inner?.imageMessage ? "image" : inner?.videoMessage ? "video" : null;
+        if (type) {
+          viewOnceCache.set(jid, { type, content: inner });
+          console.log("📸 View once " + type + " dari " + jid);
         }
       }
 
-      if (connection === "open") {
-        isConnected = true;
-        broadcast({ type: "connected" });
-        console.log("✅ WhatsApp terhubung!");
+      if (text.trim() === ".rvo") {
+        const cached = viewOnceCache.get(jid);
+        if (!cached) {
+          await sock.sendMessage(jid, { text: "❌ Gak ada view once" });
+          continue;
+        }
+        try {
+          const buf = await sock.downloadMediaMessage({ message: cached.content });
+          await sock.sendMessage(jid, {
+            [cached.type]: buf,
+            caption: "🔓 .rvo — Diambil dari View Once",
+          });
+          viewOnceCache.delete(jid);
+        } catch (e) {
+          await sock.sendMessage(jid, { text: "❌ Gagal ambil media" });
+        }
       }
-
-      if (connection === "close") {
-        isConnected = false;
-        broadcast({ type: "disconnected" });
-      }
-    });
+    }
   });
 }
 
-// WebSocket
-wss.on("connection", (ws) => {
-  ws.on("message", async (msg) => {
-    try {
-      const data = JSON.parse(msg);
-      if (data.action === "pair" && data.number) {
-        const code = await generatePairingCode(data.number);
-        ws.send(JSON.stringify({ type: "pairing_code", code: code }));
-      }
-    } catch (e) {
-      ws.send(JSON.stringify({ type: "error", message: e.message }));
-    }
-  });
-});
+startBot();
