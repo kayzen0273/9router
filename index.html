@@ -43,18 +43,6 @@
     display: flex; align-items: center; justify-content: center;
     color: #555; font-size: 14px;
   }
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    padding: 10px 20px; border-radius: 8px;
-    border: none; font-weight: 600; font-size: 13px;
-    cursor: pointer; margin: 4px;
-    transition: opacity 0.2s;
-  }
-  .btn:hover { opacity: 0.85; }
-  .btn:disabled { opacity: 0.3; cursor: not-allowed; }
-  .btn-bt { background: #c084fc; color: #0a0a0a; }
-  .btn-print { background: #4ade80; color: #0a0a0a; }
-  .btn-pair { background: #c084fc; color: #0a0a0a; width: 100%; }
   .pair-box {
     margin-top: 20px; padding: 16px;
     background: #0d0d0d; border-radius: 10px;
@@ -68,6 +56,14 @@
     margin-bottom: 10px; outline: none;
   }
   .pair-input:focus { border-color: #c084fc; }
+  .pair-btn {
+    width: 100%; padding: 10px;
+    background: #c084fc; color: #0a0a0a;
+    border: none; border-radius: 8px;
+    font-weight: 600; font-size: 14px;
+    cursor: pointer;
+  }
+  .pair-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .pair-code {
     margin-top: 12px; padding: 12px;
     background: #0a2e1a; color: #4ade80;
@@ -83,7 +79,6 @@
     text-align: left; max-height: 120px; overflow-y: auto;
     font-family: monospace;
   }
-  .print-buttons { margin-top: 16px; }
 </style>
 </head>
 <body>
@@ -100,31 +95,27 @@
       <div class="placeholder">Loading...</div>
     </div>
 
-    <div class="print-buttons">
-      <button class="btn btn-bt" id="printBtBtn" disabled>🖨️ Cetak via Bluetooth</button>
-      <button class="btn btn-print" id="printBrowserBtn" disabled>🖨️ Cetak via Browser</button>
-    </div>
-
     <div class="pair-box">
       <h3>🔑 Pairing Code (8 Digit)</h3>
       <input class="pair-input" id="phoneInput" type="tel" placeholder="62812xxxxxxx" />
-      <button class="btn btn-pair" id="pairBtn">Minta Kode</button>
+      <button class="pair-btn" id="pairBtn">Minta Kode</button>
       <div id="pairCodeDisplay"></div>
     </div>
 
     <p class="hint">
-      Setelah konek, kirim <code>.rvo</code> di chat
+      Command: <code>.rvo</code> · <code>.sticker</code> · <code>.tt</code> · <code>.ig</code>
     </p>
     <div class="log" id="log">> Menunggu server...</div>
   </div>
 
 <script>
+// ============================================================
 const BOT_WS_URL = 'wss://9router-production-46d3.up.railway.app';
 const BOT_HTTP_URL = 'https://9router-production-46d3.up.railway.app';
+// ============================================================
 
 let ws = null;
 let reconnectTimer = null;
-let currentQR = null;
 
 const statusEl = document.getElementById('status');
 const statusText = document.getElementById('status-text');
@@ -133,136 +124,8 @@ const logEl = document.getElementById('log');
 const phoneInput = document.getElementById('phoneInput');
 const pairBtn = document.getElementById('pairBtn');
 const pairCodeDisplay = document.getElementById('pairCodeDisplay');
-const printBtBtn = document.getElementById('printBtBtn');
-const printBrowserBtn = document.getElementById('printBrowserBtn');
 
 function log(msg) { logEl.textContent = '> ' + msg; }
-
-// ==================== PRINT VIA BLUETOOTH ====================
-async function printQRBluetooth() {
-  if (!currentQR) { log('❌ QR belum ada'); return; }
-  if (!navigator.bluetooth) { log('❌ Browser gak support Bluetooth. Pakai Chrome!'); return; }
-
-  try {
-    log('🔍 Nyari printer Bluetooth...');
-    
-    const device = await navigator.bluetooth.requestDevice({
-      acceptAllDevices: true,
-      optionalServices: [
-        '000018f0-0000-1000-8000-00805f9b34fb',
-        '0000ff00-0000-1000-8000-00805f9b34fb',
-        '49535343-fe7d-4ae5-8fa9-9fafd205e455',
-        'e7810a71-73ae-499d-8c15-faa9aef0c3f2'
-      ]
-    });
-
-    log('✅ Ketemu: ' + device.name);
-    const server = await device.gatt.connect();
-    log('🔗 Konek ke GATT...');
-
-    const services = await server.getPrimaryServices();
-    let writeChar = null;
-
-    for (const service of services) {
-      const chars = await service.getCharacteristics();
-      for (const c of chars) {
-        if (c.properties.write || c.properties.writeWithoutResponse) {
-          writeChar = c;
-          break;
-        }
-      }
-      if (writeChar) break;
-    }
-
-    if (!writeChar) { log('❌ Printer gak punya karakteristik write'); return; }
-
-    log('📝 Nyiapin data QR...');
-    const img = new Image();
-    img.src = currentQR;
-    await new Promise(r => img.onload = r);
-
-    const escposData = await convertToESCPOS(img);
-    
-    const chunkSize = 100;
-    for (let i = 0; i < escposData.length; i += chunkSize) {
-      const chunk = escposData.slice(i, i + chunkSize);
-      await writeChar.writeValue(chunk);
-    }
-
-    log('✅ QR terkirim ke printer!');
-  } catch (e) {
-    log('❌ Error: ' + e.message);
-  }
-}
-
-async function convertToESCPOS(img) {
-  const targetWidth = 384;
-  const scale = targetWidth / img.width;
-  const targetHeight = Math.floor(img.height * scale);
-
-  const canvas = document.createElement('canvas');
-  canvas.width = targetWidth;
-  canvas.height = targetHeight;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0, 0, targetWidth, targetHeight);
-  ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
-
-  const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight).data;
-  const bytesPerRow = targetWidth / 8;
-  const bitmap = [];
-
-  bitmap.push(0x1B, 0x40);
-  bitmap.push(0x1B, 0x61, 0x01);
-  bitmap.push(0x1D, 0x76, 0x30, 0x00);
-  bitmap.push(bytesPerRow & 0xFF, (bytesPerRow >> 8) & 0xFF);
-  bitmap.push(targetHeight & 0xFF, (targetHeight >> 8) & 0xFF);
-
-  for (let y = 0; y < targetHeight; y++) {
-    for (let x = 0; x < targetWidth; x += 8) {
-      let byte = 0;
-      for (let bit = 0; bit < 8; bit++) {
-        const px = x + bit;
-        if (px >= targetWidth) continue;
-        const idx = (y * targetWidth + px) * 4;
-        const gray = (imageData[idx] + imageData[idx+1] + imageData[idx+2]) / 3;
-        if (gray < 128) byte |= (0x80 >> bit);
-      }
-      bitmap.push(byte);
-    }
-  }
-
-  bitmap.push(0x0A, 0x0A, 0x0A);
-  bitmap.push(0x1D, 0x56, 0x42, 0x00);
-
-  return new Uint8Array(bitmap);
-}
-
-// ==================== PRINT VIA BROWSER ====================
-function printQRBrowser() {
-  if (!currentQR) { log('❌ QR belum ada'); return; }
-  
-  const w = window.open('', '_blank');
-  w.document.write(`
-    <html>
-    <head>
-      <title>Print QR - WA RVO Bot</title>
-      <style>
-        body { 
-          display: flex; justify-content: center; align-items: center;
-          min-height: 100vh; margin: 0; font-family: sans-serif;
-        }
-        img { width: 400px; height: 400px; }
-      </style>
-    </head>
-    <body>
-      <img src="${currentQR}" onload="window.print(); window.close();">
-    </body>
-    </html>
-  `);
-  w.document.close();
-  log('🖨️ Print dialog dibuka');
-}
 
 // ==================== PAIRING CODE ====================
 pairBtn.addEventListener('click', async () => {
@@ -309,11 +172,8 @@ function connectWS() {
       
       if (data.type === 'qr') {
         log('📱 QR Code diterima');
-        currentQR = data.qr;
         qrContainer.innerHTML = '<img src="' + data.qr + '" alt="QR">';
         statusText.textContent = '⏳ Scan QR / pake pairing code';
-        printBtBtn.disabled = false;
-        printBrowserBtn.disabled = false;
       }
       
       if (data.type === 'pairing') {
@@ -327,9 +187,6 @@ function connectWS() {
         statusText.textContent = '✅ Perangkat tertaut';
         qrContainer.innerHTML = '<div class="placeholder" style="border-color:#4ade80;color:#4ade80;">✅ Terhubung</div>';
         pairCodeDisplay.innerHTML = '';
-        printBtBtn.disabled = true;
-        printBrowserBtn.disabled = true;
-        currentQR = null;
       }
       
       if (data.type === 'disconnected') {
@@ -348,8 +205,6 @@ function connectWS() {
   };
 }
 
-printBtBtn.addEventListener('click', printQRBluetooth);
-printBrowserBtn.addEventListener('click', printQRBrowser);
 connectWS();
 </script>
 </body>
