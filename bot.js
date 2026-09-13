@@ -1,10 +1,16 @@
-const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, Browsers } = require("@whiskeysockets/baileys");
+const { 
+  default: makeWASocket, 
+  useMultiFileAuthState, 
+  DisconnectReason, 
+  Browsers, 
+  downloadMediaMessage // ✅ Import langsung dari Baileys
+} = require("@whiskeysockets/baileys");
 const { WebSocketServer } = require("ws");
 const qrcode = require("qrcode");
 const pino = require("pino");
 const express = require("express");
 const fs = require("fs");
-const { Sticker, StickerTypes } = require('wa-sticker-kit');
+const { Sticker, StickerTypes } = require('wa-sticker-formatter'); // Ganti ke library yang lebih stabil
 const { download: downloadTikTok } = require('@silent-tech-offc/ttdl');
 const { ultraigdl } = require('ultra-igdl');
 
@@ -172,7 +178,7 @@ async function start() {
           continue;
         }
         try {
-          const buf = await sock.downloadMediaMessage({ message: c.content });
+          const buf = await downloadMediaMessage({ message: c.content }, 'buffer', {});
           await sock.sendMessage(jid, { [c.type]: buf, caption: "🔓 .rvo — Diambil dari View Once" });
           cache.delete(jid);
           console.log("✅ .rvo terkirim");
@@ -189,7 +195,7 @@ async function start() {
           continue;
         }
         try {
-          const buf = await sock.downloadMediaMessage({ message: media.message });
+          const buf = await downloadMediaMessage({ message: media.message }, 'buffer', {});
           const sticker = new Sticker(buf, {
             pack: 'WA RVO Bot',
             author: 'Owner',
