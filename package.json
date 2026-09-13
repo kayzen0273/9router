@@ -2,6 +2,9 @@
   "name": "wa-rvo-bot",
   "version": "1.0.0",
   "main": "bot.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "start": "node bot.js"
   },
@@ -11,7 +14,7 @@
     "qrcode": "^1.5.4",
     "pino": "^9.0.0",
     "ws": "^8.18.0",
-    "wa-sticker-kit": "^1.0.1",
+    "wa-sticker-formatter": "^4.4.0",
     "@silent-tech-offc/ttdl": "^1.0.0",
     "ultra-igdl": "^1.0.0"
   }
